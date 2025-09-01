@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRC Funny Quiz V5.0 - Multilingual Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #f0f2f5; overflow-x: hidden; } .screen { display: none; } .screen.active { display: block; } .answer-btn { transition: all 0.2s ease-in-out; } .answer-btn:hover:not(:disabled) { transform: scale(1.05); } .answer-btn.selected { border-width: 4px; border-color: #fbbf24; transform: scale(1.05); } .answer-btn:disabled { opacity: 0.6; cursor: not-allowed; } .tab-btn.active { border-bottom-color: #4f46e5; color: #4f46e5; }
+        .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 5px; height: 250px; perspective: 500px; }
+        .podium-item { width: 30%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 1rem; border-radius: 12px 12px 0 0; color: #374151; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border-bottom: 5px solid rgba(0,0,0,0.2); transform: translateY(250px); opacity: 0; }
+        @keyframes slideUp { from { transform: translateY(250px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .podium-item.animate { animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .podium-1 { height: 100%; background: linear-gradient(to top, #ffd700, #fde68a); animation-delay: 1.2s !important; }
+        .podium-2 { height: 80%; background: linear-gradient(to top, #c0c0c0, #e5e7eb); animation-delay: 0.6s !important; }
+        .podium-3 { height: 60%; background: linear-gradient(to top, #cd7f32, #f9c288); animation-delay: 0s !important; }
+        .podium-rank { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+        .podium-name { font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem; text-shadow: 0px 1px 2px rgba(255,255,255,0.5); }
+        .podium-score { font-size: 1rem; margin-top: 0.25rem; }
+        .fa-crown { color: #f59e0b; font-size: 2rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="app-container" class="max-w-4xl mx-auto p-4 min-h-screen flex flex-col justify-center">
+
+        <div id="home-screen" class="screen active text-center">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <img src="TRC-Logo.jpg" alt="Thai Rayon Logo" class="mx-auto h-24 w-24 mb-4 object-contain">
+                <h1 class="text-4xl font-bold mb-2">TRC Funny Quiz</h1>
+                <p class="text-gray-600 mb-8">Organizational Learning Platform through Gamification</p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button id="show-host-options-btn" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-indigo-700 transition duration-300 shadow-md">
+                        <i class="fas fa-user-tie mr-2"></i>Create / Choose A Quiz (Host)
+                    </button>
+                    <button id="show-player-join-btn" class="bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold py-3 px-6 rounded-lg hover:from-green-600 hover:to-teal-600 transition duration-300 shadow-md">
+                        <i class="fas fa-user-graduate mr-2"></i>Do A Quiz (Player)
+                    </button>
+                </div>
+                <div class="mt-8 text-center">
+                    <a href="index.html" class="text-gray-500 hover:text-indigo-600 transition-colors font-semibold">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Lobby
+                    </a>
+                </div>
+                <div class="mt-6 text-xs text-gray-400">
+                    <p>User ID: <span id="user-id-display">Loading...</span></p>
+                </div>
+                <div class="mt-10 text-xs text-gray-500">
+                    <p>&copy; 2025 Sittidate Purintawarrakun</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="host-options-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><h2 class="text-3xl font-bold mb-6">Manage A Quiz</h2><div class="flex flex-col md:flex-row gap-4 justify-center"><button id="create-quiz-btn" class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition shadow-md">Create a new quiz</button><button id="view-my-quizzes-btn" class="bg-gradient-to-r from-purple-500 to-violet-500 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-violet-600 transition shadow-md">Pick an available quiz set</button></div><button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back</button></div></div>
+        
+        <div id="quiz-creator-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-6">Create / Edit Quiz</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b pb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Quiz Title (TH)</label>
+                        <input type="text" id="quiz-title-th" placeholder="ชื่อแบบทดสอบ" class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Quiz Title (EN)</label>
+                        <input type="text" id="quiz-title-en" placeholder="Quiz Title" class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Category (TH)</label>
+                        <input type="text" id="quiz-category-th" placeholder="หมวดหมู่" class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-gray-700">Category (EN)</label>
+                        <input type="text" id="quiz-category-en" placeholder="Category" class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div class="md:col-span-2">
+                         <label class="block text-sm font-medium text-gray-700">Description (TH)</label>
+                        <textarea id="quiz-description-th" placeholder="คำอธิบายสั้นๆ (ถ้ามี)" class="w-full p-3 border rounded-lg mt-1" rows="2"></textarea>
+                    </div>
+                     <div class="md:col-span-2">
+                         <label class="block text-sm font-medium text-gray-700">Description (EN)</label>
+                        <textarea id="quiz-description-en" placeholder="Short Description (if any)" class="w-full p-3 border rounded-lg mt-1" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div id="questions-container"></div>
+                <button id="add-question-btn" class="mt-4 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition w-full"><i class="fas fa-plus mr-2"></i>Add Question</button>
+                <div class="mt-6 flex gap-4">
+                    <button id="save-quiz-btn" class="flex-1 bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400">Save</button>
+                    <button class="back-btn flex-1 bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="my-quizzes-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-6">My Quizzes</h2>
+                <input type="text" id="quiz-search-input" placeholder="Search by Quiz Name..." class="w-full p-3 border rounded-lg mb-6 focus:ring-2 focus:ring-indigo-500">
+                <div id="my-quizzes-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <button class="back-btn mt-8 text-gray-500 hover:text-gray-700">&larr; Back</button>
+            </div>
+        </div>
+        
+        <div id="player-join-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <h2 class="text-3xl font-bold mb-4">Join the quiz</h2>
+                <p class="text-gray-600 mb-4">Please select your language</p>
+
+                <div class="mb-6 flex justify-center gap-4">
+                    <button id="lang-th-btn" class="lang-btn p-2 rounded-lg border-2 border-transparent transition-all">
+                        <img src="https://flagcdn.com/th.svg" width="60" alt="ภาษาไทย">
+                    </button>
+                    <button id="lang-en-btn" class="lang-btn p-2 rounded-lg border-2 border-transparent transition-all">
+                        <img src="https://flagcdn.com/gb.svg" width="60" alt="English">
+                    </button>
+                </div>
+                <style>.lang-btn.selected { border-color: #4f46e5; transform: scale(1.1); }</style>
+
+                <input type="text" id="game-pin-input" placeholder="Game Pin (4 Digit)" maxlength="4" class="w-full text-center text-2xl p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500 tracking-widest">
+                <input type="text" id="player-name-input" placeholder="Your Name" class="w-full text-center p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500">
+                <button id="join-game-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400">Join</button>
+                <button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to Home</button>
+            </div>
+        </div>
+
+        <div id="host-lobby-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><p class="text-gray-600">Players, enter this code to join:</p><div class="my-4 bg-indigo-600 text-white p-4 rounded-lg"><p class="text-lg">Game PIN</p><p id="game-pin-display" class="text-6xl font-bold tracking-widest">----</p></div><input type="text" id="session-name-input" placeholder="Enter Session Name (optional, e.g., Staff Round)" class="w-full text-center p-2 border rounded-lg mt-4 focus:ring-2 focus:ring-indigo-500"><h3 class="text-2xl font-bold mt-6 mb-4">Joined Players (<span id="player-count">0</span>)</h3><div id="player-list" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center"></div><div class="mt-6"><label for="bgm-select" class="block mb-2 text-sm font-medium text-gray-900">Choose Background Music:</label><select id="bgm-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"><option value="none" selected>Turn Off Music</option><option value="trc-quiz-1.mp3" >Music 1</option><option value="trc-quiz-2.mp3">Music 2</option><option value="trc-quiz-3.mp3">Music 3</option><option value="trc-quiz-4.mp3">Music 4</option><option value="trc-quiz-5.mp3">Music 5</option><option value="trc-quiz-6.mp3">Music 6</option><option value="trc-quiz-7.mp3">Music 7</option><option value="trc-quiz-8.mp3">Music 8</option><option value="trc-quiz-9.mp3">Music 9</option><option value="trc-quiz-10.mp3">Music 10</option></select></div><button id="start-game-btn" class="mt-8 w-full bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition text-2xl shadow-lg disabled:bg-gray-400" disabled>Start Game!</button><button class="back-btn mt-4 text-gray-500 hover:text-gray-700">&larr; Cancel and Back to Quiz List</button></div></div>
+        <div id="player-lobby-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><i class="fas fa-spinner fa-spin text-5xl text-green-500 mb-4"></i><h2 class="text-3xl font-bold">Already Joined!</h2><p class="text-gray-600 mt-2">Waiting for the Host to Start the Game...</p></div></div>
+        <div id="player-intermission-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><i class="fas fa-hourglass-half fa-spin text-5xl text-indigo-500 mb-4"></i><h2 id="intermission-message" class="text-3xl font-bold">Correct!</h2><p class="text-gray-600 mt-2">Next Question Coming Up...</p></div></div>
+        <div id="player-answer-screen" class="screen"><div class="text-center"><div class="bg-white p-4 rounded-lg shadow-md mb-4"><p id="player-q-text" class="text-xl md:text-2xl font-semibold text-gray-800 min-h-[60px] flex items-center justify-center"></p></div><div class="mb-4 text-center"><p id="player-timer" class="text-4xl font-bold text-red-500">--</p></div><div id="player-feedback" class="mb-4 p-4 rounded-lg text-white font-bold text-2xl hidden"></div><div id="player-answer-grid" class="grid grid-cols-2 gap-4"><button data-index="0" class="answer-btn h-32 md:h-40 bg-red-500 text-white font-bold text-2xl rounded-lg shadow-md"></button><button data-index="1" class="answer-btn h-32 md:h-40 bg-blue-500 text-white font-bold text-2xl rounded-lg shadow-md"></button><button data-index="2" class="answer-btn h-32 md:h-40 bg-yellow-500 text-white font-bold text-2xl rounded-lg shadow-md"></button><button data-index="3" class="answer-btn h-32 md:h-40 bg-green-500 text-white font-bold text-2xl rounded-lg shadow-md"></button></div></div></div>
+        <div id="leaderboard-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 id="leaderboard-title" class="text-3xl font-bold mb-2 text-center">Leaderboard</h2>
+
+                <div id="host-realtime-info" class="hidden text-center mb-4 text-gray-600">
+                    <p>Question <span id="host-rt-q-number">1</span> / <span id="host-rt-q-total">10</span></p>
+                    <p>Time Remaining: <span id="host-rt-timer" class="font-bold">20</span> sec</p>
+                </div>
+                <div id="final-podium-container" class="hidden mt-4">
+                    <div id="final-podium" class="podium-container"></div>
+                </div>
+                <div id="leaderboard-list-container" class="mt-6">
+                    <div id="leaderboard-list" class="space-y-2"></div>
+                </div>
+                <p id="player-final-rank" class="text-center text-2xl mt-8 font-bold hidden"></p>
+                <button id="host-end-game-btn" class="hidden mt-8 w-full bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 transition text-xl">End Game & Return to Home</button>
+                <button id="player-back-home-btn" class="hidden mt-8 w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition text-xl">
+                    <i class="fas fa-home mr-2"></i>Back to Home
+                </button>
+            </div>
+        </div>
+        <div id="history-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl"><h2 class="text-3xl font-bold mb-1">Quiz History</h2><p class="text-gray-500 mb-6">For: <span id="history-quiz-title" class="font-semibold"></span></p><div id="history-list" class="space-y-3"></div><button class="back-to-quizzes-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to Quiz List</button></div></div>
+        <div id="report-screen" class="screen"><div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl"><div class="flex justify-between items-start mb-4"><div class="flex-grow"><h2 id="report-quiz-title" class="text-2xl md:text-3xl font-bold">BBSO</h2><p id="report-session-name" class="text-gray-500"></p></div><div class="flex flex-col items-end gap-2"><span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Completed</span><button id="share-report-btn" class="bg-blue-500 text-white font-bold py-1 px-3 rounded-md text-sm hover:bg-blue-600 transition-colors"><i class="fas fa-envelope mr-1"></i> Share</button></div></div></div><div class="grid grid-cols-4 gap-3 mb-6"><div class="bg-amber-100 text-amber-900 p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:shadow-lg hover:-translate-y-1"><i class="fas fa-bullseye fa-2x"></i><div><p class="font-semibold">Accuracy</p><p id="report-summary-accuracy" class="text-3xl font-bold">-%</p></div></div><div class="bg-blue-100 text-blue-900 p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:shadow-lg hover:-translate-y-1"><i class="fas fa-tasks fa-2x"></i><div><p class="font-semibold">Completion</p><p id="report-summary-completion" class="text-3xl font-bold">-%</p></div></div><div class="bg-violet-100 text-violet-900 p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:shadow-lg hover:-translate-y-1"><i class="fas fa-users fa-2x"></i><div><p class="font-semibold">Participants</p><p id="report-summary-participants" class="text-3xl font-bold">-</p></div></div><div class="bg-teal-100 text-teal-900 p-5 rounded-xl shadow-md flex items-center gap-4 transition-all hover:shadow-lg hover:-translate-y-1"><i class="fas fa-question-circle fa-2x"></i><div><p class="font-semibold">Questions</p><p id="report-summary-questions" class="text-3xl font-bold">-</p></div></div></div><div class="border-b border-gray-200 mb-4"><nav class="flex space-x-4" aria-label="Tabs"><button id="tab-btn-participants" class="tab-btn active font-medium px-1 py-2 border-b-2 border-transparent">Participants</button><button id="tab-btn-questions" class="tab-btn font-medium px-1 py-2 border-b-2 border-transparent">Questions</button></nav></div><div id="tab-content-participants" class="tab-content"></div><div id="tab-content-questions" class="tab-content hidden"></div><button class="back-to-history-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to history</button></div></div>
+        <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"><div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm"><p id="alert-message" class="mb-4"></p><button id="alert-ok-btn" class="bg-indigo-500 text-white px-4 py-2 rounded-lg">Confirm</button></div></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, query, where, getDocs, onSnapshot, serverTimestamp, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        const firebaseConfig = { apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg", authDomain: "trc-funny-quiz.firebaseapp.com", projectId: "trc-funny-quiz", storageBucket: "trc-funny-quiz.appspot.com", messagingSenderId: "323647073409", appId: "1:323647073409:web:1445589b1bc6eb77bcf180" };
+        const appId = 'trc-funny-quiz';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // ✨ ADD: HELPER FUNCTION FOR MULTILINGUAL SUPPORT ✨
+        const getTextInLanguage = (data, lang) => {
+            if (typeof data === 'object' && data !== null) {
+                return data[lang] || data.en || data.th || ''; // Fallback logic: preferred lang > english > thai > empty
+            }
+            if (typeof data === 'string') {
+                return data; // For backward compatibility with old quizzes
+            }
+            return ''; // Default empty string
+        };
+
+        const auth = getAuth(app);
+        
+        // ✨ ADD: LANGUAGE SELECTION LOGIC ✨
+        document.addEventListener('DOMContentLoaded', () => {
+            const setLanguage = (lang) => {
+                localStorage.setItem('quizLanguage', lang);
+                document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('selected'));
+                const selectedBtn = document.getElementById(`lang-${lang}-btn`);
+                if(selectedBtn) selectedBtn.classList.add('selected');
+            };
+
+            const initialLang = localStorage.getItem('quizLanguage') || 'en';
+            setLanguage(initialLang);
+
+            document.getElementById('lang-th-btn')?.addEventListener('click', () => setLanguage('th'));
+            document.getElementById('lang-en-btn')?.addEventListener('click', () => setLanguage('en'));
+        });
+
+        let userId = null; let currentGameSessionId = null; let currentPlayerId = null; let currentQuizForHistory = null; let gameUnsubscribe = null; let playersUnsubscribe = null; let questionTimeout = null; let visualTimerInterval = null; let processedQuestionIndex = -1; let bgmAudio; let bgmPreviewAudio;
+        const sfx = { countdown: new Audio("sfx-countdown.mp3"), correct: new Audio("sfx-correct.mp3"), wrong: new Audio("sfx-wrong.mp3"), applause: new Audio("sfx-applause.mp3") };
+        const MAX_SCORE_PER_QUESTION = 1000; const MAX_PENALTY_SCORE = 500; const STREAK_BONUS_PER_LEVEL = 100;
+        const screens = document.querySelectorAll('.screen'); const alertModal = document.getElementById('alert-modal'); const alertMessage = document.getElementById('alert-message');
+        const showScreen = (screenId) => { screens.forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); };
+        const showAlert = (message) => { alertMessage.textContent = message; alertModal.style.display = 'flex'; };
+        document.getElementById('alert-ok-btn').addEventListener('click', () => { alertModal.style.display = 'none'; });
+        onAuthStateChanged(auth, async (user) => { if (user) { userId = user.uid; document.getElementById('user-id-display').textContent = userId.substring(0, 8); } else { try { await signInAnonymously(auth); } catch (error) { console.error("Authentication Error:", error); showAlert("Failed to Verify Identity"); } } });
+        document.getElementById('show-host-options-btn').addEventListener('click', () => showScreen('host-options-screen')); document.getElementById('show-player-join-btn').addEventListener('click', () => showScreen('player-join-screen'));
+        document.querySelectorAll('.back-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const parentScreenId = e.target.closest('.screen').id;
+                if (parentScreenId === 'host-lobby-screen') {
+                    if (currentGameSessionId) {
+                        if (window.confirm('Are you sure you want to cancel this game room?')) {
+                            try {
+                                await deleteDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId));
+                                if (playersUnsubscribe) playersUnsubscribe();
+                                currentGameSessionId = null;
+                                showAlert('Game room canceled.');
+                                document.getElementById('view-my-quizzes-btn').click();
+                            } catch (error) {
+                                console.error("Error canceling game session:", error);
+                                showAlert('Failed to cancel the game room.');
+                            }
+                        }
+                    } else {
+                        document.getElementById('view-my-quizzes-btn').click();
+                    }
+                    return;
+                }
+                if (['host-options-screen', 'player-join-screen'].includes(parentScreenId)) {
+                    showScreen('home-screen');
+                } else if (['quiz-creator-screen', 'my-quizzes-screen'].includes(parentScreenId)) {
+                    showScreen('host-options-screen');
+                }
+            });
+        });
+        document.querySelector('.back-to-quizzes-btn').addEventListener('click', () => document.getElementById('view-my-quizzes-btn').click());
+        document.querySelector('.back-to-history-btn').addEventListener('click', () => showScreen('history-screen'));
+        let currentQuizId = null;
+        document.getElementById('create-quiz-btn').addEventListener('click', () => { resetQuizCreator(); showScreen('quiz-creator-screen'); });
+        document.getElementById('add-question-btn').addEventListener('click', () => addQuestionToForm());
+
+        // ✨ REPLACED: `addQuestionToForm` for multilingual support ✨
+        const addQuestionToForm = (question = { text: {th:'', en:''}, options: [{}, {}, {}, {}], correctIndex: 0, timeLimit: 20 }) => {
+            const container = document.getElementById('questions-container');
+            const qIndex = container.children.length;
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'bg-gray-50 p-4 rounded-lg mb-4 border';
+            questionDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <label class="font-bold">Question ${qIndex + 1}</label>
+                    <div class="flex items-center">
+                        <i class="fas fa-clock mr-2 text-gray-500"></i>
+                        <select class="question-time-limit p-1 border rounded-md text-sm">
+                            <option value="10" ${question.timeLimit == 10 ? 'selected' : ''}>10 Sec</option>
+                            <option value="20" ${question.timeLimit == 20 ? 'selected' : ''}>20 Sec</option>
+                            <option value="30" ${question.timeLimit == 30 ? 'selected' : ''}>30 Sec</option>
+                            <option value="60" ${question.timeLimit == 60 ? 'selected' : ''}>60 Sec</option>
+                        </select>
+                    </div>
+                    <button class="remove-question-btn text-red-500 hover:text-red-700 font-bold text-xl">&times;</button>
+                </div>
+                <div class="grid grid-cols-2 gap-x-4">
+                    <textarea class="question-text-th w-full p-2 border rounded-md" placeholder="คำถาม (TH)">${getTextInLanguage(question.text, 'th')}</textarea>
+                    <textarea class="question-text-en w-full p-2 border rounded-md" placeholder="Question (EN)">${getTextInLanguage(question.text, 'en')}</textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                    ${[0,1,2,3].map(i => {
+                        const opt = question.options[i] || {th:'', en:''};
+                        return `
+                        <div class="flex items-center bg-white p-2 rounded-md border">
+                            <input type="radio" name="correct-answer-${qIndex}" value="${i}" class="correct-answer-radio mr-3" ${i === question.correctIndex ? 'checked' : ''}>
+                            <div class="w-full">
+                                <input type="text" class="option-input-th w-full p-2 border rounded-md mb-1 text-sm" placeholder="ตัวเลือก ${i + 1} (TH)" value="${getTextInLanguage(opt, 'th')}">
+                                <input type="text" class="option-input-en w-full p-2 border rounded-md text-sm" placeholder="Option ${i + 1} (EN)" value="${getTextInLanguage(opt, 'en')}">
+                            </div>
+                        </div>`
+                    }).join('')}
+                </div>
+            `;
+            container.appendChild(questionDiv);
+            questionDiv.querySelector('.remove-question-btn').addEventListener('click', (e) => {
+                e.target.closest('.bg-gray-50').remove();
+                document.querySelectorAll('#questions-container > div').forEach((div, index) => {
+                    div.querySelector('label').textContent = `Question ${index + 1}`;
+                });
+            });
+        };
+
+        // ✨ REPLACED: `resetQuizCreator` for multilingual support ✨
+        const resetQuizCreator = () => {
+            ['quiz-title-th', 'quiz-title-en', 'quiz-category-th', 'quiz-category-en', 'quiz-description-th', 'quiz-description-en'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('questions-container').innerHTML = '';
+            currentQuizId = null;
+            addQuestionToForm();
+        };
+
+        // ✨ REPLACED: `save-quiz-btn` listener for multilingual support ✨
+        document.getElementById('save-quiz-btn').addEventListener('click', async (event) => {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = "Saving...";
+            if (!userId) { btn.disabled = false; btn.textContent = "Save Quiz"; return showAlert('Verifying Identity...'); }
+
+            const title_th = document.getElementById('quiz-title-th').value.trim();
+            const title_en = document.getElementById('quiz-title-en').value.trim();
+            const category_th = document.getElementById('quiz-category-th').value.trim();
+            const category_en = document.getElementById('quiz-category-en').value.trim();
+            const description_th = document.getElementById('quiz-description-th').value.trim();
+            const description_en = document.getElementById('quiz-description-en').value.trim();
+
+            if (!title_en && !title_th) { btn.disabled = false; btn.textContent = "Save Quiz"; return showAlert('Please enter at least one language for the Quiz Title.'); }
+
+            const questions = Array.from(document.querySelectorAll('#questions-container > div')).map(el => {
+                const text_th = el.querySelector('.question-text-th').value.trim();
+                const text_en = el.querySelector('.question-text-en').value.trim();
+                const options_th = Array.from(el.querySelectorAll('.option-input-th')).map(input => input.value.trim());
+                const options_en = Array.from(el.querySelectorAll('.option-input-en')).map(input => input.value.trim());
+                const options = options_th.map((th, i) => ({ th: th, en: options_en[i] }));
+                const correctIndex = parseInt(el.querySelector('.correct-answer-radio:checked')?.value);
+                const timeLimit = parseInt(el.querySelector('.question-time-limit').value);
+                return { text: { th: text_th, en: text_en }, options, correctIndex, timeLimit };
+            });
+
+            if (questions.some(q => (!q.text.th && !q.text.en) || q.options.some(opt => (!opt.th && !opt.en)) || isNaN(q.correctIndex))) {
+                btn.disabled = false; btn.textContent = "Save Quiz"; return showAlert('Please fill in at least one language for all questions and options, and select a correct answer.');
+            }
+            if (questions.length === 0) { btn.disabled = false; btn.textContent = "Save Quiz"; return showAlert('Please add at least one question'); }
+
+            const quizData = {
+                title: { th: title_th, en: title_en },
+                category: { th: category_th, en: category_en },
+                description: { th: description_th, en: description_en },
+                questions,
+                creatorId: userId,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            };
+
+            const collectionPath = `/artifacts/${appId}/public/data/quizzes`;
+            try {
+                if (currentQuizId) {
+                    await setDoc(doc(db, collectionPath, currentQuizId), { ...quizData, updatedAt: serverTimestamp() }, { merge: true });
+                    showAlert('Quiz Updated Successfully!');
+                } else {
+                    await addDoc(collection(db, collectionPath), quizData);
+                    showAlert('Quiz Successfully Created!');
+                }
+                document.getElementById('view-my-quizzes-btn').click();
+            } catch (error) {
+                console.error("Error saving quiz:", error);
+                showAlert('Oops! Something Went Wrong While Saving the Quiz');
+            } finally {
+                btn.disabled = false; btn.textContent = "Save Quiz";
+            }
+        });
+        
+        // ✨ MODIFIED: `view-my-quizzes-btn` listener for multilingual support ✨
+        document.getElementById('view-my-quizzes-btn').addEventListener('click', async () => {
+            if (!userId) return showAlert('Loading Player Profile...');
+            showScreen('my-quizzes-screen');
+            const listEl = document.getElementById('my-quizzes-list');
+            listEl.innerHTML = '<p>Loading Quiz...</p>';
+            const searchInput = document.getElementById('quiz-search-input');
+            if(searchInput) searchInput.value = '';
+
+            try {
+                const q = query(collection(db, `/artifacts/${appId}/public/data/quizzes`), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="col-span-full text-center">You Have Not Created a Quiz Yet</p>';
+                    return;
+                }
+                listEl.innerHTML = '';
+                const lang = localStorage.getItem('quizLanguage') || 'en';
+                querySnapshot.forEach(doc => {
+                    const quiz = doc.data();
+                    const quizCard = document.createElement('div');
+                    quizCard.className = 'quiz-card bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105';
+                    
+                    const titleText = getTextInLanguage(quiz.title, lang);
+                    const descriptionText = getTextInLanguage(quiz.description, lang) || `${quiz.questions.length} questions`;
+                    const categoryText = getTextInLanguage(quiz.category, lang);
+
+                    quizCard.innerHTML = ` <div class="p-5 flex-grow flex flex-col"> ${categoryText ? `<span class="text-sm font-semibold text-indigo-500 mb-2">${categoryText}</span>` : ''} <h3 class="text-xl font-bold mb-2 text-gray-800">${titleText}</h3> <p class="text-gray-600 text-sm mb-4 flex-grow">${descriptionText}</p> <div class="flex items-center text-sm text-gray-500 border-t pt-4 mt-auto"> <span class="flex items-center"><i class="fas fa-list-ol mr-2"></i>${quiz.questions.length} Questions</span> </div> </div> <div class="p-4 bg-gray-50 grid grid-cols-2 gap-2"> <button data-id="${doc.id}" class="host-quiz-btn col-span-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:from-indigo-600 hover:to-blue-600">Start Game</button> <button data-id="${doc.id}" class="edit-quiz-btn bg-yellow-500 text-white px-3 py-1 rounded-md text-sm hover:bg-yellow-600">Edit</button> <button data-id="${doc.id}" class="delete-quiz-btn bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">Delete</button> <button data-id="${doc.id}" data-title='${JSON.stringify(quiz.title)}' class="reports-quiz-btn col-span-2 bg-cyan-500 text-white px-3 py-1 rounded-md text-sm hover:bg-cyan-600">View Reports</button> </div> `;
+                    listEl.appendChild(quizCard);
+                });
+
+                const allQuizCards = document.querySelectorAll('.quiz-card');
+                document.getElementById('quiz-search-input').addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    allQuizCards.forEach(card => {
+                        const title = card.querySelector('h3').textContent.toLowerCase();
+                        if (title.includes(searchTerm)) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+
+                listEl.querySelectorAll('.reports-quiz-btn').forEach(btn => btn.addEventListener('click', (e) => viewReports(e.target.dataset.id, JSON.parse(e.target.dataset.title))));
+                listEl.querySelectorAll('.host-quiz-btn').forEach(btn => btn.addEventListener('click', (e) => hostGame(e.target.dataset.id)));
+                listEl.querySelectorAll('.edit-quiz-btn').forEach(btn => btn.addEventListener('click', (e) => editQuiz(e.target.dataset.id)));
+                listEl.querySelectorAll('.delete-quiz-btn').forEach(btn => btn.addEventListener('click', (e) => deleteQuiz(e.target.dataset.id)));
+            } catch (error) {
+                console.error("Error loading quizzes:", error);
+                listEl.innerHTML = '<p class="text-red-500 col-span-full">Oops! Something Went Wrong While Loading the Quiz</p>';
+            }
+        });
+        
+        // ✨ REPLACED: `editQuiz` for multilingual support ✨
+        const editQuiz = async (quizId) => {
+            try {
+                const quizDoc = await getDoc(doc(db, `/artifacts/${appId}/public/data/quizzes`, quizId));
+                if (!quizDoc.exists()) return showAlert('Quiz Not Found');
+                const quiz = quizDoc.data();
+                resetQuizCreator(); 
+                currentQuizId = quizId;
+                
+                document.getElementById('quiz-title-th').value = getTextInLanguage(quiz.title, 'th');
+                document.getElementById('quiz-title-en').value = getTextInLanguage(quiz.title, 'en');
+                document.getElementById('quiz-category-th').value = getTextInLanguage(quiz.category, 'th');
+                document.getElementById('quiz-category-en').value = getTextInLanguage(quiz.category, 'en');
+                document.getElementById('quiz-description-th').value = getTextInLanguage(quiz.description, 'th');
+                document.getElementById('quiz-description-en').value = getTextInLanguage(quiz.description, 'en');
+                
+                document.getElementById('questions-container').innerHTML = '';
+                if(quiz.questions) {
+                    quiz.questions.forEach(q => addQuestionToForm(q));
+                }
+                showScreen('quiz-creator-screen');
+            } catch (error) { console.error("Error fetching quiz for edit:", error); showAlert('An Error Occurred While Loading the Quiz'); }
+        };
+        
+        const deleteQuiz = async (quizId) => { if (window.confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) { try { await deleteDoc(doc(db, `/artifacts/${appId}/public/data/quizzes`, quizId)); showAlert('Quiz deleted successfully'); document.getElementById('view-my-quizzes-btn').click(); } catch (error) { console.error("Error deleting quiz:", error); showAlert('Failed to delete quiz.'); } } };
+        const deleteReport = async (reportId) => { if (window.confirm('Are you sure you want to delete this report? This action cannot be undone')) { try { await deleteDoc(doc(db, `/artifacts/${appId}/public/data/gameReports`, reportId)); showAlert('Report Deleted Successfully'); if(currentQuizForHistory) { viewReports(currentQuizForHistory.id, currentQuizForHistory.title); } } catch (error) { console.error("Error deleting report:", error); showAlert('Failed to Delete Report'); } } };
+        const shareReportByEmail = (report) => { const recipientEmail = prompt("Please enter recipient email (use commas to separate multiple emails ,):"); if (recipientEmail) { const lang = localStorage.getItem('quizLanguage') || 'en'; const subject = `Summary Quiz: ${getTextInLanguage(report.quizTitle, lang)} (${report.sessionName})`; let body = `Game Results Summary Quiz:\n\n`; body += `Title: ${getTextInLanguage(report.quizTitle, lang)}\n`; body += `Session: ${report.sessionName}\n`; body += `------------------------------------\n`; body += `Summary:\n`; body += `- Participants: ${report.summary.participantsCount} Participants\n`; body += `- Accuracy Rate: ${report.summary.accuracy}%\n`; body += `- Questions: ${report.summary.questionsCount} Questions\n\n`; body += `Leaderboard:\n`; report.participants.slice(0, 5).forEach((p, index) => { body += `${index + 1}. ${p.name} - ${p.score} Score (Accuracy ${p.accuracy}%)\n`; }); if (report.participants.length > 5) { body += `...\n`; } body += `\n\n------------------------------------\n`; body += `Question Summary:\n\n`; report.questions.forEach((q, index) => { body += `${index + 1}. ${getTextInLanguage(q.text, lang)} (Accurary ${q.accuracy}%)\n`; q.options.forEach((opt, i) => { const isCorrect = i === q.correctIndex ? '✔️ ' : '   '; body += `${isCorrect}${getTextInLanguage(opt, lang)} (${opt.answerCount} Participants)\n`; }); body += `\n`; }); body += `\nCreated By TRC Funny Quiz`; try { navigator.clipboard.writeText(body); showAlert('Report Copied Successfully! Paste It in Your Email'); const encodedSubject = encodeURIComponent(subject); const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}`; window.location.href = mailtoLink; } catch (err) { console.error('Failed to copy text: ', err); showAlert('You Cannot Copy This Content'); } } };
+        const hostGame = async (quizId) => { const pin = Math.floor(1000 + Math.random() * 9000).toString(); try { const gameSessionRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/gameSessions`), { quizId: quizId, hostId: userId, pin: pin, sessionName: "", bgmChoice: 'none', status: 'waiting', currentQuestionIndex: -1, leaderboard: [], createdAt: serverTimestamp() }); currentGameSessionId = gameSessionRef.id; document.getElementById('game-pin-display').textContent = pin; document.getElementById('player-list').innerHTML = ''; document.getElementById('player-count').textContent = '0'; document.getElementById('start-game-btn').disabled = true; document.getElementById('session-name-input').value = ''; showScreen('host-lobby-screen'); listenToGameSession(currentGameSessionId); } catch (error) { console.error("Error hosting game:", error); showAlert('Failed to Create Game Room'); } };
+        const unlockAllAudio = () => { for (const key in sfx) { sfx[key].play().catch(() => {}); sfx[key].pause(); sfx[key].currentTime = 0; } }; 
+        document.getElementById('join-game-btn').addEventListener('click', async (event) => { unlockAllAudio(); const btn = event.target; btn.disabled = true; btn.textContent = 'Joining...'; const pin = document.getElementById('game-pin-input').value.trim(); const name = document.getElementById('player-name-input').value.trim(); if (!pin || !name) { btn.disabled = false; btn.textContent = 'Join Game'; return showAlert('Enter Game Pin and Your name'); } try { const q = query(collection(db, `/artifacts/${appId}/public/data/gameSessions`), where("pin", "==", pin), where("status", "==", "waiting")); const querySnapshot = await getDocs(q); if (querySnapshot.empty) { btn.disabled = false; btn.textContent = 'Join Game'; return showAlert('No Game Found with This Code'); } const gameDoc = querySnapshot.docs[0]; currentGameSessionId = gameDoc.id; const playerRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId, 'players'), { name: name, score: 0, streak: 0, answers: {} }); currentPlayerId = playerRef.id; showScreen('player-lobby-screen'); listenToGameSession(currentGameSessionId); } catch (error) { console.error("Error joining game:", error); showAlert('Failed to Join Game'); } finally { if (!currentPlayerId) { btn.disabled = false; btn.textContent = 'Join Game'; } } });
+        const listenToGameSession = (sessionId) => { if (gameUnsubscribe) gameUnsubscribe(); if (playersUnsubscribe) playersUnsubscribe(); const gameRef = doc(db, `/artifacts/${appId}/public/data/gameSessions`, sessionId); gameUnsubscribe = onSnapshot(gameRef, async (docSnap) => { if (!docSnap.exists()) return cleanupAndExit('Game Over'); const game = docSnap.data(); const lang = localStorage.getItem('quizLanguage') || 'en'; if (userId !== game.hostId) { if (game.status === 'in-progress' && (!bgmAudio || bgmAudio.src.includes(game.bgmChoice) === false)) { if (bgmAudio) bgmAudio.pause(); if (game.bgmChoice && game.bgmChoice !== 'none') { bgmAudio = new Audio(game.bgmChoice); bgmAudio.loop = true; bgmAudio.volume = 0.10; bgmAudio.play().catch(e => console.error("Player BGM failed:", e)); } } } if (userId === game.hostId) { switch (game.status) { case 'waiting': showScreen('host-lobby-screen'); listenToPlayers(sessionId); break; case 'in-progress': case 'leaderboard': showScreen('leaderboard-screen'); await updateRealtimeHostView(game); break; case 'finished': await generateReport(game, sessionId); showScreen('leaderboard-screen'); displayLeaderboard(game, true); break; case 'ended': cleanupAndExit('Game Over. Thank You for Playing'); break; } } else { switch (game.status) { case 'waiting': showScreen('player-lobby-screen'); break; case 'in-progress': await displayQuestion(game); break; case 'leaderboard': const feedback = game.leaderboard.find(p => p.id === currentPlayerId)?.lastAnswerCorrect; document.getElementById('intermission-message').textContent = feedback === undefined ? 'Next Question Coming Up...' : (feedback ? (lang === 'th' ? 'ตอบถูก!' : 'You Got It Right!') : (lang === 'th' ? 'ตอบผิด!' : 'You Got It Wrong!')); showScreen('player-intermission-screen'); break; case 'finished': showScreen('leaderboard-screen'); displayLeaderboard(game, true); break; case 'ended': cleanupAndExit('Game Over. Thank You for Playing'); break; } } }); };
+        const listenToPlayers = (sessionId) => { const playersRef = collection(db, `/artifacts/${appId}/public/data/gameSessions`, sessionId, 'players'); playersUnsubscribe = onSnapshot(playersRef, (snapshot) => { const playerList = document.getElementById('player-list'); playerList.innerHTML = ''; snapshot.docs.forEach(doc => { const playerEl = document.createElement('div'); playerEl.className = 'bg-gray-200 p-2 rounded-md truncate'; playerEl.textContent = doc.data().name; playerList.appendChild(playerEl); }); document.getElementById('player-count').textContent = snapshot.size; document.getElementById('start-game-btn').disabled = snapshot.size === 0; }); };
+        let previewTimeoutId = null;
+        document.getElementById('bgm-select').addEventListener('change', (event) => { const selectedMusic = event.target.value; clearTimeout(previewTimeoutId); if (bgmPreviewAudio) { bgmPreviewAudio.pause(); } if (selectedMusic !== 'none') { bgmPreviewAudio = new Audio(selectedMusic); bgmPreviewAudio.volume = 0.4; bgmPreviewAudio.play().catch(e => console.error("Preview audio failed:", e)); previewTimeoutId = setTimeout(() => { if (bgmPreviewAudio) { bgmPreviewAudio.pause(); bgmPreviewAudio.currentTime = 0; } }, 10000); } });
+        document.getElementById('start-game-btn').addEventListener('click', async () => { try { if (bgmPreviewAudio) bgmPreviewAudio.pause(); const selectedBgm = document.getElementById('bgm-select').value; if (bgmAudio) bgmAudio.pause(); if (selectedBgm !== 'none') { bgmAudio = new Audio(selectedBgm); bgmAudio.loop = true; bgmAudio.volume = 0.10; bgmAudio.play().catch(e => console.error("Audio play failed:", e)); } const playersSnapshot = await getDocs(collection(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId, 'players')); const initialLeaderboard = playersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, score: 0, streak: 0, lastAnswerCorrect: null })); const sessionName = document.getElementById('session-name-input').value.trim() || `Session @ ${new Date().toLocaleTimeString()}`; processedQuestionIndex = -1; await updateDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId), { leaderboard: initialLeaderboard, sessionName: sessionName, bgmChoice: selectedBgm }); runGameLoop(); } catch (error) { console.error("Error starting game:", error); showAlert('Oops! Something Went Wrong When Starting the Game'); } });
+        const runGameLoop = async () => { const gameDoc = await getDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId)); if(!gameDoc.exists()) return; const quizDoc = await getDoc(doc(db, `/artifacts/${appId}/public/data/quizzes`, gameDoc.data().quizId)); if (!quizDoc.exists()) return cleanupAndExit("Quiz Set Not Available"); const quiz = quizDoc.data(); for (let i = 0; i < quiz.questions.length; i++) { const question = quiz.questions[i]; const timeLimit = question.timeLimit || 20; await updateDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId), { status: 'in-progress', currentQuestionIndex: i, questionStartTime: serverTimestamp() }); await new Promise(resolve => setTimeout(resolve, timeLimit * 1000)); await calculateScoresAndEndQuestion(i, question); if (i < quiz.questions.length - 1) { await new Promise(resolve => setTimeout(resolve, 5000)); } } await updateDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId), { status: 'finished' }); };
+        const calculateScoreForPlayer = (playerAnswerData, question, questionStartTime) => { const timeTakenMs = playerAnswerData.submittedAt.toMillis() - questionStartTime.toMillis(); const timeTakenSec = Math.max(0, timeTakenMs / 1000); const timeLimit = question.timeLimit || 20; if (playerAnswerData.answerIndex === question.correctIndex) { const scoreForRound = Math.round(Math.max(0, MAX_SCORE_PER_QUESTION * (1 - (timeTakenSec / timeLimit / 2)))); return { scoreChange: scoreForRound, wasCorrect: true }; } else { const penaltyRatio = Math.max(0, 1 - (timeTakenSec / timeLimit)); const penalty = Math.round(MAX_PENALTY_SCORE * penaltyRatio); return { scoreChange: -penalty, wasCorrect: false }; } };
+        const calculateScoresAndEndQuestion = async (questionIndex, question) => { const gameDocSnap = await getDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId)); if (!gameDocSnap.exists()) return; const freshGameData = gameDocSnap.data(); if (!freshGameData.questionStartTime) { await updateDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId), { status: 'leaderboard' }); return; } const playersSnapshot = await getDocs(collection(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId, 'players')); let updatedLeaderboard = JSON.parse(JSON.stringify(freshGameData.leaderboard)); for (const playerDoc of playersSnapshot.docs) { const player = playerDoc.data(); const playerInLeaderboard = updatedLeaderboard.find(p => p.id === playerDoc.id); if (!playerInLeaderboard) continue; const answerData = player.answers ? player.answers[questionIndex] : null; if (answerData) { const { scoreChange, wasCorrect } = calculateScoreForPlayer(answerData, question, freshGameData.questionStartTime); if (wasCorrect) { playerInLeaderboard.streak = (playerInLeaderboard.streak || 0) + 1; const bonus = playerInLeaderboard.streak * STREAK_BONUS_PER_LEVEL; playerInLeaderboard.score += scoreChange + bonus; playerInLeaderboard.lastAnswerCorrect = true; } else { playerInLeaderboard.streak = 0; playerInLeaderboard.score += scoreChange; playerInLeaderboard.lastAnswerCorrect = false; } } else { playerInLeaderboard.streak = 0; playerInLeaderboard.lastAnswerCorrect = false; } playerInLeaderboard.score = Math.max(0, Math.round(playerInLeaderboard.score)); } updatedLeaderboard.sort((a, b) => b.score - a.score); await updateDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId), { leaderboard: updatedLeaderboard, status: 'leaderboard' }); };
+        
+        // ✨ REPLACED: `displayQuestion` for multilingual support ✨
+        const displayQuestion = async (game) => {
+            if (processedQuestionIndex === game.currentQuestionIndex) return;
+            processedQuestionIndex = game.currentQuestionIndex;
+            const quizDoc = await getDoc(doc(db, `/artifacts/${appId}/public/data/quizzes`, game.quizId));
+            if (!quizDoc.exists()) return cleanupAndExit("Quiz Set Not Available");
+
+            const lang = localStorage.getItem('quizLanguage') || 'en';
+            const quiz = quizDoc.data();
+            const question = quiz.questions[game.currentQuestionIndex];
+            
+            clearTimeout(questionTimeout);
+            clearInterval(visualTimerInterval);
+            const timeForThisQuestion = question.timeLimit || 20;
+            let timeLeft = timeForThisQuestion;
+
+            showScreen('player-answer-screen');
+            document.getElementById('player-feedback').classList.add('hidden');
+            document.getElementById('player-q-text').textContent = getTextInLanguage(question.text, lang);
+            const playerTimerEl = document.getElementById('player-timer');
+            playerTimerEl.textContent = timeLeft;
+
+            visualTimerInterval = setInterval(() => {
+                timeLeft--;
+                playerTimerEl.textContent = Math.max(0, timeLeft);
+                if (timeLeft <= 5 && timeLeft >= 1) sfx.countdown.play().catch(()=>{});
+                if (timeLeft <= 0) clearInterval(visualTimerInterval);
+            }, 1000);
+
+            document.querySelectorAll('.answer-btn').forEach((btn, index) => {
+                btn.disabled = false;
+                btn.className = `answer-btn p-3 min-h-[8rem] flex items-center justify-center text-center bg-${['red','blue','yellow','green'][index]}-500 text-white font-bold text-lg md:text-xl rounded-lg shadow-md transition-transform transform hover:scale-105`;
+                btn.textContent = getTextInLanguage(question.options[index], lang) || '';
+                btn.onclick = () => {
+                    const answerIndex = parseInt(btn.dataset.index);
+                    if (answerIndex === question.correctIndex) { sfx.correct.play().catch(() => {}); } else { sfx.wrong.play().catch(() => {}); }
+                    handlePlayerAnswer(answerIndex, game.currentQuestionIndex);
+                };
+            });
+        };
+        
+        const handlePlayerAnswer = async (answerIndex, questionIndex) => { clearInterval(visualTimerInterval); document.querySelectorAll('.answer-btn').forEach(b => { b.disabled = true; b.onclick = null; if (parseInt(b.dataset.index) === answerIndex) { b.classList.add('selected'); } }); const feedbackEl = document.getElementById('player-feedback'); feedbackEl.textContent = 'Already Answered!'; feedbackEl.className = 'mb-4 p-4 rounded-lg text-white font-bold text-2xl bg-gray-500'; feedbackEl.classList.remove('hidden'); if (!currentPlayerId || !currentGameSessionId) return; try { const playerDocRef = doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId, 'players', currentPlayerId); await updateDoc(playerDocRef, { [`answers.${questionIndex}`]: { answerIndex, submittedAt: serverTimestamp() } }); } catch (error) { console.error("Error submitting answer:", error); showAlert("Oops! Something Went Wrong with Your Answer!"); } };
+        const displayLeaderboard = async (game, isFinal) => {
+            clearTimeout(questionTimeout);
+            clearInterval(visualTimerInterval);
+            const listContainer = document.getElementById('leaderboard-list-container');
+            const podiumContainer = document.getElementById('final-podium-container');
+            const leaderboard = game.leaderboard || [];
+            document.getElementById('host-realtime-info').classList.add('hidden');
+            podiumContainer.classList.add('hidden');
+            if (isFinal) {
+                document.getElementById('leaderboard-title').textContent = 'Quiz Results';
+                podiumContainer.classList.remove('hidden');
+                renderPodium(leaderboard.slice(0, 3));
+                renderLeaderboardList(leaderboard.slice(3));
+                if (userId === game.hostId) document.getElementById('host-end-game-btn').classList.remove('hidden');
+                if (currentPlayerId) {
+                    const myRank = leaderboard.findIndex(p => p.id === currentPlayerId) + 1;
+                    const rankEl = document.getElementById('player-final-rank');
+                    rankEl.textContent = myRank > 0 ? `Your Rank ${myRank}!` : 'Thanks for Playing!';
+                    rankEl.classList.remove('hidden');
+
+                    // ✨ ADD THIS LINE to show the player's button ✨
+                    document.getElementById('player-back-home-btn').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('leaderboard-title').textContent = 'Leaderboard';
+                renderLeaderboardList(leaderboard);
+            }
+        };
+        const renderLeaderboardList = (players) => { const listEl = document.getElementById('leaderboard-list'); listEl.innerHTML = ''; if (players.length === 0 && !document.getElementById('final-podium-container').classList.contains('hidden')) { listEl.innerHTML = '<p class="text-center text-gray-500 mt-4">- No other players -</p>'; return; } players.forEach((player, i) => { const rank = document.getElementById('final-podium-container').classList.contains('hidden') ? i + 1 : i + 4; const itemEl = document.createElement('div'); itemEl.className = 'flex justify-between items-center p-3 rounded-lg bg-gray-100'; const streakText = player.streak > 1 ? `<span class="text-sm text-orange-500 font-bold ml-2">🔥 x${player.streak}</span>` : ''; itemEl.innerHTML = `<div class="flex items-center gap-3"><span class="font-bold w-8 text-center text-lg">${rank}</span><span>${player.name}${streakText}</span></div><span class="font-bold text-indigo-600">${player.score} Score</span>`; listEl.appendChild(itemEl); }); };
+        const renderPodium = (top3) => { const podiumEl = document.getElementById('final-podium'); podiumEl.innerHTML = ''; const podiumOrder = [1, 0, 2]; const podiumItems = podiumOrder.map(rankIndex => top3[rankIndex]).filter(p => p); podiumItems.forEach(player => { if (!player) return; const rank = top3.findIndex(p => p.id === player.id) + 1; const podiumDiv = document.createElement('div'); podiumDiv.className = `podium-item podium-${rank}`; podiumDiv.innerHTML = ` ${rank === 1 ? '<i class="fas fa-crown"></i>' : ''} <div class="podium-rank">${rank}</div> <div class="podium-name">${player.name}</div> <div class="podium-score">${player.score} Score</div> `; podiumEl.appendChild(podiumDiv); }); setTimeout(() => { sfx.applause.play().catch(()=>{}); document.querySelectorAll('.podium-item').forEach(el => el.classList.add('animate')); var duration = 5 * 1000; var animationEnd = Date.now() + duration; var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 }; function randomInRange(min, max) { return Math.random() * (max - min) + min; } var interval = setInterval(function() { var timeLeft = animationEnd - Date.now(); if (timeLeft <= 0) return clearInterval(interval); var particleCount = 50 * (timeLeft / duration); confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }); confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }); }, 250); }, 100); };
+        const updateRealtimeHostView = async (game) => { const quizDoc = await getDoc(doc(db, `/artifacts/${appId}/public/data/quizzes`, game.quizId)); if (!quizDoc.exists()) return; const quiz = quizDoc.data(); const question = quiz.questions[game.currentQuestionIndex]; if (!question) return; displayLeaderboard(game, false); document.getElementById('host-realtime-info').classList.remove('hidden'); document.getElementById('host-rt-q-number').textContent = game.currentQuestionIndex + 1; document.getElementById('host-rt-q-total').textContent = quiz.questions.length; clearInterval(visualTimerInterval); const timeLimit = question.timeLimit || 20; const timerEl = document.getElementById('host-rt-timer'); if (!game.questionStartTime) { timerEl.textContent = '--'; return; } const startTime = game.questionStartTime.toMillis(); visualTimerInterval = setInterval(() => { const now = Date.now(); const elapsed = Math.floor((now - startTime) / 1000); const timeLeft = Math.max(0, timeLimit - elapsed); timerEl.textContent = timeLeft; if(timeLeft <= 0) clearInterval(visualTimerInterval); }, 500); };
+        // ✨ FIX: เปลี่ยนปุ่มจบเกมให้ส่งสัญญาณไปที่ Firebase
+        document.getElementById('host-end-game-btn').addEventListener('click', async () => {
+            if (currentGameSessionId) {
+                await updateDoc(doc(db, `/artifacts/${appId}/public/data/gameSessions`, currentGameSessionId), {
+                    status: 'ended'
+                });
+            }
+        }); 
+
+        // ✨ ADD THIS LISTENER for the player's button ✨
+        document.getElementById('player-back-home-btn').addEventListener('click', () => {
+            cleanupAndExit('Thank you for playing!');
+        });
+        const cleanupAndExit = (message) => { if (bgmAudio) { bgmAudio.pause(); bgmAudio = null; } for (const key in sfx) { sfx[key].pause(); sfx[key].currentTime = 0; } clearInterval(visualTimerInterval); clearTimeout(questionTimeout); if (gameUnsubscribe) gameUnsubscribe(); if (playersUnsubscribe) playersUnsubscribe(); currentGameSessionId = null; currentPlayerId = null; processedQuestionIndex = -1; showAlert(message); showScreen('home-screen'); };
+        const generateReport = async (game, sessionId) => { const reportRef = doc(db, `/artifacts/${appId}/public/data/gameReports`, sessionId); if ((await getDoc(reportRef)).exists()) return; const quizDoc = await getDoc(doc(db, `/artifacts/${appId}/public/data/quizzes`, game.quizId)); if (!quizDoc.exists()) return; const quiz = quizDoc.data(); const playersSnapshot = await getDocs(collection(db, `/artifacts/${appId}/public/data/gameSessions`, sessionId, 'players')); const playersData = playersSnapshot.docs.map(d => ({ id: d.id, ...d.data() })); let totalCorrect = 0; let totalAttempted = 0; const participantsReport = []; for (const player of playersData) { let correctCount = 0; const playerAnswersReport = []; quiz.questions.forEach((q, i) => { const answerData = player.answers ? player.answers[i] : null; if (answerData) { const isCorrect = answerData.answerIndex === q.correctIndex; if (isCorrect) correctCount++; playerAnswersReport.push({ questionIndex: i, isCorrect }); } }); totalCorrect += correctCount; totalAttempted += Object.keys(player.answers || {}).length; participantsReport.push({ id: player.id, name: player.name, score: game.leaderboard.find(p => p.id === player.id)?.score || 0, accuracy: quiz.questions.length > 0 ? Math.round((correctCount / quiz.questions.length) * 100) : 0, points: correctCount, totalQuestions: quiz.questions.length, answers: playerAnswersReport }); } const questionsReport = []; quiz.questions.forEach((q, i) => { const optionCounts = Array(q.options.length).fill(0); let correctAnswers = 0; let incorrectAnswers = 0; playersData.forEach(p => { const answerData = p.answers ? p.answers[i] : null; if (answerData) { optionCounts[answerData.answerIndex]++; if(answerData.answerIndex === q.correctIndex) correctAnswers++; else incorrectAnswers++; } }); const totalAnswersForQ = correctAnswers + incorrectAnswers; questionsReport.push({ questionIndex: i, text: q.text, accuracy: totalAnswersForQ > 0 ? Math.round((correctAnswers / totalAnswersForQ) * 100) : 0, options: q.options.map((optText, optIdx) => ({ text: optText, answerCount: optionCounts[optIdx] })), correctIndex: q.correctIndex, stats: { correct: correctAnswers, incorrect: incorrectAnswers, unattempted: playersData.length - totalAnswersForQ } }); }); const finalReport = { quizId: game.quizId, quizTitle: quiz.title, sessionName: game.sessionName, playedAt: game.createdAt, summary: { accuracy: totalAttempted > 0 ? Math.round((totalCorrect / totalAttempted) * 100) : 0, completion: playersData.length > 0 ? Math.round((totalAttempted / (quiz.questions.length * playersData.length)) * 100) : 0, participantsCount: playersData.length, questionsCount: quiz.questions.length }, participants: participantsReport.sort((a,b) => b.score - a.score), questions: questionsReport }; await setDoc(reportRef, finalReport); };
+        const viewReports = async (quizId, quizTitle) => { currentQuizForHistory = { id: quizId, title: quizTitle }; showScreen('history-screen'); const lang = localStorage.getItem('quizLanguage') || 'en'; document.getElementById('history-quiz-title').textContent = getTextInLanguage(quizTitle, lang); const listEl = document.getElementById('history-list'); listEl.innerHTML = '<p>Loading History...</p>'; try { const q = query(collection(db, `/artifacts/${appId}/public/data/gameReports`), where("quizId", "==", quizId), orderBy("playedAt", "desc")); const querySnapshot = await getDocs(q); if (querySnapshot.empty) { listEl.innerHTML = '<p>No Reports Available for This Quiz</p>'; return; } listEl.innerHTML = ''; querySnapshot.forEach(doc => { const report = doc.data(); const d = report.playedAt.toDate(); const dateString = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; const itemEl = document.createElement('div'); itemEl.className = 'report-item bg-gray-100 p-3 rounded-lg flex justify-between items-center'; itemEl.innerHTML = ` <div class="flex-grow cursor-pointer hover:bg-gray-200 -m-3 p-3 rounded-lg report-clickable-area"> <p class="font-bold">${report.sessionName}</p> <p class="text-sm text-gray-500">${dateString} - ${report.summary.participantsCount} People</p> </div> <button data-id="${doc.id}" class="delete-report-btn ml-4 bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs hover:bg-red-600 transition-colors"> <i class="fas fa-trash"></i> </button> `; itemEl.querySelector('.report-clickable-area').addEventListener('click', () => renderReportScreen(doc.data())); listEl.appendChild(itemEl); }); listEl.querySelectorAll('.delete-report-btn').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); deleteReport(e.target.closest('button').dataset.id); }); }); } catch(error) { console.error("Firestore query error:", error); listEl.innerHTML = `<p class="text-red-500">Error: Could not load data. A Firestore index might be required (check console F12 for details).</p>`}};
+        
+        // ✨ MODIFIED: `renderReportScreen` for multilingual support ✨
+        const renderReportScreen = (report) => {
+            showScreen('report-screen');
+            const lang = localStorage.getItem('quizLanguage') || 'en';
+            document.getElementById('report-quiz-title').textContent = getTextInLanguage(report.quizTitle, lang);
+            document.getElementById('report-session-name').textContent = report.sessionName;
+            document.getElementById('report-summary-accuracy').textContent = `${report.summary.accuracy}%`;
+            document.getElementById('report-summary-completion').textContent = `${report.summary.completion}%`;
+            document.getElementById('report-summary-participants').textContent = report.summary.participantsCount;
+            document.getElementById('report-summary-questions').textContent = report.summary.questionsCount;
+            const shareButton = document.getElementById('share-report-btn');
+            if (shareButton) { const newShareButton = shareButton.cloneNode(true); shareButton.parentNode.replaceChild(newShareButton, shareButton); newShareButton.addEventListener('click', () => shareReportByEmail(report)); }
+            renderParticipants(report.participants);
+            renderQuestions(report.questions);
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    tabContents.forEach(c => c.classList.add('hidden'));
+                    const contentId = btn.id.replace('btn', 'content');
+                    document.getElementById(contentId).classList.remove('hidden');
+                });
+            });
+            document.getElementById('tab-btn-participants').click();
+        };
+
+        const renderParticipants = (participants) => { const container = document.getElementById('tab-content-participants'); container.innerHTML = '<div class="space-y-4"></div>'; const listEl = container.querySelector('.space-y-4'); if (participants.length === 0) { listEl.innerHTML = '<p>No Participants Available</p>'; return; } participants.forEach(p => { const progressBar = p.answers.map(ans => `<div class="flex-1 h-2 ${ans.isCorrect ? 'bg-green-500' : 'bg-red-500'} rounded"></div>`).join(''); const itemEl = document.createElement('div'); itemEl.className = 'bg-gray-50 p-4 rounded-lg'; itemEl.innerHTML = `<div class="flex justify-between items-center mb-2"><p class="font-bold">${p.name}</p><div class="text-right"><p class="font-semibold text-lg">${p.score} <span class="text-sm font-normal text-gray-600">Score</span></p><p class="text-sm text-gray-600">${p.accuracy}% (${p.points}/${p.totalQuestions})</p></div></div><div class="flex gap-1">${progressBar}</div>`; listEl.appendChild(itemEl); }); };
+        
+        // ✨ MODIFIED: `renderQuestions` for multilingual support ✨
+        const renderQuestions = (questions) => {
+            const container = document.getElementById('tab-content-questions');
+            container.innerHTML = '<div class="space-y-4"></div>';
+            const listEl = container.querySelector('.space-y-4');
+            if (questions.length === 0) { listEl.innerHTML = '<p>No Questions Available</p>'; return; }
+            const lang = localStorage.getItem('quizLanguage') || 'en';
+            questions.forEach((q, index) => {
+                const optionsHtml = q.options.map((opt, i) => `<div class="flex items-center justify-between py-1"><div class="flex items-center"><span class="font-mono mr-2 text-gray-500">${String.fromCharCode(65 + i)}</span><p class="${i === q.correctIndex ? 'text-green-600 font-semibold' : ''}">${getTextInLanguage(opt.text, lang)}</p>${i === q.correctIndex ? '<i class="fas fa-check text-green-500 ml-2"></i>' : ''}</div><p class="text-sm text-gray-600">${opt.answerCount} Answer(s)</p></div>`).join('');
+                const totalParticipants = q.stats.correct + q.stats.incorrect + q.stats.unattempted;
+                const correctWidth = totalParticipants > 0 ? (q.stats.correct / totalParticipants) * 100 : 0;
+                const incorrectWidth = totalParticipants > 0 ? (q.stats.incorrect / totalParticipants) * 100 : 0;
+                const itemEl = document.createElement('div');
+                itemEl.className = 'bg-gray-50 p-4 rounded-lg';
+                itemEl.innerHTML = `<div class="flex justify-between items-center text-sm text-gray-600 mb-2"><span>Multiple Choice</span><div class="flex items-center gap-4"><span><i class="fas fa-check-circle text-green-500 mr-1"></i> ${q.accuracy}% Accuracy</span></div></div><p class="font-semibold mb-3">${index + 1}. ${getTextInLanguage(q.text, lang)}</p><div class="text-sm mb-4">${optionsHtml}</div><div class="space-y-2 text-xs text-gray-700"><div class="flex items-center justify-between"><span>Correct (${q.stats.correct})</span><span>Incorrect (${q.stats.incorrect})</span></div><div class="w-full bg-gray-200 rounded-full h-2.5 flex"><div class="bg-green-500 h-2.5 rounded-l-full" style="width: ${correctWidth}%"></div><div class="bg-red-500 h-2.5 rounded-r-full" style="width: ${incorrectWidth}%"></div></div><p class="text-center text-gray-500">Unattempted: ${q.stats.unattempted}</p></div>`;
+                listEl.appendChild(itemEl);
+            });
+        };
+    </script>
+
+</body>
+</html>

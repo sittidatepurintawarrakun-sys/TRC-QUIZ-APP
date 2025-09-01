@@ -1,16 +1,88 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRC Learning Center - Lobby</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+    </style>
 </head>
+<body class="bg-slate-50 text-slate-800">
 
-<body>
-  Hello world
-  <script src="script.js"></script>
+    <div class="relative min-h-screen flex flex-col items-center justify-center p-6 md:p-8 overflow-hidden">
+
+        <div class="absolute -top-24 -left-24 w-72 h-72 bg-cyan-200 rounded-full opacity-50 blur-3xl"></div>
+        <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-200 rounded-full opacity-50 blur-3xl"></div>
+
+        <main class="w-full max-w-5xl text-center z-10">
+            
+            <div class="mb-12">
+                <div class="flex justify-center items-center gap-4 mb-4">
+                    <i class="fas fa-crown text-4xl bg-gradient-to-br from-yellow-400 to-amber-600 text-transparent bg-clip-text"></i>
+                    <h1 class="text-5xl md:text-7xl font-extrabold text-emerald-600">
+                        TRC Learning Center
+                    </h1>
+                    <i class="fas fa-graduation-cap text-slate-800 text-4xl"></i>
+                </div>
+                <p class="text-lg md:text-xl text-slate-500">
+                    Turn Knowledge into Adventure. Start Your Challenge Today!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col items-center hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-48 h-48 rounded-full border-4 border-blue-200 flex items-center justify-center mb-4">
+                        <i class="fas fa-book-open-reader text-blue-600 text-7xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-blue-800 mb-2">โหมดทำข้อสอบ (Self-Paced)</h2>
+                    <p class="text-slate-600 mb-6 flex-grow">
+                        ทำแบบทดสอบตามความเร็วของคุณ ไม่ต้องจับเวลา เหมาะสำหรับการทบทวนความรู้และเรียนรู้ด้วยตนเอง
+                    </p>
+                    <button id="go-to-exam" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30">
+                        <i class="fas fa-book-reader mr-2"></i> Select
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col items-center hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <div class="w-48 h-48 rounded-full border-4 border-emerald-200 flex items-center justify-center mb-4">
+                <i class="fas fa-trophy text-7xl bg-gradient-to-br from-yellow-400 to-amber-600 text-transparent bg-clip-text"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-emerald-800 mb-2">โหมดแข่งขันจับเวลา (Real-Time)</h2>
+                <p class="text-slate-600 mb-6 flex-grow">
+                แข่งขันกับเพื่อนๆ แบบเรียลไทม์ ตอบคำถามให้ไวและแม่นยำที่สุดเพื่อคว้าชัยชนะ!
+                </p>
+                <button id="go-to-realtime" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/30">
+                <i class="fas fa-stopwatch-20 mr-2"></i> Select
+                </button>
+                </div>
+
+            </div>
+        </main>
+        
+        <footer class="absolute bottom-4 text-sm z-10">
+            <p class="font-semibold bg-gradient-to-r from-slate-600 to-slate-900 text-transparent bg-clip-text">
+                &copy; 2025 Sittidate Purintawarrakun
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        // ปุ่มโหมดทำข้อสอบ จะพาไปที่ไฟล์ exam.html
+        document.getElementById('go-to-exam').addEventListener('click', () => {
+            window.location.href = 'exam.html';
+        });
+
+        // ปุ่มโหมดแข่งขัน จะพาไปที่ไฟล์ quiz.html (หรือ game.html หากคุณเปลี่ยนชื่อไปแล้ว)
+        document.getElementById('go-to-realtime').addEventListener('click', () => {
+            window.location.href = 'quiz.html'; 
+        });
+    </script>
 </body>
-
 </html>
