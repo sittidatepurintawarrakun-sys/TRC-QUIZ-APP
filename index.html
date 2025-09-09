@@ -8,81 +8,464 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body {
-            font-family: 'Kanit', sans-serif;
+        body { font-family: 'Kanit', sans-serif; }
+        .hidden { display: none; }
+        .tab-btn.active { border-color: #10b981; color: #059669; }
+        .dropdown-menu {
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
         }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
+    <div class="relative min-h-screen flex flex-col p-4 sm:p-6 md:p-8">
+        <div class="absolute inset-0 overflow-hidden -z-10">
+            <div class="absolute -top-24 -left-24 w-72 h-72 bg-cyan-200 rounded-full opacity-50 blur-3xl"></div>
+            <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-200 rounded-full opacity-50 blur-3xl"></div>
+        </div>
 
-    <div class="relative min-h-screen flex flex-col items-center justify-center p-6 md:p-8 overflow-hidden">
-
-        <div class="absolute -top-24 -left-24 w-72 h-72 bg-cyan-200 rounded-full opacity-50 blur-3xl"></div>
-        <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-emerald-200 rounded-full opacity-50 blur-3xl"></div>
-
-        <main class="w-full max-w-5xl text-center z-10">
+        <header class="w-full flex justify-between items-center mb-8 sm:mb-12">
+            <!-- Left side can be empty or have a logo -->
+            <div></div>
             
-            <div class="mb-12">
+            <!-- Right side Actions -->
+            <div class="flex items-center gap-4">
+                <!-- ✨ NEW: Unauthenticated Buttons -->
+                <div id="unauth-buttons" class="flex items-center gap-4">
+                    <button id="header-login-btn" class="font-bold text-slate-600 hover:text-emerald-600 transition-colors px-2">Sign In</button>
+                    <button id="header-signup-btn" class="bg-emerald-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-emerald-700 transition-colors shadow-md">Sign up FREE</button>
+                </div>
+
+                <!-- ✨ MODIFIED: Authenticated User Profile Dropdown -->
+                <div id="auth-profile" class="relative hidden">
+                    <button id="user-menu-button" class="w-12 h-12 rounded-full bg-white/70 backdrop-blur-sm shadow-md flex items-center justify-center hover:bg-emerald-50 transition-colors">
+                        <img id="user-photo" src="" alt="User Photo" class="w-full h-full rounded-full object-cover border-2 border-emerald-400">
+                    </button>
+                    
+                    <div id="dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 py-1 z-50 origin-top-right dropdown-menu opacity-0 transform scale-95">
+                        <div class="px-4 py-2 border-b">
+                            <p class="text-sm text-slate-500">Signed in as</p>
+                            <p id="user-name" class="font-bold text-slate-800 truncate"></p>
+                        </div>
+                        <a href="#" id="show-profile-modal-btn" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Profile</a>
+                        <a href="#" id="sign-out-btn" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="w-full max-w-5xl text-center flex-grow flex flex-col justify-center mx-auto">
+             <div class="mb-12">
                 <div class="flex justify-center items-center gap-4 mb-4">
                     <i class="fas fa-crown text-4xl bg-gradient-to-br from-yellow-400 to-amber-600 text-transparent bg-clip-text"></i>
-                    <h1 class="text-5xl md:text-7xl font-extrabold text-emerald-600">
-                        TRC Learning Center
-                    </h1>
+                    <h1 class="text-5xl md:text-7xl font-extrabold text-emerald-600">TRC Learning Center</h1>
                     <i class="fas fa-graduation-cap text-slate-800 text-4xl"></i>
                 </div>
-                <p class="text-lg md:text-xl text-slate-500">
-                    Turn Knowledge into Adventure. Start Your Challenge Today!
-                </p>
+                <p class="text-lg md:text-xl text-slate-500">Turn Knowledge into Adventure. Start Your Challenge Today!</p>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
                 <div class="bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col items-center hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                    <div class="w-48 h-48 rounded-full border-4 border-blue-200 flex items-center justify-center mb-4">
-                        <i class="fas fa-book-open-reader text-blue-600 text-7xl"></i>
-                    </div>
+                    <div class="w-48 h-48 rounded-full border-4 border-blue-200 flex items-center justify-center mb-4"><i class="fas fa-book-open-reader text-blue-600 text-7xl"></i></div>
                     <h2 class="text-2xl font-bold text-blue-800 mb-2">โหมดทำข้อสอบ (Self-Paced)</h2>
-                    <p class="text-slate-600 mb-6 flex-grow">
-                        ทำแบบทดสอบตามความเร็วของคุณ ไม่ต้องจับเวลา เหมาะสำหรับการทบทวนความรู้และเรียนรู้ด้วยตนเอง
-                    </p>
-                    <button id="go-to-exam" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30">
-                        <i class="fas fa-book-reader mr-2"></i> Select
-                    </button>
+                    <p class="text-slate-600 mb-6 flex-grow">ทำแบบทดสอบตามความเร็วของคุณ ไม่ต้องจับเวลา เหมาะสำหรับการทบทวนความรู้และเรียนรู้ด้วยตนเอง</p>
+                    <button data-url="exam.html" class="game-mode-btn w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30"><i class="fas fa-book-reader mr-2"></i> Select</button>
                 </div>
-
                 <div class="bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col items-center hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                <div class="w-48 h-48 rounded-full border-4 border-emerald-200 flex items-center justify-center mb-4">
-                <i class="fas fa-trophy text-7xl bg-gradient-to-br from-yellow-400 to-amber-600 text-transparent bg-clip-text"></i>
+                    <div class="w-48 h-48 rounded-full border-4 border-emerald-200 flex items-center justify-center mb-4"><i class="fas fa-trophy text-7xl bg-gradient-to-br from-yellow-400 to-amber-600 text-transparent bg-clip-text"></i></div>
+                    <h2 class="text-2xl font-bold text-emerald-800 mb-2">โหมดแข่งขันจับเวลา (Real-Time)</h2>
+                    <p class="text-slate-600 mb-6 flex-grow">แข่งขันกับเพื่อนๆ แบบเรียลไทม์ ตอบคำถามให้ไวและแม่นยำที่สุดเพื่อคว้าชัยชนะ!</p>
+                    <button data-url="quiz.html" class="game-mode-btn w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/30"><i class="fas fa-stopwatch-20 mr-2"></i> Select</button>
                 </div>
-                <h2 class="text-2xl font-bold text-emerald-800 mb-2">โหมดแข่งขันจับเวลา (Real-Time)</h2>
-                <p class="text-slate-600 mb-6 flex-grow">
-                แข่งขันกับเพื่อนๆ แบบเรียลไทม์ ตอบคำถามให้ไวและแม่นยำที่สุดเพื่อคว้าชัยชนะ!
-                </p>
-                <button id="go-to-realtime" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/30">
-                <i class="fas fa-stopwatch-20 mr-2"></i> Select
-                </button>
-                </div>
-
             </div>
         </main>
         
-        <footer class="absolute bottom-4 text-sm z-10">
-            <p class="font-semibold bg-gradient-to-r from-slate-600 to-slate-900 text-transparent bg-clip-text">
-                &copy; 2025 Sittidate Purintawarrakun
-            </p>
+        <footer class="w-full text-center mt-8 sm:mt-12">
+            <p class="font-semibold bg-gradient-to-r from-slate-600 to-slate-900 text-transparent bg-clip-text text-sm">&copy; 2025 Sittidate Purintawarrakun</p>
         </footer>
     </div>
+
+    <!-- Modals (Login/Signup, Guest Confirm, Profile Edit, Alert) -->
+    <div id="login-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-md p-6 sm:p-8 rounded-2xl shadow-2xl relative">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+            <div class="border-b border-slate-200 mb-4">
+                <nav class="-mb-px flex space-x-6">
+                    <button id="signin-tab-btn" class="tab-btn active whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Sign In</button>
+                    <button id="signup-tab-btn" class="tab-btn whitespace-nowrap py-3 px-1 border-b-2 border-transparent font-medium text-sm text-slate-500 hover:text-slate-700">Create New Account</button>
+                </nav>
+            </div>
+            <div id="signin-form">
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label for="signin-email" class="block text-sm font-medium text-slate-700 text-left">Email</label>
+                        <input type="email" id="signin-email" autocomplete="email" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label for="signin-password" class="block text-sm font-medium text-slate-700 text-left">Password</label>
+                        <input type="password" id="signin-password" autocomplete="current-password" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                </div>
+                <button id="signin-btn" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-colors">Sign In</button>
+            </div>
+            <div id="signup-form" class="hidden">
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label for="signup-name" class="block text-sm font-medium text-slate-700 text-left">Display Name</label>
+                        <input type="text" id="signup-name" autocomplete="name" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                     <div>
+                        <label for="signup-email" class="block text-sm font-medium text-slate-700 text-left">Email</label>
+                        <input type="email" id="signup-email" autocomplete="email" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label for="signup-password" class="block text-sm font-medium text-slate-700 text-left">Password (at least 6 characters)</label>
+                        <input type="password" id="signup-password" autocomplete="new-password" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                </div>
+                <button id="signup-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">Create Account</button>
+            </div>
+            <div class="my-6 relative"><hr class="border-slate-200"><span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-2 text-slate-400 text-sm">OR</span></div>
+            <div class="flex flex-col gap-3">
+                <button id="google-signin-btn" class="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-50 transition-colors"><i class="fab fa-google text-red-500 text-xl"></i> Sign in with Google</button>
+            </div>
+        </div>
+    </div>
+    <div id="guest-confirm-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm">
+            <i class="fas fa-user-secret text-4xl text-slate-400 mb-4"></i>
+            <h3 class="text-2xl font-bold text-slate-800">Play as a Guest?</h3>
+            <p class="text-slate-500 mt-2 mb-6">Your progress and scores will not be saved. To save your data, please sign in first.</p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button id="guest-confirm-btn" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-colors">Continue as Guest</button>
+                <button id="guest-cancel-btn" class="w-full bg-slate-200 text-slate-700 font-bold py-3 rounded-lg hover:bg-slate-300 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div id="profile-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-md p-6 sm:p-8 rounded-2xl shadow-2xl relative">
+            <button id="close-profile-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold text-slate-800 mb-6 text-center">Edit Profile</h3>
+            <div class="space-y-4">
+                <div class="flex flex-col items-center">
+                    <img id="profile-photo-preview" src="" class="w-24 h-24 rounded-full border-4 border-emerald-200 mb-2 object-cover">
+                    <input type="file" id="profile-photo-input" class="hidden" accept="image/*">
+                    <button id="change-photo-btn" class="text-sm text-emerald-600 font-semibold hover:underline">Change Photo</button>
+                </div>
+                 <div>
+                    <label for="profile-name-input" class="block text-sm font-medium text-slate-700 text-left">Display Name</label>
+                    <input type="text" id="profile-name-input" autocomplete="name" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+            </div>
+            <div class="mt-8 flex gap-4">
+                 <button id="save-profile-btn" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-400">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    <div id="alert-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm">
+            <p id="alert-message" class="mb-4"></p>
+            <button id="alert-ok-btn" class="bg-emerald-500 text-white px-6 py-2 rounded-lg">OK</button>
+        </div>
+    </div>
     
-    <script>
-        // ปุ่มโหมดทำข้อสอบ จะพาไปที่ไฟล์ exam.html
-        document.getElementById('go-to-exam').addEventListener('click', () => {
-            window.location.href = 'exam.html';
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg",
+            authDomain: "trc-funny-quiz.firebaseapp.com",
+            projectId: "trc-funny-quiz",
+            storageBucket: "trc-funny-quiz.appspot.com",
+            messagingSenderId: "323647073409",
+            appId: "1:323647073409:web:1445589b1bc6eb77bcf180"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Element References
+        const gameModeButtons = document.querySelectorAll('.game-mode-btn');
+        const loginModal = document.getElementById('login-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const signinTabBtn = document.getElementById('signin-tab-btn');
+        const signupTabBtn = document.getElementById('signup-tab-btn');
+        const signinForm = document.getElementById('signin-form');
+        const signupForm = document.getElementById('signup-form');
+        const signinBtn = document.getElementById('signin-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const googleSignInBtn = document.getElementById('google-signin-btn');
+        const guestConfirmModal = document.getElementById('guest-confirm-modal');
+        const guestConfirmBtn = document.getElementById('guest-confirm-btn');
+        const guestCancelBtn = document.getElementById('guest-cancel-btn');
+        const alertModal = document.getElementById('alert-modal');
+        const alertMessage = document.getElementById('alert-message');
+        const alertOkBtn = document.getElementById('alert-ok-btn');
+        
+        // ✨ NEW/MODIFIED UI elements for header
+        const unauthButtons = document.getElementById('unauth-buttons');
+        const headerLoginBtn = document.getElementById('header-login-btn');
+        const headerSignupBtn = document.getElementById('header-signup-btn');
+        const authProfile = document.getElementById('auth-profile');
+        const userMenuButton = document.getElementById('user-menu-button');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        const userPhoto = document.getElementById('user-photo');
+        const userName = document.getElementById('user-name');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const showProfileModalBtn = document.getElementById('show-profile-modal-btn');
+        
+        // Profile Modal Elements
+        const profileModal = document.getElementById('profile-modal');
+        const closeProfileModalBtn = document.getElementById('close-profile-modal-btn');
+        const profilePhotoPreview = document.getElementById('profile-photo-preview');
+        const profilePhotoInput = document.getElementById('profile-photo-input');
+        const changePhotoBtn = document.getElementById('change-photo-btn');
+        const profileNameInput = document.getElementById('profile-name-input');
+        const saveProfileBtn = document.getElementById('save-profile-btn');
+
+        let destinationUrl = '';
+        
+        // --- Main Logic ---
+        onAuthStateChanged(auth, (user) => {
+            updateUI(user);
         });
 
-        // ปุ่มโหมดแข่งขัน จะพาไปที่ไฟล์ quiz.html (หรือ game.html หากคุณเปลี่ยนชื่อไปแล้ว)
-        document.getElementById('go-to-realtime').addEventListener('click', () => {
-            window.location.href = 'quiz.html'; 
+        // --- Event Listeners ---
+        headerLoginBtn.addEventListener('click', () => {
+            switchTab('signin');
+            loginModal.classList.remove('hidden');
         });
+
+        headerSignupBtn.addEventListener('click', () => {
+            switchTab('signup');
+            loginModal.classList.remove('hidden');
+        });
+
+        userMenuButton.addEventListener('click', () => {
+            const isHidden = dropdownMenu.classList.contains('hidden');
+            if (isHidden) {
+                dropdownMenu.classList.remove('hidden');
+                setTimeout(() => {
+                    dropdownMenu.classList.remove('opacity-0', 'scale-95');
+                }, 10);
+            } else {
+                dropdownMenu.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    dropdownMenu.classList.add('hidden');
+                }, 200);
+            }
+        });
+
+        window.addEventListener('click', (e) => {
+            if (!userMenuButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                if (!dropdownMenu.classList.contains('hidden')) {
+                    dropdownMenu.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => dropdownMenu.classList.add('hidden'), 200);
+                }
+            }
+        });
+        
+        gameModeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                destinationUrl = button.dataset.url;
+                if (auth.currentUser && !auth.currentUser.isAnonymous) {
+                    window.location.href = destinationUrl;
+                } else {
+                    guestConfirmModal.classList.remove('hidden');
+                }
+            });
+        });
+        
+        guestConfirmBtn.addEventListener('click', async () => {
+            try {
+                guestConfirmModal.classList.add('hidden');
+                await signInAnonymously(auth);
+                if (destinationUrl) {
+                    window.location.href = destinationUrl;
+                }
+            } catch (error) {
+                handleAuthError(error);
+            }
+        });
+        
+        guestCancelBtn.addEventListener('click', () => {
+            guestConfirmModal.classList.add('hidden');
+        });
+        
+        closeModalBtn.addEventListener('click', () => loginModal.classList.add('hidden'));
+        signinTabBtn.addEventListener('click', () => switchTab('signin'));
+        signupTabBtn.addEventListener('click', () => switchTab('signup'));
+        
+        signinBtn.addEventListener('click', handleSignIn);
+        signupBtn.addEventListener('click', handleSignUp);
+        
+        googleSignInBtn.addEventListener('click', () => {
+            signInWithPopup(auth, googleProvider)
+                .then(() => {
+                    loginModal.classList.add('hidden');
+                    if (destinationUrl) {
+                         window.location.href = destinationUrl;
+                    }
+                })
+                .catch(handleAuthError);
+        });
+        
+        signOutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            signOut(auth);
+            dropdownMenu.classList.add('hidden', 'opacity-0', 'scale-95');
+        });
+
+        alertOkBtn.addEventListener('click', () => alertModal.classList.add('hidden'));
+
+        showProfileModalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (user) {
+                profileNameInput.value = user.displayName || '';
+                profilePhotoPreview.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random`;
+                profileModal.classList.remove('hidden');
+                dropdownMenu.classList.add('hidden', 'opacity-0', 'scale-95');
+            }
+        });
+
+        closeProfileModalBtn.addEventListener('click', () => profileModal.classList.add('hidden'));
+        changePhotoBtn.addEventListener('click', () => profilePhotoInput.click());
+        profilePhotoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    profilePhotoPreview.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        saveProfileBtn.addEventListener('click', handleProfileUpdate);
+
+        // --- Helper Functions ---
+        function switchTab(tabName) {
+            if (tabName === 'signin') {
+                signinForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                signinTabBtn.classList.add('active');
+                signupTabBtn.classList.remove('active');
+            } else {
+                signinForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                signinTabBtn.classList.remove('active');
+                signupTabBtn.classList.add('active');
+            }
+        }
+
+        async function handleSignUp() {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value.trim();
+            if (!name || !email || !password) {
+                return showAlert('Please fill in all fields.');
+            }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, { displayName: name });
+                loginModal.classList.add('hidden');
+                if (destinationUrl) {
+                    window.location.href = destinationUrl;
+                }
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        async function handleSignIn() {
+            const email = document.getElementById('signin-email').value.trim();
+            const password = document.getElementById('signin-password').value.trim();
+             if (!email || !password) {
+                return showAlert('Please enter email and password.');
+            }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                loginModal.classList.add('hidden');
+                if (destinationUrl) {
+                    window.location.href = destinationUrl;
+                }
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+        
+        async function handleProfileUpdate() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            saveProfileBtn.disabled = true;
+            saveProfileBtn.textContent = 'Saving...';
+
+            try {
+                const newName = profileNameInput.value.trim();
+                const newPhotoFile = profilePhotoInput.files[0];
+                let photoURL = user.photoURL; 
+
+                if (newPhotoFile) {
+                    const photoRef = ref(storage, `profilePictures/${user.uid}/${newPhotoFile.name}`);
+                    const snapshot = await uploadBytes(photoRef, newPhotoFile);
+                    photoURL = await getDownloadURL(snapshot.ref);
+                }
+
+                await updateProfile(user, {
+                    displayName: newName,
+                    photoURL: photoURL
+                });
+
+                profileModal.classList.add('hidden');
+                showAlert('Profile updated successfully!');
+                updateUI(auth.currentUser); 
+
+            } catch (error) {
+                handleAuthError(error);
+            } finally {
+                saveProfileBtn.disabled = false;
+                saveProfileBtn.textContent = 'Save Changes';
+            }
+        }
+
+        function updateUI(user) {
+            if (user && !user.isAnonymous) {
+                // Authenticated user
+                unauthButtons.classList.add('hidden');
+                authProfile.classList.remove('hidden');
+                
+                userPhoto.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=random&color=fff`;
+                userName.textContent = user.displayName || 'User';
+            } else {
+                // Unauthenticated or Anonymous user
+                unauthButtons.classList.remove('hidden');
+                authProfile.classList.add('hidden');
+            }
+        }
+
+        function handleAuthError(error) {
+            console.error("Authentication Error:", error.code, error.message);
+            let message = 'An unexpected error occurred.';
+            switch (error.code) {
+                case 'auth/invalid-email': message = 'Invalid email format.'; break;
+                case 'auth/user-not-found':
+                case 'auth/wrong-password': message = 'Incorrect email or password.'; break;
+                case 'auth/email-already-in-use': message = 'This email is already registered. Please sign in.'; break;
+                case 'auth/weak-password': message = 'Password must be at least 6 characters long.'; break;
+                case 'auth/popup-closed-by-user': message = 'The sign-in window was closed before completion.'; break;
+                case 'storage/unauthorized': message = 'You do not have permission to upload this file. Please check Storage security rules.'; break;
+                default: message = 'An error occurred. Please try again later.';
+            }
+            showAlert(message);
+        }
+
+        function showAlert(message) {
+            alertMessage.textContent = message;
+            alertModal.classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
+

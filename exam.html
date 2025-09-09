@@ -27,9 +27,7 @@
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-
     <div id="app-container" class="max-w-4xl mx-auto p-4 min-h-screen flex flex-col justify-center">
-
         <div id="home-screen" class="screen active text-center">
             <div class="bg-white p-8 rounded-2xl shadow-xl">
                 <img src="TRC-Logo.jpg" alt="Thai Rayon Logo" class="mx-auto h-24 w-24 mb-4 object-contain">
@@ -43,14 +41,13 @@
                     <a href="index.html" class="text-gray-500 hover:text-orange-600 transition-colors font-semibold"><i class="fas fa-arrow-left mr-2"></i>Back to Lobby</a>
                 </div>
                 <div class="mt-6 text-xs text-gray-400">
-                    <p>User ID: <span id="user-id-display">Loading...</span></p>
+                    <p>User: <span id="user-id-display">Loading...</span></p>
                 </div>
                 <div class="mt-10 text-xs text-gray-500">
                     <p>&copy; 2025 Sittidate Purintawarrakun</p>
                 </div>
             </div>
         </div>
-
         <div id="host-options-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><h2 class="text-3xl font-bold mb-6">Manage An Exam</h2><div class="flex flex-col md:flex-row gap-4 justify-center"><button id="create-quiz-btn" class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition shadow-md">Create A New Exam</button><button id="view-my-quizzes-btn" class="bg-gradient-to-r from-purple-500 to-violet-500 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-violet-600 transition shadow-md">Pick an available Exam Set</button></div><button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back</button></div></div>
         <div id="quiz-creator-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl"><h2 class="text-3xl font-bold mb-6">Create / Edit</h2><input type="text" id="quiz-title" placeholder="Exam Title" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-500"><textarea id="quiz-description" placeholder="Short Description (if any) &#13;&#10;คำอธิบายสั้นๆ (ถ้ามี)" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-500" rows="2"></textarea><div id="questions-container"></div><button id="add-question-btn" class="mt-4 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition w-full"><i class="fas fa-plus mr-2"></i>Add Question</button><div class="mt-6 flex gap-4"><button id="save-quiz-btn" class="flex-1 bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400">Save </button><button class="back-btn flex-1 bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition">Cancel</button></div></div></div>
         <div id="my-quizzes-screen" class="screen">
@@ -69,7 +66,7 @@
         <div id="player-join-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><h2 class="text-3xl font-bold mb-6">Join the Exam</h2><input type="text" id="game-pin-input" placeholder="Join Code (4 digits)" maxlength="4" class="w-full text-center text-2xl p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500 tracking-widest"><input type="text" id="player-name-input" placeholder="Your Name" class="w-full text-center p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500"><button id="join-game-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400">Join</button><button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back</button></div></div>
         <div id="host-lobby-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><p class="text-gray-600">Players, enter this code to join:</p><div class="my-4 bg-indigo-600 text-white p-4 rounded-lg"><p class="text-lg">Join Code</p><p id="game-pin-display" class="text-6xl font-bold tracking-widest">----</p></div><h3 class="text-2xl font-bold mt-6 mb-4">Participants (<span id="player-count">0</span>)</h3><div id="player-list" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center min-h-[50px]"></div><button id="start-game-btn" class="mt-8 w-full bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition text-2xl shadow-lg disabled:bg-gray-400" disabled>Start!</button> <button class="back-btn mt-6 text-gray-500 hover:text-gray-700"> &larr; Back to Home</button></div></div>
         <div id="host-in-progress-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><h2 class="text-3xl font-bold mb-2">Game in Progress...</h2><p class="text-gray-600 mb-6">Join Code: <span id="in-progress-pin" class="font-bold text-indigo-600"></span></p><h3 class="text-2xl font-bold mt-6 mb-4">Player Status</h3><p class="mb-4"><span id="completed-players-count">0</span> / <span id="total-players-count">0</span> Player Finished the Exam</p><div id="in-progress-player-list" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center min-h-[50px]"></div><button id="end-game-btn" class="mt-8 w-full bg-emerald-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-600 transition text-2xl shadow-lg disabled:bg-gray-400" disabled><i class="fas fa-flag-checkered mr-2"></i>End Game and View Summary</button></div></div>
-        <div id="results-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl"><h2 class="text-3xl font-bold mb-2 text-center">🏆 Score Summary 🏆</h2><div id="final-podium" class="podium-container mt-6"></div><div id="leaderboard-list" class="space-y-2 mt-6"></div><button id="back-to-home-from-results-btn" class="mt-8 w-full bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-600 transition">Back to Home</button></div></div>
+        <div id="results-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl"><h2 class="text-3xl font-bold mb-2 text-center"> 🏆  Score Summary  🏆 </h2><div id="final-podium" class="podium-container mt-6"></div><div id="leaderboard-list" class="space-y-2 mt-6"></div><button id="back-to-home-from-results-btn" class="mt-8 w-full bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-600 transition">Back to Home</button></div></div>
         <div id="player-lobby-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><i class="fas fa-spinner fa-spin text-5xl text-teal-500 mb-4"></i><h2 class="text-3xl font-bold">Participation confirmed!</h2><p class="text-gray-600 mt-2">Waiting for the host to start...</p></div></div>
         <div id="player-answer-screen" class="screen"><div class="bg-white p-6 rounded-2xl shadow-xl"><p id="exam-progress" class="text-right text-sm text-gray-500 mb-2"></p><div class="bg-gray-50 p-4 rounded-lg mb-6 min-h-[100px] flex items-center justify-center"><p id="player-q-text" class="text-xl md:text-2xl font-semibold text-gray-800 text-center"></p></div><div id="exam-options-container" class="space-y-3 mb-6"></div><button id="exam-submit-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition shadow-md">Submit Answer</button></div></div>
         <div id="player-finished-screen" class="screen"><div class="bg-white p-8 rounded-2xl shadow-xl text-center"><i class="fas fa-check-circle text-5xl text-emerald-500 mb-4"></i><div id="finished-message"><h2 class="text-3xl font-bold">Finished the Exam!</h2><p class="text-gray-600 mt-2">Waiting for the host to end the exam to view the summary...</p></div></div></div>
@@ -85,7 +82,6 @@
                         <button id="share-report-btn" class="bg-blue-500 text-white font-bold py-1 px-3 rounded-md text-sm hover:bg-blue-600 transition-colors"><i class="fas fa-envelope mr-1"></i> Share</button>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <div class="bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-center gap-4">
                         <i class="fas fa-bullseye text-2xl text-amber-500"></i>
@@ -129,13 +125,11 @@
         </div>
         <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"><div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm"><p id="alert-message" class="mb-4"></p><button id="alert-ok-btn" class="bg-indigo-500 text-white px-4 py-2 rounded-lg">ตกลง</button></div></div>
     </div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, query, where, getDocs, onSnapshot, serverTimestamp, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    // TODO: For production, these keys should be stored in environment variables, not hardcoded.
+    
     const firebaseConfig = { apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg", authDomain: "trc-funny-quiz.firebaseapp.com", projectId: "trc-funny-quiz", storageBucket: "trc-funny-quiz.appspot.com", messagingSenderId: "323647073409", appId: "1:323647073409:web:1445589b1bc6eb77bcf180" };
     
     const CONSTANTS = {
@@ -165,7 +159,6 @@
             COMPLETED: 'completed'
         }
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
@@ -182,8 +175,7 @@
     const sfx = { 
         applause: new Audio(applauseFile)
     };
-    // No loop for applause sound
-
+    
     const unlockAudio = () => {
         if (appState.audioUnlocked) return;
         const sound = sfx.applause;
@@ -202,7 +194,7 @@
     const screens = document.querySelectorAll('.screen');
     const showAlert = (message) => { document.getElementById('alert-message').textContent = message; document.getElementById('alert-modal').style.display = 'flex'; };
     document.getElementById('alert-ok-btn').addEventListener('click', () => { document.getElementById('alert-modal').style.display = 'none'; });
-
+    
     const cleanupListeners = () => {
         if (appState.playersUnsubscribe) { appState.playersUnsubscribe(); appState.playersUnsubscribe = null; }
     };
@@ -237,13 +229,24 @@
         sessionStorage.clear();
     };
 
-    onAuthStateChanged(auth, async (user) => { if (user) { appState.userId = user.uid; document.getElementById('user-id-display').textContent = appState.userId.substring(0, 8); } else { try { await signInAnonymously(auth); } catch (error) { console.error("Auth Error:", error); showAlert("Authentication failed"); } } });
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            appState.userId = user.uid;
+            // ✨ FIX: Display name for signed-in users, or ID for guests
+            if (user.isAnonymous) {
+                document.getElementById('user-id-display').textContent = user.uid.substring(0, 8) + ' (Guest)';
+            } else {
+                document.getElementById('user-id-display').textContent = user.displayName || 'Player';
+            }
+            
+            restoreSession();
+        } else {
+            console.log("No authenticated user found. Redirecting to the main lobby.");
+            window.location.href = 'index.html';
+        }
+    });
 
     const restoreSession = () => {
-        if (!sessionStorage.getItem('gameSessionId')) {
-            clearGameState();
-        }
-
         appState.gameSessionId = sessionStorage.getItem('gameSessionId');
         appState.playerId = sessionStorage.getItem('playerId');
         appState.gamePin = sessionStorage.getItem('gamePin');
@@ -254,8 +257,9 @@
         const lastScreen = sessionStorage.getItem('currentScreen') || CONSTANTS.SCREENS.HOME;
         
         if (appState.gameSessionId) {
-            if (appState.isHost) rejoinAsHost();
-            else if (appState.playerId) { 
+            if (appState.isHost) {
+                 rejoinAsHost();
+            } else if (appState.playerId) { 
                 listenToGameSession(appState.gameSessionId);
                 navigateTo(lastScreen); 
             }
@@ -263,11 +267,21 @@
             navigateTo(CONSTANTS.SCREENS.HOME);
         }
     };
-
-    document.addEventListener('DOMContentLoaded', restoreSession);
-
+    
     document.getElementById('show-host-options-btn').addEventListener('click', () => navigateTo(CONSTANTS.SCREENS.HOST_OPTIONS));
-    document.getElementById('show-player-join-btn').addEventListener('click', () => navigateTo(CONSTANTS.SCREENS.PLAYER_JOIN));
+    
+    // ✨ NEW: Pre-fill player name if user is signed in
+    document.getElementById('show-player-join-btn').addEventListener('click', () => {
+        const user = auth.currentUser;
+        const playerNameInput = document.getElementById('player-name-input');
+        if (user && !user.isAnonymous && user.displayName) {
+            playerNameInput.value = user.displayName;
+        } else {
+            playerNameInput.value = '';
+        }
+        navigateTo(CONSTANTS.SCREENS.PLAYER_JOIN);
+    });
+    
     document.getElementById('back-to-home-from-results-btn').addEventListener('click', () => {
         clearGameState();
         navigateTo(CONSTANTS.SCREENS.HOME);
@@ -311,19 +325,12 @@
         navigateTo(CONSTANTS.SCREENS.MY_QUIZZES);
         const listEl = document.getElementById('my-quizzes-list');
         const searchInput = document.getElementById('search-quiz-input');
-
-        // Reset screen state
         searchInput.value = '';
         listEl.innerHTML = '<p>Loading...</p>';
-
         try {
             const q = query(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/quizzes`));
             const querySnapshot = await getDocs(q);
-
-            // Store all quizzes fetched from the database in a local constant
             const allQuizzes = querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-
-            // A dedicated function to render the list of quizzes
             const renderQuizzes = (quizzesToRender) => {
                 listEl.innerHTML = '';
                 if (quizzesToRender.length === 0) {
@@ -333,7 +340,6 @@
                     listEl.innerHTML = `<p class="col-span-full text-center text-gray-500">${message}</p>`;
                     return;
                 }
-
                 quizzesToRender.forEach(({ id, data: quiz }) => {
                     const card = document.createElement('div');
                     card.className = 'bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105';
@@ -355,15 +361,9 @@
                     listEl.appendChild(card);
                 });
             };
-
-            // Initial render of all quizzes
             renderQuizzes(allQuizzes);
-
-            // Use cloneNode to safely replace the input and its old listeners
             const newSearchInput = searchInput.cloneNode(true);
             searchInput.parentNode.replaceChild(newSearchInput, searchInput);
-
-            // Add the search event listener to the new input element
             newSearchInput.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
                 const filteredQuizzes = allQuizzes.filter(quiz => 
@@ -371,7 +371,6 @@
                 );
                 renderQuizzes(filteredQuizzes);
             });
-
         } catch (error) {
             console.error("Error loading quizzes:", error);
             listEl.innerHTML = '<p class="text-red-500 col-span-full">Failed to load exam</p>';
@@ -394,307 +393,15 @@
     const submitFinalResults = async () => { if (!appState.playerId || !appState.gameSessionId) return; try { const playerRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId, 'players', appState.playerId); await updateDoc(playerRef, { score: appState.exam.score, answers: appState.exam.answers, status: CONSTANTS.PLAYER_STATUS.COMPLETED }); sessionStorage.removeItem('examState'); } catch (error) { showAlert("Error submitting the exam!"); } };
     const displayResultsWithPodium = async (sessionId) => { 
         sfx.applause.play().catch(error => console.warn("Could not play applause sound:", error));
-
         const playersRef = collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, sessionId, 'players'); const snapshot = await getDocs(playersRef); const players = snapshot.docs.map(doc => ({ name: doc.data().name, score: doc.data().score || 0 })); players.sort((a, b) => b.score - a.score); const podiumEl = document.getElementById('final-podium'); const listEl = document.getElementById('leaderboard-list'); podiumEl.innerHTML = ''; listEl.innerHTML = ''; const top3 = players.slice(0, 3); const rest = players.slice(3); const podiumOrder = [1, 0, 2]; podiumOrder.forEach(rankIndex => { const player = top3[rankIndex]; if (!player) return; const rank = rankIndex + 1; const podiumDiv = document.createElement('div'); podiumDiv.className = `podium-item podium-${rank}`; podiumDiv.innerHTML = ` ${rank === 1 ? '<i class="fas fa-crown"></i>' : ''} <div class="podium-rank">${rank}</div> <div class="podium-name">${player.name}</div> <div class="podium-score">${player.score} Score</div> `; podiumEl.appendChild(podiumDiv); }); rest.forEach((player, i) => { const rank = i + 4; const itemEl = document.createElement('div'); itemEl.className = 'flex justify-between items-center p-3 rounded-lg bg-gray-100'; itemEl.innerHTML = `<div class="flex items-center gap-3"><span class="font-bold w-8 text-center text-lg">${rank}</span><span>${player.name}</span></div><span class="font-bold text-indigo-600">${player.score} คะแนน</span>`; listEl.appendChild(itemEl); }); setTimeout(() => { document.querySelectorAll('.podium-item').forEach(el => el.classList.add('animate')); var duration = 5 * 1000; var animationEnd = Date.now() + duration; var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 }; function randomInRange(min, max) { return Math.random() * (max - min) + min; }
         appState.confettiInterval = setInterval(function() { var timeLeft = animationEnd - Date.now(); if (timeLeft <= 0) { clearInterval(appState.confettiInterval); appState.confettiInterval = null; return; }
         var particleCount = 50 * (timeLeft / duration); confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }); confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }); }, 250); }, 100); 
     };
-    const generateReport = async (sessionId, quizId, sessionName) => {
-        const reportRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameReports`, sessionId);
-        if ((await getDoc(reportRef)).exists()) return;
-
-        const quizDoc = await getDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/quizzes`, quizId));
-        if (!quizDoc.exists()) return;
-
-        const quiz = quizDoc.data();
-        const playersSnapshot = await getDocs(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, sessionId, 'players'));
-        const playersData = playersSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-
-        let totalCorrect = 0;
-        let totalAttempted = 0;
-
-        const participantsReport = playersData.map(player => {
-            let correctCount = 0;
-            const questionsAnswered = player.answers.length;
-
-            quiz.questions.forEach((q, i) => {
-                const answerData = player.answers.find(a => a.questionText === q.text);
-                if (answerData && answerData.isCorrect) {
-                    correctCount++;
-                }
-            });
-
-            totalCorrect += correctCount;
-            totalAttempted += questionsAnswered;
-
-            return {
-                name: player.name,
-                score: player.score || 0,
-                accuracy: questionsAnswered > 0 ? Math.round((correctCount / questionsAnswered) * 100) : 0,
-                // --- DATA NEW ---
-                correctCount: correctCount,
-                totalQuestions: quiz.questions.length,
-                questionsAnswered: questionsAnswered
-                // --- END DATA NEW ---
-            };
-        });
-
-        const questionsReport = quiz.questions.map((q, i) => {
-            const optionCounts = Array(q.options.length).fill(0);
-            let correctAnswers = 0;
-            playersData.forEach(p => {
-                const answerData = p.answers.find(a => a.questionText === q.text);
-                if (answerData) {
-                    optionCounts[answerData.selectedIndex]++;
-                    if (answerData.isCorrect) correctAnswers++;
-                }
-            });
-            const totalAnswersForQ = optionCounts.reduce((a, b) => a + b, 0);
-            return {
-                text: q.text,
-                accuracy: totalAnswersForQ > 0 ? Math.round((correctAnswers / totalAnswersForQ) * 100) : 0,
-                options: q.options.map((optText, optIdx) => ({
-                    text: optText,
-                    answerCount: optionCounts[optIdx]
-                })),
-                correctIndex: q.correctIndex
-            };
-        });
-
-        const finalReport = {
-            quizId: quizId,
-            quizTitle: quiz.title,
-            sessionName: sessionName || `Session @ ${new Date().toLocaleDateString()}`,
-            playedAt: serverTimestamp(),
-            summary: {
-                accuracy: totalAttempted > 0 ? Math.round((totalCorrect / totalAttempted) * 100) : 0,
-                completion: playersData.length > 0 && quiz.questions.length > 0 ? Math.round((totalAttempted / (quiz.questions.length * playersData.length)) * 100) : 0,
-                participantsCount: playersData.length,
-                questionsCount: quiz.questions.length
-            },
-            participants: participantsReport.sort((a, b) => b.score - a.score),
-            questions: questionsReport
-        };
-
-        await setDoc(reportRef, finalReport);
-    };
-    const viewReports = async (quizId, quizTitle) => {
-        appState.currentQuizForHistory = { id: quizId, title: quizTitle };
-        navigateTo(CONSTANTS.SCREENS.HISTORY);
-        document.getElementById('history-quiz-title').textContent = quizTitle;
-        const listEl = document.getElementById('history-list');
-        listEl.innerHTML = '<p>Loading Records...</p>';
-        try {
-            const q = query(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameReports`), where("quizId", "==", quizId), orderBy("playedAt", "desc"));
-            const querySnapshot = await getDocs(q);
-            if (querySnapshot.empty) { listEl.innerHTML = '<p>No report available for this exam set</p>'; return; }
-            listEl.innerHTML = '';
-            querySnapshot.forEach(doc => {
-                const report = doc.data(); const d = report.playedAt.toDate(); const dateString = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-                const itemEl = document.createElement('div'); itemEl.className = 'bg-gray-100 p-3 rounded-lg flex justify-between items-center';
-                itemEl.innerHTML = `<div class="flex-grow cursor-pointer hover:bg-gray-200 -m-3 p-3 rounded-lg report-clickable-area"><p class="font-bold">${report.sessionName}</p><p class="text-sm text-gray-500">${dateString} - ${report.summary.participantsCount} Participants</p></div><button data-id="${doc.id}" class="delete-report-btn ml-4 bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs hover:bg-red-600 transition-colors"><i class="fas fa-trash"></i></button>`;
-                itemEl.querySelector('.report-clickable-area').addEventListener('click', () => renderReportScreen(report));
-                itemEl.querySelector('.delete-report-btn').addEventListener('click', (e) => { e.stopPropagation(); deleteReport(e.target.closest('button').dataset.id); });
-                listEl.appendChild(itemEl);
-            });
-        } catch (error) { console.error("Error fetching reports:", error); listEl.innerHTML = '<p class="text-red-500">An error occurred while loading history</p>'; }
-    };
+    const generateReport = async (sessionId, quizId, sessionName) => { const reportRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameReports`, sessionId); if ((await getDoc(reportRef)).exists()) return; const quizDoc = await getDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/quizzes`, quizId)); if (!quizDoc.exists()) return; const quiz = quizDoc.data(); const playersSnapshot = await getDocs(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, sessionId, 'players')); const playersData = playersSnapshot.docs.map(d => ({ id: d.id, ...d.data() })); let totalCorrect = 0; let totalAttempted = 0; const participantsReport = playersData.map(player => { let correctCount = 0; const questionsAnswered = player.answers.length; quiz.questions.forEach((q, i) => { const answerData = player.answers.find(a => a.questionText === q.text); if (answerData && answerData.isCorrect) { correctCount++; } }); totalCorrect += correctCount; totalAttempted += questionsAnswered; return { name: player.name, score: player.score || 0, accuracy: questionsAnswered > 0 ? Math.round((correctCount / questionsAnswered) * 100) : 0, correctCount: correctCount, totalQuestions: quiz.questions.length, questionsAnswered: questionsAnswered }; }); const questionsReport = quiz.questions.map((q, i) => { const optionCounts = Array(q.options.length).fill(0); let correctAnswers = 0; playersData.forEach(p => { const answerData = p.answers.find(a => a.questionText === q.text); if (answerData) { optionCounts[answerData.selectedIndex]++; if (answerData.isCorrect) correctAnswers++; } }); const totalAnswersForQ = optionCounts.reduce((a, b) => a + b, 0); return { text: q.text, accuracy: totalAnswersForQ > 0 ? Math.round((correctAnswers / totalAnswersForQ) * 100) : 0, options: q.options.map((optText, optIdx) => ({ text: optText, answerCount: optionCounts[optIdx] })), correctIndex: q.correctIndex }; }); const finalReport = { quizId: quizId, quizTitle: quiz.title, sessionName: sessionName || `Session @ ${new Date().toLocaleDateString()}`, playedAt: serverTimestamp(), summary: { accuracy: totalAttempted > 0 ? Math.round((totalCorrect / totalAttempted) * 100) : 0, completion: playersData.length > 0 && quiz.questions.length > 0 ? Math.round((totalAttempted / (quiz.questions.length * playersData.length)) * 100) : 0, participantsCount: playersData.length, questionsCount: quiz.questions.length }, participants: participantsReport.sort((a, b) => b.score - a.score), questions: questionsReport }; await setDoc(reportRef, finalReport); };
+    const viewReports = async (quizId, quizTitle) => { appState.currentQuizForHistory = { id: quizId, title: quizTitle }; navigateTo(CONSTANTS.SCREENS.HISTORY); document.getElementById('history-quiz-title').textContent = quizTitle; const listEl = document.getElementById('history-list'); listEl.innerHTML = '<p>Loading Records...</p>'; try { const q = query(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameReports`), where("quizId", "==", quizId), orderBy("playedAt", "desc")); const querySnapshot = await getDocs(q); if (querySnapshot.empty) { listEl.innerHTML = '<p>No report available for this exam set</p>'; return; } listEl.innerHTML = ''; querySnapshot.forEach(doc => { const report = doc.data(); const d = report.playedAt.toDate(); const dateString = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; const itemEl = document.createElement('div'); itemEl.className = 'bg-gray-100 p-3 rounded-lg flex justify-between items-center'; itemEl.innerHTML = `<div class="flex-grow cursor-pointer hover:bg-gray-200 -m-3 p-3 rounded-lg report-clickable-area"><p class="font-bold">${report.sessionName}</p><p class="text-sm text-gray-500">${dateString} - ${report.summary.participantsCount} Participants</p></div><button data-id="${doc.id}" class="delete-report-btn ml-4 bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs hover:bg-red-600 transition-colors"><i class="fas fa-trash"></i></button>`; itemEl.querySelector('.report-clickable-area').addEventListener('click', () => renderReportScreen(report)); itemEl.querySelector('.delete-report-btn').addEventListener('click', (e) => { e.stopPropagation(); deleteReport(e.target.closest('button').dataset.id); }); listEl.appendChild(itemEl); }); } catch (error) { console.error("Error fetching reports:", error); listEl.innerHTML = '<p class="text-red-500">An error occurred while loading history</p>'; } };
     const deleteReport = async (reportId) => { if (window.confirm('Are you sure you want to delete this report? This action cannot be undone')) { try { await deleteDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameReports`, reportId)); showAlert('Report deleted successfully'); if(appState.currentQuizForHistory) { viewReports(appState.currentQuizForHistory.id, appState.currentQuizForHistory.title); } } catch (error) { console.error("Error deleting report:", error); showAlert('Failed to delete the report'); } } };
-    // วางโค้ดใหม่ทั้งหมดนี้ลงไปแทนที่
-    const renderReportScreen = (report) => {
-        navigateTo(CONSTANTS.SCREENS.REPORT);
-
-        // Populate header and summary cards
-        document.getElementById('report-quiz-title').textContent = report.quizTitle;
-        document.getElementById('report-session-name').textContent = report.sessionName;
-        document.getElementById('report-summary-accuracy').textContent = `${report.summary.accuracy}%`;
-        document.getElementById('report-summary-completion').textContent = `${report.summary.completion}%`;
-        document.getElementById('report-summary-participants').textContent = report.summary.participantsCount;
-        document.getElementById('report-summary-questions').textContent = report.summary.questionsCount;
-
-        // Safely re-attach share button listener
-        const newShareButton = document.getElementById('share-report-btn').cloneNode(true);
-        document.getElementById('share-report-btn').parentNode.replaceChild(newShareButton, document.getElementById('share-report-btn'));
-        newShareButton.addEventListener('click', () => shareReportByEmail(report));
-
-        // --- RENDER PARTICIPANTS TAB ---
-        const renderParticipants = (participants) => {
-            const container = document.getElementById('tab-content-participants');
-            container.innerHTML = '<div class="space-y-4"></div>';
-            const listEl = container.querySelector('.space-y-4');
-
-            if (!participants || participants.length === 0) {
-                listEl.innerHTML = '<p>No players found</p>';
-                return;
-            }
-
-            participants.forEach(p => {
-                const correctPercent = p.totalQuestions > 0 ? (p.correctCount / p.totalQuestions) * 100 : 0;
-                const incorrectCount = p.questionsAnswered - p.correctCount;
-                const incorrectPercent = p.totalQuestions > 0 ? (incorrectCount / p.totalQuestions) * 100 : 0;
-
-                const itemEl = document.createElement('div');
-                itemEl.className = 'bg-gray-50 p-4 rounded-lg border';
-                itemEl.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <p class="font-bold text-lg">${p.name}</p>
-                        <div class="text-right">
-                            <p class="font-bold text-xl">${p.score} <span class="text-sm font-normal text-gray-600">Score</span></p>
-                            <p class="text-sm text-gray-600">${p.accuracy}% (${p.correctCount}/${p.totalQuestions})</p>
-                        </div>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 flex overflow-hidden">
-                        <div class="bg-green-500 h-2.5" style="width: ${correctPercent}%"></div>
-                        <div class="bg-red-500 h-2.5" style="width: ${incorrectPercent}%"></div>
-                    </div>
-                `;
-                listEl.appendChild(itemEl);
-            });
-        };
-
-        // --- RENDER QUESTIONS TAB ---
-        const renderQuestions = (questions) => {
-            const container = document.getElementById('tab-content-questions');
-            container.innerHTML = '<div class="space-y-6"></div>';
-            const listEl = container.querySelector('.space-y-6');
-
-            if (!questions || questions.length === 0) {
-                listEl.innerHTML = '<p>No exam questions found</p>';
-                return;
-            }
-
-            questions.forEach((q, index) => {
-                const totalParticipants = report.summary.participantsCount;
-                const totalAnswersForQ = q.options.reduce((sum, opt) => sum + opt.answerCount, 0);
-                const correctAnswers = q.options[q.correctIndex].answerCount;
-                const incorrectAnswers = totalAnswersForQ - correctAnswers;
-                const unattempted = totalParticipants - totalAnswersForQ;
-
-                const correctPercent = totalParticipants > 0 ? (correctAnswers / totalParticipants) * 100 : 0;
-                const incorrectPercent = totalParticipants > 0 ? (incorrectAnswers / totalParticipants) * 100 : 0;
-
-                const optionsHtml = q.options.map((opt, i) => `
-                    <div class="flex justify-between items-center py-1 text-gray-700">
-                        <div class="flex items-center">
-                            <span class="font-bold mr-2">${String.fromCharCode(65 + i)}</span>
-                            <p class="${i === q.correctIndex ? 'text-green-600 font-semibold' : ''}">${opt.text}</p>
-                            ${i === q.correctIndex ? '<i class="fas fa-check text-green-500 ml-2"></i>' : ''}
-                        </div>
-                        <p class="text-sm font-medium">${opt.answerCount} Answer${opt.answerCount !== 1 ? 's' : ''}</p>
-                    </div>
-                `).join('');
-
-                const itemEl = document.createElement('div');
-                itemEl.className = 'bg-gray-50 p-4 rounded-lg border';
-                itemEl.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <p class="text-xs text-gray-500">Multiple Choice</p>
-                            <p class="font-bold text-lg">${index + 1}. ${q.text}</p>
-                        </div>
-                        <p class="font-semibold text-green-600 flex items-center gap-1">
-                            <i class="fas fa-check-circle"></i> ${q.accuracy}% Accuracy
-                        </p>
-                    </div>
-                    <div class="space-y-1 mb-4">${optionsHtml}</div>
-                    <div class="w-full bg-gray-200 rounded-full h-4 flex overflow-hidden text-white text-xs items-center">
-                        <div class="bg-green-500 h-4 flex items-center justify-center" style="width: ${correctPercent}%">${Math.round(correctPercent)}%</div>
-                        <div class="bg-red-500 h-4 flex items-center justify-center" style="width: ${incorrectPercent}%">${Math.round(incorrectPercent)}%</div>
-                    </div>
-                    <div class="flex justify-between text-sm mt-1 px-1">
-                        <span class="text-gray-600">Correct (${correctAnswers})</span>
-                        <span class="text-gray-600">Incorrect (${incorrectAnswers})</span>
-                        <span class="text-gray-600">Unattempted (${unattempted})</span>
-                    </div>
-                `;
-                listEl.appendChild(itemEl);
-            });
-        };
-
-        // --- INITIALIZE TABS AND RENDER CONTENT ---
-        renderParticipants(report.participants);
-        renderQuestions(report.questions);
-
-        // Re-attach tab listeners
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        tabButtons.forEach(btn => {
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-            newBtn.addEventListener('click', () => {
-                tabButtons.forEach(b => b.classList.remove('active'));
-                newBtn.classList.add('active');
-                tabContents.forEach(c => c.classList.add('hidden'));
-                const contentId = newBtn.id.replace('btn', 'content');
-                document.getElementById(contentId).classList.remove('hidden');
-            });
-        });
-
-        // Ensure the default tab is active
-        document.getElementById('tab-btn-participants').classList.add('active');
-        document.getElementById('tab-content-participants').classList.remove('hidden');
-        document.getElementById('tab-btn-questions').classList.remove('active');
-        document.getElementById('tab-content-questions').classList.add('hidden');
-    };
-    const shareReportByEmail = (report) => {
-        const recipientEmail = prompt("Please enter recipient email (use commas to separate multiple emails ,):");
-
-        if (recipientEmail) {
-            const subject = `Summary Quiz: ${report.quizTitle} (${report.sessionName})`;
-
-            // --- สร้างเนื้อหา Report ทั้งหมดเหมือนเดิม ---
-            let body = `Game Results Summary Quiz:\n\n`;
-            body += `Title: ${report.quizTitle}\n`;
-            body += `Session: ${report.sessionName}\n`;
-            body += `------------------------------------\n`;
-            body += `Summary:\n`;
-            body += `- Participants: ${report.summary.participantsCount} Participants\n`;
-            body += `- Accuracy Rate: ${report.summary.accuracy}%\n`;
-            body += `- Questions: ${report.summary.questionsCount} Questions\n\n`;
-
-            body += `Leaderboard:\n`;
-            report.participants.slice(0, 5).forEach((p, index) => {
-                body += `${index + 1}. ${p.name} - ${p.score} Score (Accuracy ${p.accuracy}%)\n`;
-            });
-            if (report.participants.length > 5) {
-                body += `...\n`;
-            }
-
-            body += `\n\n------------------------------------\n`;
-            body += `Question Summary:\n\n`;
-
-            report.questions.forEach((q, index) => {
-                body += `${index + 1}. ${q.text} (Accurary ${q.accuracy}%)\n`;
-                q.options.forEach((opt, i) => {
-                    const isCorrect = i === q.correctIndex ? '✔️ ' : '   '; // แก้ไข padding เล็กน้อย
-                    body += `${isCorrect}${opt.text} (${opt.answerCount} Participants)\n`;
-                });
-                body += `\n`;
-            });
-
-            body += `\nCreated By TRC Exam Mode`;
-
-            // ✨✨✨ FIX: เปลี่ยนจากการยัด body ลงใน link มาเป็นการ Copy to Clipboard ✨✨✨
-            try {
-                // 1. คัดลอกเนื้อหาทั้งหมดไปยัง Clipboard
-                navigator.clipboard.writeText(body);
-
-                // 2. แจ้งเตือนผู้ใช้
-                showAlert('Report Copied Successfully! Paste It in Your Email');
-
-                // 3. สร้าง mailto link ที่มีแค่ผู้รับและหัวข้อ (สั้นและปลอดภัย)
-                const encodedSubject = encodeURIComponent(subject);
-                const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}`;
-
-                // 4. เปิดโปรแกรมอีเมล
-                window.location.href = mailtoLink;
-
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-                showAlert('You Cannot Copy This Content');
-            }
-        }
-    };
+    const renderReportScreen = (report) => { navigateTo(CONSTANTS.SCREENS.REPORT); document.getElementById('report-quiz-title').textContent = report.quizTitle; document.getElementById('report-session-name').textContent = report.sessionName; document.getElementById('report-summary-accuracy').textContent = `${report.summary.accuracy}%`; document.getElementById('report-summary-completion').textContent = `${report.summary.completion}%`; document.getElementById('report-summary-participants').textContent = report.summary.participantsCount; document.getElementById('report-summary-questions').textContent = report.summary.questionsCount; const newShareButton = document.getElementById('share-report-btn').cloneNode(true); document.getElementById('share-report-btn').parentNode.replaceChild(newShareButton, document.getElementById('share-report-btn')); newShareButton.addEventListener('click', () => shareReportByEmail(report)); const renderParticipants = (participants) => { const container = document.getElementById('tab-content-participants'); container.innerHTML = '<div class="space-y-4"></div>'; const listEl = container.querySelector('.space-y-4'); if (!participants || participants.length === 0) { listEl.innerHTML = '<p>No players found</p>'; return; } participants.forEach(p => { const correctPercent = p.totalQuestions > 0 ? (p.correctCount / p.totalQuestions) * 100 : 0; const incorrectCount = p.questionsAnswered - p.correctCount; const incorrectPercent = p.totalQuestions > 0 ? (incorrectCount / p.totalQuestions) * 100 : 0; const itemEl = document.createElement('div'); itemEl.className = 'bg-gray-50 p-4 rounded-lg border'; itemEl.innerHTML = ` <div class="flex justify-between items-center mb-2"> <p class="font-bold text-lg">${p.name}</p> <div class="text-right"> <p class="font-bold text-xl">${p.score} <span class="text-sm font-normal text-gray-600">Score</span></p> <p class="text-sm text-gray-600">${p.accuracy}% (${p.correctCount}/${p.totalQuestions})</p> </div> </div> <div class="w-full bg-gray-200 rounded-full h-2.5 flex overflow-hidden"> <div class="bg-green-500 h-2.5" style="width: ${correctPercent}%"></div> <div class="bg-red-500 h-2.5" style="width: ${incorrectPercent}%"></div> </div> `; listEl.appendChild(itemEl); }); }; const renderQuestions = (questions) => { const container = document.getElementById('tab-content-questions'); container.innerHTML = '<div class="space-y-6"></div>'; const listEl = container.querySelector('.space-y-6'); if (!questions || questions.length === 0) { listEl.innerHTML = '<p>No exam questions found</p>'; return; } questions.forEach((q, index) => { const totalParticipants = report.summary.participantsCount; const totalAnswersForQ = q.options.reduce((sum, opt) => sum + opt.answerCount, 0); const correctAnswers = q.options[q.correctIndex].answerCount; const incorrectAnswers = totalAnswersForQ - correctAnswers; const unattempted = totalParticipants - totalAnswersForQ; const correctPercent = totalParticipants > 0 ? (correctAnswers / totalParticipants) * 100 : 0; const incorrectPercent = totalParticipants > 0 ? (incorrectAnswers / totalParticipants) * 100 : 0; const optionsHtml = q.options.map((opt, i) => ` <div class="flex justify-between items-center py-1 text-gray-700"> <div class="flex items-center"> <span class="font-bold mr-2">${String.fromCharCode(65 + i)}</span> <p class="${i === q.correctIndex ? 'text-green-600 font-semibold' : ''}">${opt.text}</p> ${i === q.correctIndex ? '<i class="fas fa-check text-green-500 ml-2"></i>' : ''} </div> <p class="text-sm font-medium">${opt.answerCount} Answer${opt.answerCount !== 1 ? 's' : ''}</p> </div> `).join(''); const itemEl = document.createElement('div'); itemEl.className = 'bg-gray-50 p-4 rounded-lg border'; itemEl.innerHTML = ` <div class="flex justify-between items-start mb-3"> <div> <p class="text-xs text-gray-500">Multiple Choice</p> <p class="font-bold text-lg">${index + 1}. ${q.text}</p> </div> <p class="font-semibold text-green-600 flex items-center gap-1"> <i class="fas fa-check-circle"></i> ${q.accuracy}% Accuracy </p> </div> <div class="space-y-1 mb-4">${optionsHtml}</div> <div class="w-full bg-gray-200 rounded-full h-4 flex overflow-hidden text-white text-xs items-center"> <div class="bg-green-500 h-4 flex items-center justify-center" style="width: ${correctPercent}%">${Math.round(correctPercent)}%</div> <div class="bg-red-500 h-4 flex items-center justify-center" style="width: ${incorrectPercent}%">${Math.round(incorrectPercent)}%</div> </div> <div class="flex justify-between text-sm mt-1 px-1"> <span class="text-gray-600">Correct (${correctAnswers})</span> <span class="text-gray-600">Incorrect (${incorrectAnswers})</span> <span class="text-gray-600">Unattempted (${unattempted})</span> </div> `; listEl.appendChild(itemEl); }); }; renderParticipants(report.participants); renderQuestions(report.questions); const tabButtons = document.querySelectorAll('.tab-btn'); const tabContents = document.querySelectorAll('.tab-content'); tabButtons.forEach(btn => { const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn); newBtn.addEventListener('click', () => { tabButtons.forEach(b => b.classList.remove('active')); newBtn.classList.add('active'); tabContents.forEach(c => c.classList.add('hidden')); const contentId = newBtn.id.replace('btn', 'content'); document.getElementById(contentId).classList.remove('hidden'); }); }); document.getElementById('tab-btn-participants').classList.add('active'); document.getElementById('tab-content-participants').classList.remove('hidden'); document.getElementById('tab-btn-questions').classList.remove('active'); document.getElementById('tab-content-questions').classList.add('hidden'); };
+    const shareReportByEmail = (report) => { const recipientEmail = prompt("Please enter recipient email (use commas to separate multiple emails ,):"); if (recipientEmail) { const subject = `Summary Quiz: ${report.quizTitle} (${report.sessionName})`; let body = `Game Results Summary Quiz:\n\n`; body += `Title: ${report.quizTitle}\n`; body += `Session: ${report.sessionName}\n`; body += `------------------------------------\n`; body += `Summary:\n`; body += `- Participants: ${report.summary.participantsCount} Participants\n`; body += `- Accuracy Rate: ${report.summary.accuracy}%\n`; body += `- Questions: ${report.summary.questionsCount} Questions\n\n`; body += `Leaderboard:\n`; report.participants.slice(0, 5).forEach((p, index) => { body += `${index + 1}. ${p.name} - ${p.score} Score (Accuracy ${p.accuracy}%)\n`; }); if (report.participants.length > 5) { body += `...\n`; } body += `\n\n------------------------------------\n`; body += `Question Summary:\n\n`; report.questions.forEach((q, index) => { body += `${index + 1}. ${q.text} (Accurary ${q.accuracy}%)\n`; q.options.forEach((opt, i) => { const isCorrect = i === q.correctIndex ? ' ✔️  ' : '   '; body += `${isCorrect}${opt.text} (${opt.answerCount} Participants)\n`; }); body += `\n`; }); body += `\nCreated By TRC Exam Mode`; try { navigator.clipboard.writeText(body); showAlert('Report Copied Successfully! Paste It in Your Email'); const encodedSubject = encodeURIComponent(subject); const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}`; window.location.href = mailtoLink; } catch (err) { console.error('Failed to copy text: ', err); showAlert('You Cannot Copy This Content'); } } };
     const listenToGameSession = (sessionId) => { if (appState.gameUnsubscribe) appState.gameUnsubscribe(); const gameRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, sessionId); appState.gameUnsubscribe = onSnapshot(gameRef, (docSnap) => { if (!docSnap.exists()) { showAlert("This session has been ended by the host"); clearGameState(); navigateTo(CONSTANTS.SCREENS.HOME); return; } const game = docSnap.data(); const currentScreen = sessionStorage.getItem('currentScreen'); if (appState.isHost) { if (game.status === CONSTANTS.GAME_STATUS.IN_PROGRESS && currentScreen === CONSTANTS.SCREENS.HOST_LOBBY) { navigateTo(CONSTANTS.SCREENS.HOST_IN_PROGRESS); document.getElementById('in-progress-pin').textContent = game.pin; listenToPlayerProgress(sessionId); } } else { if (game.status === CONSTANTS.GAME_STATUS.IN_PROGRESS && currentScreen === CONSTANTS.SCREENS.PLAYER_LOBBY) { startSelfPacedQuiz(game); } else if (game.status === CONSTANTS.GAME_STATUS.FINISHED && (currentScreen === CONSTANTS.SCREENS.PLAYER_FINISHED || currentScreen === CONSTANTS.SCREENS.PLAYER_ANSWER)) { navigateTo(CONSTANTS.SCREENS.RESULTS); displayResultsWithPodium(sessionId); } } }); };
     document.getElementById('end-game-btn').addEventListener('click', async () => { if (appState.gameSessionId) { const gameDoc = await getDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId)); if(gameDoc.exists()) { const gameData = gameDoc.data(); await generateReport(appState.gameSessionId, gameData.quizId, "Exam Session"); } await updateDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId), { status: CONSTANTS.GAME_STATUS.FINISHED }); navigateTo(CONSTANTS.SCREENS.RESULTS); displayResultsWithPodium(appState.gameSessionId); } });
     const rejoinAsHost = async () => { if (!appState.gameSessionId) return; const gameRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId); const docSnap = await getDoc(gameRef); if (docSnap.exists()) { const game = docSnap.data(); appState.gamePin = game.pin; listenToGameSession(appState.gameSessionId); if (game.status === CONSTANTS.GAME_STATUS.WAITING) { navigateTo(CONSTANTS.SCREENS.HOST_LOBBY); document.getElementById('game-pin-display').textContent = game.pin; listenToPlayersInLobby(appState.gameSessionId); } else if (game.status === CONSTANTS.GAME_STATUS.IN_PROGRESS) { navigateTo(CONSTANTS.SCREENS.HOST_IN_PROGRESS); document.getElementById('in-progress-pin').textContent = game.pin; listenToPlayerProgress(appState.gameSessionId); } else if (game.status === CONSTANTS.GAME_STATUS.FINISHED) { navigateTo(CONSTANTS.SCREENS.RESULTS); displayResultsWithPodium(appState.gameSessionId); } } else { showAlert('Game session not found. It may have been deleted'); clearGameState(); navigateTo(CONSTANTS.SCREENS.HOME); } };
@@ -703,7 +410,7 @@
     const resetQuizCreator = () => { document.getElementById('quiz-title').value = ''; document.getElementById('quiz-description').value = ''; document.getElementById('questions-container').innerHTML = ''; appState.currentQuizId = null; addQuestionToForm(); };
     const addQuestionToForm = (question = { text: '', options: ['', '', '', ''], correctIndex: 0 }) => { const container = document.getElementById('questions-container'); const qIndex = container.children.length; const questionDiv = document.createElement('div'); questionDiv.className = 'bg-gray-50 p-4 rounded-lg mb-4 border'; questionDiv.innerHTML = `<div class="flex justify-between items-center mb-2"><label class="font-bold">Question ${qIndex + 1}</label><button class="remove-question-btn text-red-500 hover:text-red-700 font-bold text-xl">&times;</button></div><textarea class="question-text w-full p-2 border rounded-md" placeholder="Question Text &#13;&#10;เนื้อหาคำถาม">${question.text}</textarea><div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">${question.options.map((opt, i) => `<div class="flex items-center bg-white p-2 rounded-md"><input type="radio" name="correct-answer-${qIndex}" value="${i}" class="correct-answer-radio mr-3 h-5 w-5" ${i === question.correctIndex ? 'checked' : ''}><input type="text" class="option-input w-full p-2 border-gray-200 rounded-md" placeholder="Option ${i + 1}" value="${opt}"></div>`).join('')}</div>`; container.appendChild(questionDiv); questionDiv.querySelector('.remove-question-btn').addEventListener('click', (e) => { e.target.closest('.bg-gray-50').remove(); container.querySelectorAll('.bg-gray-50').forEach((div, index) => { div.querySelector('label').textContent = `Question ${index + 1}`; }); }); };
     document.getElementById('save-quiz-btn').addEventListener('click', async () => { const btn = document.getElementById('save-quiz-btn'); btn.disabled = true; btn.textContent = "Saving..."; if (!appState.userId) { btn.disabled = false; btn.textContent = "Save Exam Set"; return showAlert('Identity verification in progress...'); } const title = document.getElementById('quiz-title').value.trim(); const description = document.getElementById('quiz-description').value.trim(); if (!title) { btn.disabled = false; btn.textContent = "Save Exam Set"; return showAlert('Please enter an exam name'); } const questions = Array.from(document.querySelectorAll('#questions-container > div')).map(el => { const text = el.querySelector('.question-text').value.trim(); const options = Array.from(el.querySelectorAll('.option-input')).map(input => input.value.trim()); const correctIndex = parseInt(el.querySelector('.correct-answer-radio:checked')?.value); return { text, options, correctIndex }; }); if (questions.some(q => !q.text || q.options.some(opt => !opt) || isNaN(q.correctIndex))) { btn.disabled = false; btn.textContent = "Save Exam Set"; return showAlert('Please complete the question and all options, and select the correct answer for each question'); } if (questions.length === 0) { btn.disabled = false; btn.textContent = "Save Exam Set"; return showAlert('You must add at least one question to the exam set'); } const quizData = { title, description, questions, creatorId: appState.userId, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }; try { if (appState.currentQuizId) { await setDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/quizzes`, appState.currentQuizId), { ...quizData, updatedAt: serverTimestamp() }, { merge: true }); showAlert('Exam updated successfully!'); } else { await addDoc(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/quizzes`), quizData); showAlert('Exam created successfully!'); } document.getElementById('view-my-quizzes-btn').click(); } catch (error) { console.error("Error saving quiz:", error); showAlert('An error occurred during save'); } finally { btn.disabled = false; btn.textContent = "Save Exam Set"; } });
-
 </script>
 </body>
 </html>
+
