@@ -206,7 +206,7 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, query, where, getDocs, onSnapshot, serverTimestamp, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        const firebaseConfig = { apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg", authDomain: "trc-funny-quiz.firebaseapp.com", projectId: "trc-funny-quiz", storageBucket: "trc-funny-quiz.appspot.com", messagingSenderId: "323647073409", appId: "1:323647073409:web:1445589b1bc6eb77bcf180" };
+        const firebaseConfig = window.__FIREBASE_CONFIG__;
         const appId = 'trc-funny-quiz';
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
