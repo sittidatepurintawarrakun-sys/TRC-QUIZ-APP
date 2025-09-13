@@ -147,7 +147,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, query, where, getDocs, onSnapshot, serverTimestamp, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, collection, query, where, getDocs, onSnapshot, serverTimestamp, deleteDoc, orderBy, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
     const firebaseConfig = { apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg", authDomain: "trc-funny-quiz.firebaseapp.com", projectId: "trc-funny-quiz", storageBucket: "trc-funny-quiz.appspot.com", messagingSenderId: "323647073409", appId: "1:323647073409:web:1445589b1bc6eb77bcf180" };
     
@@ -165,6 +165,12 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    const DEFAULT_COVER_IMAGES = [
+        'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg',
+        'https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg',
+        'https://images.pexels.com/photos/3244513/pexels-photo-3244513.jpeg',
+        'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg'
+    ];
     
     const appState = {
         userId: null, currentQuizId: null, currentQuizForHistory: null, gameSessionId: null,
@@ -325,18 +331,36 @@
                 const lang = localStorage.getItem('examLanguage') || 'en';
                 quizzesToRender.forEach(({ id, data: quiz }) => {
                     const card = document.createElement('div');
-                    card.className = 'bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105';
+                    card.className = 'relative bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105';
+                    // --- โค้ดสำหรับดึงค่าต่างๆ (ใช้ ?? เพื่อป้องกัน error) ---
+                    const totalPlays = quiz.playCount ?? 0;
+                    const rating = quiz.rating ?? 0;
+
                     card.innerHTML = `
-                        <div class="p-5 flex-grow flex flex-col">
-                            <p class="text-xl font-bold mb-2 text-gray-800">${getTextInLanguage(quiz.title, lang)}</p>
-                            <p class="text-gray-600 text-sm mb-4 flex-grow">${getTextInLanguage(quiz.description, lang) || `${quiz.questions.length} Question(s)`}</p>
+                        <div class="relative">
+                            <img class="w-full h-32 object-cover" src="${quiz.coverImageUrl || 'https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg'}" alt="Exam Cover Image">
+                            <div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 text-sm font-bold text-yellow-600">
+                                <i class="fas fa-star"></i>
+                                <span>${rating.toFixed(1)}</span>
+                            </div>
                         </div>
-                        <div class="p-4 bg-gray-50 grid grid-cols-2 gap-2">
-                            <button class="start-session-btn col-span-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold hover:from-indigo-600 hover:to-blue-600">Start Game</button>
-                            <button class="edit-quiz-btn bg-yellow-500 text-white px-3 py-1 rounded-md text-sm hover:bg-yellow-600">Edit</button>
-                            <button class="delete-quiz-btn bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">Delete</button>
-                            <button class="reports-quiz-btn col-span-2 bg-cyan-500 text-white px-3 py-1 rounded-md text-sm hover:bg-cyan-600">View Reports</button>
-                        </div>`;
+                        <div class="p-4 flex-grow flex flex-col">
+                            <h3 class="text-lg font-bold mb-2 text-gray-800">${getTextInLanguage(quiz.title, lang)}</h3>
+                            <p class="text-gray-600 text-xs mb-3 flex-grow">${getTextInLanguage(quiz.description, lang) || 'No description.'}</p>
+                            <div class="flex justify-between items-center text-xs text-gray-500 border-t pt-3 mt-auto">
+                                <span class="flex items-center gap-1.5"><i class="fas fa-list-ol"></i>${quiz.questions.length} Questions</span>
+                                <span class="flex items-center gap-1.5"><i class="fas fa-users"></i>${totalPlays} Plays</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-50 grid grid-cols-1">
+                             <button class="start-session-btn w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors">Start Exam</button>
+                        </div>
+                        <div class="absolute top-2 left-2 flex gap-1">
+                             <button class="edit-quiz-btn text-xs bg-yellow-500 text-white px-2 py-1 rounded-md hover:bg-yellow-600">Edit</button>
+                             <button class="delete-quiz-btn text-xs bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600">Delete</button>
+                             <button class="reports-quiz-btn text-xs bg-cyan-500 text-white px-2 py-1 rounded-md hover:bg-cyan-600">Reports</button>
+                        </div>
+                    `;
                     card.querySelector('.start-session-btn').addEventListener('click', () => hostGame(id));
                     card.querySelector('.edit-quiz-btn').addEventListener('click', () => editQuiz(id));
                     card.querySelector('.delete-quiz-btn').addEventListener('click', () => deleteQuiz(id));
@@ -463,7 +487,28 @@
 
     const listenToPlayerProgress = (sessionId) => { const playersRef = collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, sessionId, 'players'); appState.playersUnsubscribe = onSnapshot(playersRef, (snapshot) => { const playerList = document.getElementById('in-progress-player-list'); if (!playerList) return; playerList.innerHTML = ''; let completedCount = 0; snapshot.docs.forEach(doc => { const player = doc.data(); const playerEl = document.createElement('div'); const isCompleted = player.status === CONSTANTS.PLAYER_STATUS.COMPLETED; if(isCompleted) completedCount++; playerEl.className = `p-2 rounded-md transition-all ${isCompleted ? 'bg-emerald-200 text-emerald-800' : 'bg-gray-200'}`; playerEl.innerHTML = `<i class="fas ${isCompleted ? 'fa-check-circle' : 'fa-spinner fa-spin'} mr-2"></i>${player.name}`; playerList.appendChild(playerEl); }); document.getElementById('completed-players-count').textContent = completedCount; document.getElementById('total-players-count').textContent = snapshot.size; const allPlayersCompleted = snapshot.size > 0 && completedCount === snapshot.size; document.getElementById('end-game-btn').disabled = !allPlayersCompleted; }); };
     document.getElementById('join-game-btn').addEventListener('click', async (event) => { const btn = event.target; btn.disabled = true; btn.textContent = 'Joining...'; const pin = document.getElementById('game-pin-input').value.trim(); const name = document.getElementById('player-name-input').value.trim(); if (!pin || !name) { btn.disabled = false; btn.textContent = 'Join'; return showAlert('Please enter pin and name.'); } try { const q = query(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`), where("pin", "==", pin), where("status", "==", CONSTANTS.GAME_STATUS.WAITING)); const querySnapshot = await getDocs(q); if (querySnapshot.empty) { btn.disabled = false; btn.textContent = 'Join'; return showAlert('Game not found.'); } const gameDoc = querySnapshot.docs[0]; appState.gameSessionId = gameDoc.id; const playerRef = await addDoc(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId, 'players'), { name: name, score: 0, answers: [], status: CONSTANTS.PLAYER_STATUS.PLAYING }); appState.playerId = playerRef.id; appState.isHost = false; sessionStorage.setItem('gameSessionId', appState.gameSessionId); sessionStorage.setItem('playerId', appState.playerId); sessionStorage.setItem('isHost', 'false'); listenToGameSession(appState.gameSessionId); navigateTo(CONSTANTS.SCREENS.PLAYER_LOBBY); } catch (error) { showAlert('Error joining game.'); btn.disabled = false; btn.textContent = 'Join'; } });
-    const startSelfPacedQuiz = async (game) => { if (appState.exam.questions.length > 0) return; try { const quizDoc = await getDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/quizzes`, game.quizId)); if (!quizDoc.exists()) throw new Error("Question set not found."); appState.exam.questions = quizDoc.data().questions.sort(() => Math.random() - 0.5); appState.exam.currentIndex = 0; appState.exam.score = 0; appState.exam.answers = []; navigateTo(CONSTANTS.SCREENS.PLAYER_ANSWER); renderExamQuestion(); } catch (error) { showAlert(error.message); } };
+    const startSelfPacedQuiz = async (game) => {
+        if (appState.exam.questions.length > 0) return;
+        try {
+            const quizDoc = await getDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/quizzes`, game.quizId));
+            if (!quizDoc.exists()) throw new Error("Question set not found.");
+
+            // ✨ EDIT: เพิ่ม originalIndex เข้าไปในแต่ละคำถามก่อนทำการ shuffle
+            const originalQuestions = quizDoc.data().questions.map((q, index) => ({
+                ...q,
+                originalIndex: index 
+            }));
+            appState.exam.questions = originalQuestions.sort(() => Math.random() - 0.5);
+
+            appState.exam.currentIndex = 0;
+            appState.exam.score = 0;
+            appState.exam.answers = [];
+            navigateTo(CONSTANTS.SCREENS.PLAYER_ANSWER);
+            renderExamQuestion();
+        } catch (error) {
+            showAlert(error.message);
+        }
+    };
     
     // ✨ MODIFIED: renderExamQuestion with language support
     const renderExamQuestion = () => { 
@@ -483,7 +528,23 @@
         }); 
     };
 
-    document.getElementById('exam-submit-btn').addEventListener('click', () => { const selectedOption = document.querySelector('input[name="exam-answer"]:checked'); if (!selectedOption) return showAlert("Please select an answer."); const question = appState.exam.questions[appState.exam.currentIndex]; const selectedIndex = parseInt(selectedOption.value); if (selectedIndex === question.correctIndex) appState.exam.score++; appState.exam.answers.push({ questionText: question.text, selectedIndex: selectedIndex, isCorrect: selectedIndex === question.correctIndex }); appState.exam.currentIndex++; renderExamQuestion(); });
+    document.getElementById('exam-submit-btn').addEventListener('click', () => {
+        const selectedOption = document.querySelector('input[name="exam-answer"]:checked');
+        if (!selectedOption) return showAlert("Please select an answer.");
+        const question = appState.exam.questions[appState.exam.currentIndex];
+        const selectedIndex = parseInt(selectedOption.value);
+        if (selectedIndex === question.correctIndex) appState.exam.score++;
+
+        // ✨ EDIT: เปลี่ยนจากการบันทึก questionText มาเป็น originalIndex แทน
+        appState.exam.answers.push({
+            originalIndex: question.originalIndex,
+            selectedIndex: selectedIndex,
+            isCorrect: selectedIndex === question.correctIndex
+        });
+
+        appState.exam.currentIndex++;
+        renderExamQuestion();
+    });
     const finishExam = () => { navigateTo(CONSTANTS.SCREENS.PLAYER_FINISHED); submitFinalResults(); };
     const submitFinalResults = async () => { if (!appState.playerId || !appState.gameSessionId) return; try { const playerRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId, 'players', appState.playerId); await updateDoc(playerRef, { score: appState.exam.score, answers: appState.exam.answers, status: CONSTANTS.PLAYER_STATUS.COMPLETED }); sessionStorage.removeItem('examState'); } catch (error) { showAlert("Error submitting exam."); } };
     const displayResultsWithPodium = async (sessionId) => { if(sfx.applause) sfx.applause.play().catch(e => console.warn(e)); const playersRef = collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, sessionId, 'players'); const snapshot = await getDocs(playersRef); const players = snapshot.docs.map(doc => ({ name: doc.data().name, score: doc.data().score || 0 })); players.sort((a, b) => b.score - a.score); const podiumEl = document.getElementById('final-podium'); const listEl = document.getElementById('leaderboard-list'); podiumEl.innerHTML = ''; listEl.innerHTML = ''; const top3 = players.slice(0, 3); const rest = players.slice(3); const podiumOrder = [1, 0, 2]; podiumOrder.forEach(rankIndex => { const player = top3[rankIndex]; if (!player) return; const rank = rankIndex + 1; const podiumDiv = document.createElement('div'); podiumDiv.className = `podium-item podium-${rank}`; podiumDiv.innerHTML = ` ${rank === 1 ? '<i class="fas fa-crown"></i>' : ''} <div class="podium-rank">${rank}</div> <div class="podium-name">${player.name}</div> <div class="podium-score">${player.score} Score</div> `; podiumEl.appendChild(podiumDiv); }); rest.forEach((player, i) => { const rank = i + 4; const itemEl = document.createElement('div'); itemEl.className = 'flex justify-between items-center p-3 rounded-lg bg-gray-100'; itemEl.innerHTML = `<div class="flex items-center gap-3"><span class="font-bold w-8 text-center text-lg">${rank}</span><span>${player.name}</span></div><span class="font-bold text-indigo-600">${player.score} Score</span>`; listEl.appendChild(itemEl); }); setTimeout(() => { document.querySelectorAll('.podium-item').forEach(el => el.classList.add('animate')); var duration = 5 * 1000; var animationEnd = Date.now() + duration; var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 }; function randomInRange(min, max) { return Math.random() * (max - min) + min; } appState.confettiInterval = setInterval(function() { var timeLeft = animationEnd - Date.now(); if (timeLeft <= 0) { return clearInterval(appState.confettiInterval); } var particleCount = 50 * (timeLeft / duration); confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }); confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }); }, 250); }, 100); };
@@ -504,16 +565,17 @@
         const participantsReport = playersData.map(player => {
             let correctCount = 0;
 
-            // สร้าง array คำตอบที่ถูกต้องสำหรับ progress bar
             const answersReport = quiz.questions.map((q, i) => {
-                const answerData = player.answers.find(a => JSON.stringify(a.questionText) === JSON.stringify(q.text));
+                // ✨ EDIT: แก้ไขการจับคู่จุดที่ 1
+                const answerData = player.answers.find(a => a.originalIndex === i);
+
                 if (answerData) {
                     if (answerData.isCorrect) {
                         correctCount++;
                     }
                     return { isCorrect: answerData.isCorrect };
                 }
-                return { isCorrect: null }; // ไม่ได้ตอบ
+                return { isCorrect: null };
             });
 
             totalAttempted += player.answers.length;
@@ -525,7 +587,7 @@
                 accuracy: quiz.questions.length > 0 ? Math.round((correctCount / quiz.questions.length) * 100) : 0,
                 correctCount,
                 totalQuestions: quiz.questions.length,
-                answers: answersReport // ส่งข้อมูลชุดนี้ไปใช้
+                answers: answersReport
             };
         });
 
@@ -533,7 +595,9 @@
             const optionCounts = Array(q.options.length).fill(0);
             let correctAnswers = 0;
             playersData.forEach(p => {
-                const answerData = p.answers.find(a => JSON.stringify(a.questionText) === JSON.stringify(q.text));
+                // ✨ EDIT: แก้ไขการจับคู่จุดที่ 2
+                const answerData = p.answers.find(a => a.originalIndex === i);
+
                 if (answerData) {
                     optionCounts[answerData.selectedIndex]++;
                     if (answerData.isCorrect) correctAnswers++;
@@ -563,6 +627,11 @@
             questions: questionsReport
         };
         await setDoc(reportRef, finalReport);
+
+        const quizDocRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/quizzes`, quizId);
+        await updateDoc(quizDocRef, {
+            playCount: increment(playersData.length)
+        });
     };
     const viewReports = async (quizId, quizTitle) => { appState.currentQuizForHistory = { id: quizId, title: quizTitle }; navigateTo(CONSTANTS.SCREENS.HISTORY); const lang = localStorage.getItem('examLanguage') || 'en'; document.getElementById('history-quiz-title').textContent = getTextInLanguage(quizTitle, lang); const listEl = document.getElementById('history-list'); listEl.innerHTML = '<p>Loading...</p>'; try { const q = query(collection(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameReports`), where("quizId", "==", quizId), orderBy("playedAt", "desc")); const querySnapshot = await getDocs(q); if (querySnapshot.empty) { listEl.innerHTML = '<p>No reports for this exam.</p>'; return; } listEl.innerHTML = ''; querySnapshot.forEach(doc => { const report = doc.data(); const d = report.playedAt.toDate(); const dateString = `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`; const itemEl = document.createElement('div'); itemEl.className = 'bg-gray-100 p-3 rounded-lg flex justify-between items-center'; itemEl.innerHTML = `<div class="flex-grow cursor-pointer hover:bg-gray-200 -m-3 p-3 rounded-lg report-clickable-area"><p class="font-bold">${report.sessionName}</p><p class="text-sm text-gray-500">${dateString} - ${report.summary.participantsCount} Participants</p></div><button data-id="${doc.id}" class="delete-report-btn ml-4 bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs hover:bg-red-600"><i class="fas fa-trash"></i></button>`; itemEl.querySelector('.report-clickable-area').addEventListener('click', () => renderReportScreen(report)); itemEl.querySelector('.delete-report-btn').addEventListener('click', (e) => { e.stopPropagation(); deleteReport(e.target.closest('button').dataset.id); }); listEl.appendChild(itemEl); }); } catch (error) { console.error(error); listEl.innerHTML = '<p class="text-red-500">Error loading history.</p>'; } };
     const deleteReport = async (reportId) => { if (window.confirm('Delete this report permanently?')) { try { await deleteDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameReports`, reportId)); showAlert('Report deleted.'); if(appState.currentQuizForHistory) { viewReports(appState.currentQuizForHistory.id, appState.currentQuizForHistory.title); } } catch (error) { showAlert('Failed to delete report.'); } } };
@@ -700,7 +769,33 @@
         });
     };
     const listenToGameSession = (sessionId) => { if (appState.gameUnsubscribe) appState.gameUnsubscribe(); const gameRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, sessionId); appState.gameUnsubscribe = onSnapshot(gameRef, (docSnap) => { if (!docSnap.exists()) { showAlert("Session ended by host."); clearGameState(); navigateTo(CONSTANTS.SCREENS.HOME); return; } const game = docSnap.data(); const currentScreen = sessionStorage.getItem('currentScreen'); if (appState.isHost) { if (game.status === CONSTANTS.GAME_STATUS.IN_PROGRESS && currentScreen === CONSTANTS.SCREENS.HOST_LOBBY) { navigateTo(CONSTANTS.SCREENS.HOST_IN_PROGRESS); document.getElementById('in-progress-pin').textContent = game.pin; listenToPlayerProgress(sessionId); } } else { if (game.status === CONSTANTS.GAME_STATUS.IN_PROGRESS && currentScreen === CONSTANTS.SCREENS.PLAYER_LOBBY) { startSelfPacedQuiz(game); } else if (game.status === CONSTANTS.GAME_STATUS.FINISHED && (currentScreen === CONSTANTS.SCREENS.PLAYER_FINISHED || currentScreen === CONSTANTS.SCREENS.PLAYER_ANSWER)) { navigateTo(CONSTANTS.SCREENS.RESULTS); displayResultsWithPodium(sessionId); } } }); };
-    document.getElementById('end-game-btn').addEventListener('click', async () => { if (appState.gameSessionId) { const gameDoc = await getDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId)); if(gameDoc.exists()) { const gameData = gameDoc.data(); await generateReport(appState.gameSessionId, gameData.quizId, gameData.sessionName); } await updateDoc(doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId), { status: CONSTANTS.GAME_STATUS.FINISHED }); navigateTo(CONSTANTS.SCREENS.RESULTS); displayResultsWithPodium(appState.gameSessionId); } });
+    document.getElementById('end-game-btn').addEventListener('click', async () => {
+        if (appState.gameSessionId) {
+            try {
+                const gameDocRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId);
+                const gameDoc = await getDoc(gameDocRef);
+
+                if (gameDoc.exists()) {
+                    const gameData = gameDoc.data();
+                    // ตรวจสอบให้แน่ใจว่าเรามีข้อมูลที่จำเป็นครบถ้วน
+                    if (gameData.quizId && gameData.sessionName) {
+                        await generateReport(appState.gameSessionId, gameData.quizId, gameData.sessionName);
+                    } else {
+                        console.error("Missing quizId or sessionName in game session data.");
+                    }
+                }
+
+                // ดำเนินการส่วนที่เหลือต่อ
+                await updateDoc(gameDocRef, { status: CONSTANTS.GAME_STATUS.FINISHED });
+                navigateTo(CONSTANTS.SCREENS.RESULTS);
+                displayResultsWithPodium(appState.gameSessionId);
+
+            } catch (error) {
+                console.error("Error ending game:", error);
+                showAlert("An error occurred while trying to end the game.");
+            }
+        }
+    });
     const rejoinAsHost = async () => { if (!appState.gameSessionId) return; const gameRef = doc(db, `artifacts/${CONSTANTS.APP_ID}/public/data/gameSessions`, appState.gameSessionId); const docSnap = await getDoc(gameRef); if (docSnap.exists()) { const game = docSnap.data(); appState.gamePin = game.pin; listenToGameSession(appState.gameSessionId); if (game.status === CONSTANTS.GAME_STATUS.WAITING) { navigateTo(CONSTANTS.SCREENS.HOST_LOBBY); document.getElementById('game-pin-display').textContent = game.pin; listenToPlayersInLobby(appState.gameSessionId); } else if (game.status === CONSTANTS.GAME_STATUS.IN_PROGRESS) { navigateTo(CONSTANTS.SCREENS.HOST_IN_PROGRESS); document.getElementById('in-progress-pin').textContent = game.pin; listenToPlayerProgress(appState.gameSessionId); } else if (game.status === CONSTANTS.GAME_STATUS.FINISHED) { navigateTo(CONSTANTS.SCREENS.RESULTS); displayResultsWithPodium(appState.gameSessionId); } } else { showAlert('Game session not found.'); clearGameState(); navigateTo(CONSTANTS.SCREENS.HOME); } };
     document.getElementById('create-quiz-btn').addEventListener('click', () => { resetQuizCreator(); navigateTo(CONSTANTS.SCREENS.QUIZ_CREATOR); });
     document.getElementById('add-question-btn').addEventListener('click', () => addQuestionToForm());
@@ -778,14 +873,18 @@
         } 
         if (questions.length === 0) { btn.disabled = false; btn.textContent = "Save"; return showAlert('Please add at least one question.'); } 
         
-        const quizData = { 
-            title: { th: title_th, en: title_en },
-            description: { th: description_th, en: description_en },
-            questions, 
-            creatorId: appState.userId, 
-            createdAt: serverTimestamp(), 
-            updatedAt: serverTimestamp() 
-        }; 
+    const quizData = {
+        title: { th: title_th, en: title_en },
+        description: { th: description_th, en: description_en },
+        questions,
+        creatorId: appState.userId,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(), //  <-- ✨ เพิ่ม comma ตรงนี้
+        // --- เพิ่ม 3 บรรทัดนี้เข้าไป ---
+        coverImageUrl: DEFAULT_COVER_IMAGES[Math.floor(Math.random() * DEFAULT_COVER_IMAGES.length)],
+        playCount: 0,
+        rating: 0
+    };
 
         try { 
             if (appState.currentQuizId) { 
