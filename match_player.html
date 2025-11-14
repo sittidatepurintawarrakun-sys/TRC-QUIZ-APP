@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- [REMARK] อัปเดต Title -->
+    <title>Join Matching Game (Multi-Language)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .card {
+            background: #f4f4f4;
+            padding: 25px;
+            font-size: 1.4em;
+            border-radius: 8px;
+            min-height: 50px;
+            line-height: 1.4;
+        }
+        .my-code {
+            background: #fffbe0;
+            padding: 20px;
+            font-size: 2.5em;
+            font-weight: bold;
+            letter-spacing: 3px;
+            border: 2px dashed #ffc107;
+            border-radius: 8px;
+            color: #333;
+        }
+        .status-lobby { color: #555; background-color: #f8f9fa; }
+        .status-pending { color: #856404; background-color: #fff3cd; }
+        .status-matched { color: #155724; background-color: #d4edda; font-size: 1.2em; }
+        .status-error,
+        .status-WRONG_MATCH { color: #721c24; background-color: #f8d7da; font-size: 1.2em; }
+        #timer-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #1a2b4d;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <!-- [NEW] Language Toggle Button -->
+    <div class="absolute top-4 right-4 z-10">
+        <button id="lang-toggle-btn" class="bg-white text-gray-700 font-bold py-2 px-4 rounded-lg shadow hover:bg-gray-100 transition">
+            <i class="fas fa-globe mr-2"></i><span id="lang-toggle-text">EN</span>
+        </button>
+    </div>
+    
+    <div class="max-w-md w-full p-4">
+        
+        <!-- Remark: Screen 1: Join Screen -->
+        <div id="player-join-screen" class="screen active">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <!-- [REMARK] ข้อความทั้งหมดจะถูกควบคุมโดย JS -->
+                <h2 class="text-3xl font-bold mb-6" data-text-key="joinTitle">Join Lock & Key Game</h2>
+                <input type="text" id="game-pin-input" placeholder="Game Pin (4 Digit)" maxlength="4"
+                    class="w-full text-center text-2xl p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500 tracking-widest"
+                    data-text-key="joinPinPlaceholder">
+                <input type="text" id="player-name-input" placeholder="Your Name"
+                    class="w-full text-center p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500"
+                    data-text-key="joinNamePlaceholder">
+                <button id="join-game-btn"
+                    class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400"
+                    data-text-key="joinButton">Join</button>
+                <a href="Match.html" class="back-btn mt-6 text-gray-500 hover:text-gray-700 inline-block"
+                    data-text-key="backToHome">&larr; Back to Home</a>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 2: Lobby Screen -->
+        <div id="player-lobby-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <i class="fas fa-spinner fa-spin text-5xl text-green-500 mb-4"></i>
+                <h2 class="text-3xl font-bold" data-text-key="lobbyTitle">Already Joined!</h2>
+                <p class="text-gray-600 mt-2 mb-6" data-text-key="lobbyWaiting">Waiting for the Host to Start...</p>
+                <div class="border-t pt-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4" data-text-key="lobbyHowToTitle"> 💡  วิธีการเล่น  💡 </h3>
+                    <div class="bg-gray-50 p-5 rounded-lg text-left text-gray-700 space-y-3">
+                        <p>
+                            <i class="fas fa-id-card-clip w-6 text-center text-blue-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo1">1. ...</span>
+                        </p>
+                        <p>
+                            <i class="fas fa-walking w-6 text-center text-green-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo2">2. ...</span>
+                        </p>
+                        <p>
+                            <i class="fas fa-exchange-alt w-6 text-center text-indigo-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo3">3. ...</span>
+                        </p>
+                        <p>
+                            <i class="fas fa-keyboard w-6 text-center text-red-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo4">4. ...</span>
+                        </p>
+                        <p>
+                            <i class="fas fa-exclamation-triangle w-6 text-center text-yellow-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo5">5. ...</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 3: Game Screen -->
+        <div id="game-container" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <div id="timer-display">--:--</div>
+
+                <div id="round-info" class="text-center mb-4 border-b pb-4">
+                    <p class="text-xl font-bold text-indigo-600" id="round-concept-display">กำลังโหลดรอบ...</p>
+                    <p class="text-sm text-gray-500" id="round-counter-display">Round -/-</p>
+                </div>
+
+                <div id="total-score-display" class="text-center mb-4 p-3 bg-blue-50 rounded-lg">
+                    <span class="text-lg text-gray-600" data-text-key="gameTotalScore">คะแนนสะสม:</span>
+                    <span id="total-score-value" class="text-3xl font-bold text-blue-800">0</span>
+                </div>
+
+                <div id="status-message" class="status-lobby p-3 rounded-lg mb-4"></div>
+                
+                <div id="my-info-section" style="display: none;">
+                    <div class="card-section mb-4">
+                        <h3 class="font-bold mb-2" data-text-key="gameYourCard">การ์ดของคุณ (รอบนี้):</h3>
+                        <div class="card" id="my-card">...</div>
+                    </div>
+                    <div class="code-section mb-4" style="display: none;">
+                        <h3 class="font-bold mb-2" data-text-key="gameYourCode">รหัสของคุณ (รอบนี้):</h3>
+                        <div class="my-code" id="my-code">...</div>
+                        <p class="text-sm text-gray-600 mt-2" data-text-key="gameShowCode">โชว์รหัสนี้ให้คู่ของคุณ</p>
+                    </div>
+                </div>
+                
+                <hr id="match-divider" class="my-6" style="display: none;">
+                
+                <div id="match-section" style="display: none;">
+                    <h3 class="font-bold mb-2" data-text-key="gameMatchTitle">จับคู่:</h3>
+                    <p class="text-gray-600 mb-4" data-text-key="gameMatchDesc">กรอกรหัสของคนที่ถือการ์ด "คู่" ของคุณ</p>
+                    <input type="text" id="partner-code-input" placeholder="กรอกรหัส 4 ตัว" maxlength="4"
+                        class="w-full text-center text-xl p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-500 tracking-widest"
+                        data-text-key="gameMatchPlaceholder">
+                    <button id="submit-match-btn"
+                        class="w-full bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-600 transition disabled:bg-gray-400"
+                        data-text-key="gameMatchButton">
+                        ยืนยันการจับคู่
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 4: End Screen -->
+        <div id="player-end-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <i class="fas fa-trophy text-5xl text-yellow-500 mb-4"></i>
+                <h2 class="text-3xl font-bold" data-text-key="endTitle">Game Finished!</h2>
+                <p id="player-final-message" class="text-gray-600 mt-2 text-xl">Thank you for playing!</p>
+                <a href="Match.html"
+                    class="back-btn mt-8 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition inline-block"
+                    data-text-key="backToHome">
+                    <i class="fas fa-home mr-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
+    
+    <script>
+        // --- Remark: Firebase Config & Setup (ไม่มีการแก้ไข) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg",
+            authDomain: "trc-funny-quiz.firebaseapp.com",
+            projectId: "trc-funny-quiz",
+            storageBucket: "trc-funny-quiz.appspot.com",
+            messagingSenderId: "323647073409",
+            appId: "1:323647073409:web:1445589b1bc6eb77bcf180"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        db.settings({experimentalForceLongPolling: true});
+        const functions = firebase.functions();
+        const auth = firebase.auth();
+        const {serverTimestamp} = firebase.firestore.FieldValue;
+        
+        // --- Remark: Path & Constants ---
+        const appId = 'trc-funny-quiz';
+        const DATA_PATH_PREFIX = `/artifacts/${appId}/public/data`;
+        const SESSIONS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameSessions`;
+        const TIME_LIMIT_SECONDS = 180; 
+
+        // --- Remark: DOM Elements ---
+        const screens = document.querySelectorAll('.screen');
+        const joinGameBtn = document.getElementById('join-game-btn');
+        const gamePinInput = document.getElementById('game-pin-input');
+        const playerNameInput = document.getElementById('player-name-input');
+        // Game screen elements
+        const timerDisplay = document.getElementById('timer-display');
+        const statusMessage = document.getElementById('status-message');
+        const myInfoSection = document.getElementById('my-info-section');
+        const myCardEl = document.getElementById('my-card');
+        const matchSection = document.getElementById('match-section');
+        const submitBtn = document.getElementById('submit-match-btn');
+        const partnerCodeInput = document.getElementById('partner-code-input');
+        const matchDivider = document.getElementById('match-divider');
+        const roundConceptDisplay = document.getElementById('round-concept-display');
+        const roundCounterDisplay = document.getElementById('round-counter-display');
+        const totalScoreValue = document.getElementById('total-score-value');
+        // [NEW] - Language button
+        const langToggleBtn = document.getElementById('lang-toggle-btn');
+        const langToggleText = document.getElementById('lang-toggle-text');
+
+        // --- Remark: Global State ---
+        let myPlayerId = null;
+        let currentGameSessionId = null;
+        let myPlayerRef = null;
+        let gameSessionRef = null;
+        let unsubscribePlayer = null;
+        let unsubscribeGame = null;
+        let countdownTimer = null;
+        
+        // [NEW] --- Remark: Language & UI Text ---
+        let currentLang = 'th'; // 'th' หรือ 'en'
+        
+        const UI_TEXT = {
+            th: {
+                // General
+                backToHome: "กลับหน้าหลัก",
+                loading: "กำลังโหลด...",
+                checking: "กำลังตรวจสอบ...",
+                errorPrefix: "ผิดพลาด",
+                codeWarning: "กรุณากรอกรหัส 4 ตัว",
+                gameFinished: "เกมจบแล้ว! ขอบคุณที่เล่นครับ",
+                // Screen 1: Join
+                joinTitle: "เข้าร่วมเกม Lock & Key",
+                joinPinPlaceholder: "รหัสเกม (4 ตัว)",
+                joinNamePlaceholder: "ชื่อของคุณ",
+                joinButton: "เข้าร่วม",
+                // Screen 2: Lobby
+                lobbyTitle: "เข้าร่วมแล้ว!",
+                lobbyWaiting: "กำลังรอ Host เริ่มเกม...",
+                lobbyHowToTitle: "วิธีการเล่น",
+                lobbyHowTo1: "เมื่อเกมเริ่ม คุณจะได้รับการ์ด 1 ใบ และ รหัส 4 ตัว",
+                lobbyHowTo2: "เดินตามหา \"คู่\" ของคุณ",
+                lobbyHowTo3: "แลกเปลี่ยนรหัสกัน (คุณต้องรู้รหัส 4 ตัว **ของคู่คุณ**)",
+                lobbyHowTo4: "กรอกรหัส 4 ตัว **ของคู่คุณ** บนหน้าจอของคุณ",
+                lobbyHowTo5: "**ระวัง!** คุณมีโอกาสตอบได้แค่ครั้งเดียว! (ผิด = จบเกมรอบนั้น)",
+                // Screen 3: Game
+                gameTotalScore: "คะแนนสะสม:",
+                gameYourCard: "การ์ดของคุณ (รอบนี้):",
+                gameYourCode: "รหัสของคุณ (รอบนี้):",
+                gameShowCode: "โชว์รหัสนี้ให้คู่ของคุณ",
+                gameMatchTitle: "จับคู่:",
+                gameMatchDesc: "กรอกรหัสของคนที่ถือการ์ด \"คู่\" ของคุณ",
+                gameMatchPlaceholder: "กรอกรหัส 4 ตัว",
+                gameMatchButton: "ยืนยันการจับคู่",
+                // Screen 4: End
+                endTitle: "เกมจบแล้ว!",
+                // Dynamic Statuses
+                findPartner: "ออกตามหาคู่ของคุณ!",
+                roundFinished: "จบรอบ! กำลังรอ Host เริ่มรอบถัดไป...",
+                spectator: "คุณเป็นผู้สังเกตการณ์ในรอบนี้ (เนื่องจากมีผู้เล่นเลขคี่)",
+                matched: (score, total) => `จับคู่สำเร็จ! รอบนี้ +${score} | รวม ${total} คะแนน`,
+                wrongMatch: (score, total) => `จับคู่ผิด! รอบนี้ ${score} | รวม ${total} คะแนน`,
+            },
+            en: {
+                // General
+                backToHome: "Back to Home",
+                loading: "Loading...",
+                checking: "Checking...",
+                errorPrefix: "Error",
+                codeWarning: "Please enter a 4-digit code",
+                gameFinished: "Game Finished! Thank you for playing!",
+                // Screen 1: Join
+                joinTitle: "Join Lock & Key Game",
+                joinPinPlaceholder: "Game Pin (4 Digit)",
+                joinNamePlaceholder: "Your Name",
+                joinButton: "Join",
+                // Screen 2: Lobby
+                lobbyTitle: "Already Joined!",
+                lobbyWaiting: "Waiting for the Host to Start the Game...",
+                lobbyHowToTitle: "How to Play",
+                lobbyHowTo1: "When the game starts, you'll get 1 card and a 4-digit code.",
+                lobbyHowTo2: "Walk around and find your \"Pair\".",
+                lobbyHowTo3: "Exchange codes (You need to get **your partner's** code).",
+                lobbyHowTo4: "Enter **your partner's** 4-digit code on your screen.",
+                lobbyHowTo5: "**Warning!** You only have one chance! (Wrong = Round over).",
+                // Screen 3: Game
+                gameTotalScore: "Total Score:",
+                gameYourCard: "Your Card (This Round):",
+                gameYourCode: "Your Code (This Round):",
+                gameShowCode: "Show this code to your partner",
+                gameMatchTitle: "Match:",
+                gameMatchDesc: "Enter the code of the person holding your \"Pair\" card",
+                gameMatchPlaceholder: "Enter 4-digit code",
+                gameMatchButton: "Confirm Match",
+                // Screen 4: End
+                endTitle: "Game Finished!",
+                // Dynamic Statuses
+                findPartner: "Find your partner!",
+                roundFinished: "Round Finished! Waiting for Host to start next round...",
+                spectator: "You are a spectator for this round (odd number of players).",
+                matched: (score, total) => `Match Success! Round +${score} | Total ${total} Score`,
+                wrongMatch: (score, total) => `Wrong Match! Round ${score} | Total ${total} Score`,
+            }
+        };
+
+        // --- Remark: Utility Functions ( [!!! MODIFIED !!!] ) ---
+        const showScreen = (screenId) => {
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        };
+        const showAlert = (message) => alert(message); 
+
+        /**
+         * [NEW] - ฟังก์ชันดึงข้อความ (Dynamic Data)
+         * - อัปเกรดให้รองรับ currentLang
+         */
+        const getTextInLanguage = (data) => {
+            if (typeof data === 'object' && data !== null) {
+                // 1. พยายามดึงภาษาที่เลือก (th หรือ en)
+                if (data[currentLang]) return data[currentLang];
+                // 2. ถ้าไม่มี, ให้ดึงภาษาที่ *ไม่ใช่* ภาษาที่เลือก (Fallback)
+                if (currentLang === 'th' && data.en) return data.en;
+                if (currentLang === 'en' && data.th) return data.th;
+                // 3. ถ้าไม่มีอีก, ให้ดึงอันไหนก็ได้
+                return data.th || data.en || '';
+            }
+            if (typeof data === 'string') return data;
+            return '';
+        };
+
+        /**
+         * [NEW] - ฟังก์ชันอัปเดต UI (Static Text)
+         * - ใช้วาดข้อความใน UI ใหม่ทั้งหมดเมื่อสลับภาษา
+         */
+        const updateStaticUIText = () => {
+            const t = UI_TEXT[currentLang];
+            document.querySelectorAll('[data-text-key]').forEach(el => {
+                const key = el.dataset.textKey;
+                if (t[key]) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = t[key];
+                    } else if (el.classList.contains('back-btn')) {
+                        // (Hardcode &larr; เพราะมันเป็น HTML entity)
+                        el.innerHTML = `&larr; ${t[key]}`;
+                    } else {
+                        el.textContent = t[key];
+                    }
+                }
+            });
+
+            // อัปเดตปุ่ม End Screen
+            const endBtn = document.querySelector('#player-end-screen .back-btn');
+            if(endBtn) endBtn.innerHTML = `<i class="fas fa-home mr-2"></i>${t.backToHome}`;
+        };
+
+        // --- [NEW] Remark: Language Toggle Event ---
+        langToggleBtn.addEventListener('click', () => {
+            currentLang = (currentLang === 'th') ? 'en' : 'th';
+            langToggleText.textContent = (currentLang === 'th') ? 'EN' : 'TH';
+            
+            // 1. อัปเดต Static UI ทั้งหมด
+            updateStaticUIText(); 
+            
+            // 2. อัปเดต Dynamic UI (ถ้ามีข้อมูล)
+            if (gameSessionRef) {
+                gameSessionRef.get().then(doc => {
+                    if (doc.exists) {
+                        const gameData = doc.data();
+                        roundConceptDisplay.textContent = getTextInLanguage(gameData.currentRoundConcept) || UI_TEXT[currentLang].loading;
+                    }
+                });
+            }
+            if (myPlayerRef) {
+                myPlayerRef.get().then(doc => {
+                    if (doc.exists) {
+                        const playerData = doc.data();
+                        // อัปเดตการ์ด
+                        myCardEl.innerHTML = getTextInLanguage(playerData.cardText) || UI_TEXT[currentLang].loading;
+                        // อัปเดต Status Message (สำคัญ)
+                        updateUI(playerData, true); // (true = force update)
+                    }
+                });
+            }
+        });
+
+        // --- Remark: 0. Login อัตโนมัติ (ไม่มีการแก้ไข) ---
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                myPlayerId = user.uid;
+                console.log("Player User ID (Anonymously):", myPlayerId);
+            } else {
+                await auth.signInAnonymously();
+            }
+            // [NEW] - เมื่อ Login เสร็จ, ให้อัปเดต UI เป็นภาษาที่ตั้งค่าไว้
+            updateStaticUIText();
+        });
+
+        // --- Remark: 1. เข้าร่วมเกม ( [!!! MODIFIED !!!] ) ---
+        // [REMARK] เพิ่มการ Alert โดยใช้ UI_TEXT
+        joinGameBtn.addEventListener('click', async () => {
+            const pin = gamePinInput.value.trim();
+            const name = playerNameInput.value.trim();
+            // [MODIFIED] - ใช้ภาษาจาก UI_TEXT
+            if (!pin || !name) return showAlert(UI_TEXT[currentLang].joinNamePlaceholder + ' & ' + UI_TEXT[currentLang].joinPinPlaceholder);
+            if (!myPlayerId) return showAlert('กำลังเชื่อมต่อ... กรุณาลองอีกครั้ง');
+            
+            joinGameBtn.disabled = true;
+            joinGameBtn.textContent = UI_TEXT[currentLang].checking;
+            try {
+                const joinGameFunc = functions.httpsCallable('joinGame');
+                const result = await joinGameFunc({pin: pin, name: name});
+                const {sessionId, playerId} = result.data;
+                if (!sessionId || !playerId) throw new Error("Server did not return session.");
+                currentGameSessionId = sessionId;
+                myPlayerId = playerId; 
+                
+                gameSessionRef = db.collection(SESSIONS_COLLECTION).doc(currentGameSessionId);
+                myPlayerRef = gameSessionRef.collection("players").doc(myPlayerId);
+                
+                listenToGameSession();
+                listenToPlayerData();
+                
+                showScreen('player-lobby-screen');
+            } catch (error) {
+                console.error("เข้าร่วมล้มเหลว:", error);
+                showAlert(error.message || 'ไม่พบห้องเกม หรือเกมเริ่มไปแล้ว');
+                joinGameBtn.disabled = false;
+                // [MODIFIED] - คืนค่าปุ่มเป็นภาษาปัจจุบัน
+                joinGameBtn.textContent = UI_TEXT[currentLang].joinButton;
+            }
+        });
+
+        // --- Remark: 2. ดักฟังสถานะ "ห้องเกม" ( [!!! MODIFIED !!!] ) ---
+        // [REMARK] อัปเดตให้ใช้ UI_TEXT
+        const listenToGameSession = () => {
+            if (unsubscribeGame) unsubscribeGame();
+            unsubscribeGame = gameSessionRef.onSnapshot((doc) => {
+                if (!doc.exists) return cleanupAndExit(UI_TEXT[currentLang].gameFinished); // [REMARK] ใช้ข้อความจบเกม
+                
+                const gameData = doc.data();
+                const t = UI_TEXT[currentLang];
+
+                // [MODIFIED] - อัปเดตข้อมูลรอบ (ใช้ getTextInLanguage)
+                roundConceptDisplay.textContent = getTextInLanguage(gameData.currentRoundConcept) || t.loading;
+                roundCounterDisplay.textContent = `Round ${gameData.currentRound} / ${gameData.totalRounds}`;
+
+                switch (gameData.status) {
+                    case 'round-in-progress':
+                        showScreen('game-container');
+                        startTimer(gameData.gameStartTime);
+                        break;
+                    case 'round-finished':
+                        if (countdownTimer) clearInterval(countdownTimer);
+                        timerDisplay.innerText = "00:00"; 
+                        showScreen('game-container'); 
+                        // [MODIFIED] - ใช้ UI_TEXT
+                        statusMessage.innerText = t.roundFinished;
+                        statusMessage.className = "status-pending p-3 rounded-lg mb-4";
+                        matchSection.style.display = 'none'; 
+                        break;
+                    case 'finished':
+                        // [MODIFIED] - ใช้ UI_TEXT
+                        cleanupAndExit(t.gameFinished);
+                        break;
+                    case 'pending':
+                        showScreen('player-lobby-screen');
+                        break;
+                }
+            });
+        };
+
+        // --- Remark: 3. ดักฟังสถานะ "ตัวเอง" (ไม่มีการแก้ไข) ---
+        const listenToPlayerData = () => {
+            if (unsubscribePlayer) unsubscribePlayer();
+            unsubscribePlayer = myPlayerRef.onSnapshot((doc) => {
+                if (!doc.exists) return cleanupAndExit(UI_TEXT[currentLang].gameFinished);
+                const playerData = doc.data();
+                updateUI(playerData); 
+            }, (error) => {
+                console.error("Player listener error:", error);
+                showAlert("การเชื่อมต่อข้อมูลผู้เล่นขัดข้อง");
+            });
+        };
+
+        // --- Remark: 4. อัปเดตหน้าจอตามสถานะ ( [!!! HEAVILY MODIFIED !!!] ) ---
+        // [REMARK] อัปเดตให้ใช้ UI_TEXT ทั้งหมด
+        const updateUI = (playerData, forceUpdate = false) => {
+            
+            const t = UI_TEXT[currentLang];
+            
+            // [MODIFIED] - อัปเดตคะแนนสะสม
+            totalScoreValue.textContent = playerData.totalScore || 0;
+
+            // [MODIFIED] - อัปเดตการ์ด (ใช้ getTextInLanguage)
+            if (playerData.personalCode) {
+                myInfoSection.style.display = 'block';
+                matchDivider.style.display = 'block';
+                myCardEl.innerHTML = getTextInLanguage(playerData.cardText) || t.loading;
+                
+                const myCodeEl = document.getElementById('my-code');
+                if (myCodeEl) {
+                    myCodeEl.innerText = playerData.personalCode;
+                    myCodeEl.closest('.code-section').style.display = 'block';
+                }
+            } else {
+                myInfoSection.style.display = 'none';
+                matchDivider.style.display = 'none';
+            }
+
+            // [REMARK] อัปเดตสถานะ "ผู้เล่น" (ใช้ UI_TEXT)
+            switch (playerData.status) {
+                case "LOBBY":
+                    showScreen('player-lobby-screen');
+                    matchSection.style.display = 'none';
+                    break;
+                
+                case "PLAYING": 
+                    // [REMARK] (ป้องกันการ "วาดทับ" สถานะจบรอบ ถ้า Host ยังไม่เริ่มรอบใหม่)
+                    // [REMARK] (เราจะเช็คจาก 'gameSessionRef' แต่การทำแบบนี้อาจจะช้า...)
+                    // [REMARK] (วิธีที่ดีกว่าคือ เช็คจาก 'gameData.status' ใน listener... เอาเป็นว่าปล่อยให้ 'round-finished' คุม)
+                    
+                    showScreen('game-container');
+                    matchSection.style.display = 'block'; 
+                    submitBtn.disabled = false; 
+                    partnerCodeInput.value = ""; 
+                    // [MODIFIED]
+                    statusMessage.innerText = t.findPartner;
+                    statusMessage.className = "p-3 rounded-lg mb-4";
+                    break;
+                
+                case "MATCHED":
+                    showScreen('game-container');
+                    // [MODIFIED] - ใช้ฟังก์ชันจาก UI_TEXT
+                    statusMessage.innerText = t.matched(playerData.roundScore, playerData.totalScore);
+                    statusMessage.className = "status-matched p-3 rounded-lg mb-4";
+                    matchSection.style.display = 'none'; 
+                    break;
+                
+                case "WRONG_MATCH":
+                    showScreen('game-container');
+                    // [MODIFIED] - ใช้ฟังก์ชันจาก UI_TEXT
+                    statusMessage.innerText = t.wrongMatch(playerData.roundScore, playerData.totalScore);
+                    statusMessage.className = "status-error p-3 rounded-lg mb-4";
+                    matchSection.style.display = 'none'; 
+                    break;
+
+                case "SPECTATOR":
+                    showScreen('game-container');
+                    // [MODIFIED]
+                    statusMessage.innerText = t.spectator;
+                    statusMessage.className = "status-lobby p-3 rounded-lg mb-4";
+                    matchSection.style.display = 'none';
+                    myInfoSection.style.display = 'none'; 
+                    matchDivider.style.display = 'none';
+                    break;
+            }
+        };
+
+        // --- Remark: 5. กดยืนยันการจับคู่ ( [!!! MODIFIED !!!] ) ---
+        // [REMARK] อัปเดตให้ใช้ UI_TEXT
+        submitBtn.addEventListener('click', async () => {
+            const t = UI_TEXT[currentLang];
+            const partnerCode = partnerCodeInput.value.trim().toUpperCase();
+            
+            // [MODIFIED]
+            if (!partnerCode || partnerCode.length !== 4) return alert(t.codeWarning);
+            
+            submitBtn.disabled = true;
+            // [MODIFIED]
+            statusMessage.innerText = t.checking;
+            statusMessage.className = "status-pending p-3 rounded-lg mb-4";
+            
+            const submitMatchFunction = functions.httpsCallable("submitPartnerCode");
+            try {
+                await submitMatchFunction({
+                    partnerCode: partnerCode,
+                    sessionId: currentGameSessionId
+                });
+            } catch (error) {
+                console.error("Error calling function:", error);
+                // [MODIFIED]
+                statusMessage.innerText = `${t.errorPrefix}: ${error.message}`;
+                statusMessage.className = "status-error p-3 rounded-lg mb-4";
+                
+                const myData = (await myPlayerRef.get()).data();
+                if (myData.status === 'PLAYING') { 
+                    submitBtn.disabled = false;
+                }
+            }
+        });
+
+        // --- Remark: 7. Timer (ไม่มีการแก้ไข) ---
+        const startTimer = (gameStartTime) => {
+            if (countdownTimer) clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                const now = Math.floor(Date.now() / 1000);
+                const timeElapsed = now - gameStartTime;
+                const timeLeft = TIME_LIMIT_SECONDS - timeElapsed;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    timerDisplay.innerText = "00:00";
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }, 1000);
+        };
+
+        // --- Remark: 8. จบเกม (ไม่มีการแก้ไข) ---
+        const cleanupAndExit = (message) => {
+            if (unsubscribePlayer) unsubscribePlayer();
+            if (unsubscribeGame) unsubscribeGame();
+            if (countdownTimer) clearInterval(countdownTimer);
+            
+            document.getElementById('player-final-message').textContent = message;
+            showScreen('player-end-screen');
+            
+            myPlayerId = null;
+            currentGameSessionId = null;
+            myPlayerRef = null;
+            gameSessionRef = null;
+        };
+    </script>
+</body>
+</html>

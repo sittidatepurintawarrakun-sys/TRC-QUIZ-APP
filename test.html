@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching Game - Host Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #4f46e5;
+            color: #4f46e5;
+        }
+
+        /* สไตล์ Leaderboard จากไฟล์เดิม */
+        .status-MATCHED {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-WRONG_MATCH {
+            color: red;
+        }
+
+        .status-PENDING {
+            color: orange;
+        }
+
+        .status-LOBBY {
+            color: #888;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+    <div id="app-container" class="max-w-4xl mx-auto p-4 min-h-screen">
+
+        <!-- Remark: Screen 1: หน้าหลัก Host (เลือกสร้าง / เลือกเล่น) -->
+        <div id="host-home-screen" class="screen active">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <h2 class="text-3xl font-bold mb-6">Manage Lock & Key Game</h2>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button id="create-set-btn"
+                        class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition shadow-md">
+                        <i class="fas fa-plus mr-2"></i>สร้างชุดคำถามจับคู่ใหม่
+                    </button>
+                    <button id="view-my-sets-btn"
+                        class="bg-gradient-to-r from-purple-500 to-violet-500 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-violet-600 transition shadow-md">
+                        <i class="fas fa-list-ul mr-2"></i>เลือกชุดคำถามที่สร้างไว้
+                    </button>
+                </div>
+                <a href="Match.html" class="back-btn mt-8 text-gray-500 hover:text-gray-700 inline-block">&larr; Back to
+                    Home</a>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 2: หน้าสร้าง/แก้ไข ชุดคำถามจับคู่ (Pairs) -->
+        <div id="set-creator-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-6">Create / Edit Lock & Key Set</h2>
+                <!-- Metadata (ชื่อ, หมวดหมู่) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b pb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Set Title (TH)</label>
+                        <input type="text" id="set-title-th" placeholder="ชื่อชุดคำถาม"
+                            class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Set Title (EN)</label>
+                        <input type="text" id="set-title-en" placeholder="Set Title"
+                            class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Category (TH)</label>
+                        <input type="text" id="set-category-th" placeholder="หมวดหมู่ (เช่น Safety, HR)"
+                            class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Image URL (Optional)</label>
+                        <input type="url" id="set-image-url"
+                            placeholder="URL รูปภาพ (เช่น https://example.com/image.jpg)"
+                            class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                </div>
+
+                <!-- Dynamic Pairs Container -->
+                <h3 class="text-xl font-bold mb-4">Matching Pairs</h3>
+                <div id="pairs-container">
+                    <!-- Pairs will be added here by JS -->
+                </div>
+
+                <button id="add-pair-btn"
+                    class="mt-4 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition w-full">
+                    <i class="fas fa-plus mr-2"></i>เพิ่มคู่ (Add Pair)
+                </button>
+
+                <div class="mt-6 flex gap-4">
+                    <button id="save-set-btn"
+                        class="flex-1 bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400">
+                        <i class="fas fa-save mr-2"></i>Save Set
+                    </button>
+                    <button
+                        class="back-btn flex-1 bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 3: หน้าแสดงชุดคำถามทั้งหมด (My Sets) -->
+        <div id="my-sets-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-6">My Matching Sets</h2>
+                <div id="my-sets-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Set cards will be added here by JS -->
+                </div>
+                <button class="back-btn mt-8 text-gray-500 hover:text-gray-700">&larr; Back</button>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 4: หน้า Lobby ของ Host -->
+        <div id="host-lobby-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <p class="text-gray-600">Players, enter this code to join:</p>
+                <div class="my-4 bg-indigo-600 text-white p-4 rounded-lg">
+                    <p class="text-lg">Game PIN</p>
+                    <p id="game-pin-display" class="text-6xl font-bold tracking-widest">----</p>
+                </div>
+                <h3 class="text-2xl font-bold mt-6 mb-4">Joined Players (<span id="player-count">0</span>)</h3>
+                <div id="player-list" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center"></div>
+                <button id="start-game-btn"
+                    class="mt-8 w-full bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition text-2xl shadow-lg disabled:bg-gray-400"
+                    disabled>Start Game!</button>
+                <button class="back-btn mt-4 text-gray-500 hover:text-gray-700">&larr; Cancel and Back</button>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 5: หน้า Leaderboard (ระหว่างเล่น) -->
+        <div id="leaderboard-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <h2 class="text-3xl font-bold mb-4">Live Leaderboard</h2>
+                <div id="host-timer-display" class="text-4xl font-bold text-red-500 mb-6">--:--</div>
+                <table class="w-full text-left">
+                    <thead>
+                        <tr>
+                            <th class="p-2 bg-gray-100">Name</th>
+                            <th class="p-2 bg-gray-100">Status</th>
+                            <th class="p-2 bg-gray-100">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-list"></tbody>
+                </table>
+                <button id="end-game-btn"
+                    class="mt-8 w-full bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 transition text-xl">
+                    End Game & View Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 6: หน้า History (รายการ Report) -->
+        <div id="history-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-1">Lock & Key Game History</h2>
+                <p class="text-gray-500 mb-6">For: <span id="history-set-title" class="font-semibold"></span></p>
+                <div id="history-list" class="space-y-3"></div>
+                <button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to Set List</button>
+            </div>
+        </div>
+
+        <!-- Remark: Screen 7: หน้า Report (แสดงผล) -->
+        <div id="report-screen" class="screen">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl">
+                <h2 id="report-set-title" class="text-2xl md:text-3xl font-bold">Report Title</h2>
+                <p id="report-session-name" class="text-gray-500 mb-4">Session Name</p>
+
+                <!-- สรุปผล -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div class="bg-blue-100 text-blue-900 p-3 md:p-5 rounded-xl shadow-md">
+                        <p class="font-semibold">Participants</p>
+                        <p id="report-summary-participants" class="text-3xl font-bold">-</p>
+                    </div>
+                    <div class="bg-green-100 text-green-900 p-3 md:p-5 rounded-xl shadow-md">
+                        <p class="font-semibold">Correct Pairs</p>
+                        <p id="report-summary-correct" class="text-3xl font-bold">-</p>
+                    </div>
+                    <div class="bg-red-100 text-red-900 p-3 md:p-5 rounded-xl shadow-md">
+                        <p class="font-semibold">Wrong Pairs</p>
+                        <p id="report-summary-wrong" class="text-3xl font-bold">-</p>
+                    </div>
+                    <div class="bg-amber-100 text-amber-900 p-3 md:p-5 rounded-xl shadow-md">
+                        <p class="font-semibold">Avg. Time</p>
+                        <p id="report-summary-avg-time" class="text-3xl font-bold">-</p>
+                    </div>
+                </div>
+
+                <!-- รายชื่อผู้เล่น -->
+                <h3 class="text-xl font-bold mb-4">Participants</h3>
+                <div id="report-participants-list" class="space-y-4">
+                    <!-- Report participant list -->
+                </div>
+
+                <button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to history</button>
+            </div>
+        </div>
+
+        <!-- Alert Modal -->
+        <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm">
+                <p id="alert-message" class="mb-4"></p>
+                <button id="alert-ok-btn" class="bg-indigo-500 text-white px-4 py-2 rounded-lg">OK</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
+
+    <script>
+        // Remark: Firebase Config (จากไฟล์ Quiz Page)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg",
+            authDomain: "trc-funny-quiz.firebaseapp.com",
+            projectId: "trc-funny-quiz",
+            storageBucket: "trc-funny-quiz.appspot.com",
+            messagingSenderId: "323647073409",
+            appId: "1:323647073409:web:1445589b1bc6eb77bcf180"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        // บังคับให้ใช้ Long Polling เพื่อแก้ปัญหา Firewall
+        db.settings({experimentalForceLongPolling: true});
+        const functions = firebase.functions();
+        const auth = firebase.auth();
+        const {serverTimestamp, increment} = firebase.firestore.FieldValue;
+
+        // Remark: Path ใหม่สำหรับเกมจับคู่
+        const appId = 'trc-funny-quiz';
+        const DATA_PATH_PREFIX = `/artifacts/${appId}/public/data`;
+        const QUIZZES_COLLECTION = `${DATA_PATH_PREFIX}/matchingQuizzes`;
+        const SESSIONS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameSessions`;
+        const REPORTS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameReports`;
+        const DEFAULT_COVER_IMAGES = [
+            'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg',
+            'https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg',
+            'https://images.pexels.com/photos/3244513/pexels-photo-3244513.jpeg',
+            'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg'
+        ];
+
+        // Remark: Global State
+        let userId = null;
+        let currentSetId = null; // ID ของชุดคำถามที่กำลังแก้ไข
+        let currentGameSessionId = null; // ID ของห้องเกมที่กำลังเล่น
+        let currentSetForHistory = null;
+        let gameUnsubscribe = null;
+        let playersUnsubscribe = null;
+        let countdownTimer = null;
+        const TIME_LIMIT_SECONDS = 60; // ต้องตรงกับ Server
+
+        // Remark: Utility Functions
+        const screens = document.querySelectorAll('.screen');
+        const alertModal = document.getElementById('alert-modal');
+        const alertMessage = document.getElementById('alert-message');
+        const showScreen = (screenId) => {
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        };
+        const showAlert = (message) => {
+            alertMessage.textContent = message;
+            alertModal.style.display = 'flex';
+        };
+        document.getElementById('alert-ok-btn').addEventListener('click', () => {
+            alertModal.style.display = 'none';
+        });
+        const getTextInLanguage = (data, lang = 'th') => { // Default to Thai
+            if (typeof data === 'object' && data !== null) return data[lang] || data.en || data.th || '';
+            if (typeof data === 'string') return data;
+            return '';
+        };
+
+        // Remark: Auth Listener
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                userId = user.uid;
+            } else {
+                // ถ้า Host ไม่ login, ให้ login แบบ anonymous
+                await auth.signInAnonymously();
+                userId = auth.currentUser.uid;
+            }
+            console.log("Host User ID:", userId);
+        });
+
+        // Remark: Navigation (Back buttons, etc.)
+        document.querySelectorAll('.back-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const parentScreen = e.target.closest('.screen').id;
+                if (['set-creator-screen', 'my-sets-screen'].includes(parentScreen)) {
+                    showScreen('host-home-screen');
+                }
+                if (parentScreen === 'host-lobby-screen') {
+                    // (ควรเพิ่ม logic ลบห้องเกม)
+                    showScreen('my-sets-screen');
+                }
+                if (parentScreen === 'history-screen') {
+                    showScreen('my-sets-screen');
+                }
+                if (parentScreen === 'report-screen') {
+                    showScreen('history-screen');
+                }
+            });
+        });
+        document.getElementById('create-set-btn').addEventListener('click', () => {
+            resetSetCreator();
+            showScreen('set-creator-screen');
+        });
+        document.getElementById('view-my-sets-btn').addEventListener('click', () => viewMySets());
+
+        // --- Remark: Section 1: Set Creator (CRUD) ---
+
+        const pairsContainer = document.getElementById('pairs-container');
+        document.getElementById('add-pair-btn').addEventListener('click', () => addPairToForm());
+
+        const addPairToForm = (pair = {qText: {th: '', en: ''}, aText: {th: '', en: ''}}) => {
+            const pairIndex = pairsContainer.children.length;
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'bg-gray-50 p-4 rounded-lg mb-4 border grid grid-cols-1 md:grid-cols-2 gap-4 relative';
+            pairDiv.innerHTML = `
+                <button class="remove-pair-btn text-red-500 hover:text-red-700 font-bold text-xl absolute top-2 right-3">&times;</button>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Card 1 (TH)</label>
+                    <textarea class="pair-qText-th w-full p-2 border rounded-md" placeholder="ข้อความการ์ดใบที่ 1 (TH)">${getTextInLanguage(pair.qText, 'th')}</textarea>
+                    <label class="block text-sm font-bold text-gray-700 mt-2">Card 1 (EN)</label>
+                    <textarea class="pair-qText-en w-full p-2 border rounded-md" placeholder="Card 1 Text (EN)">${getTextInLanguage(pair.qText, 'en')}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Card 2 (TH) - (คู่กัน)</label>
+                    <textarea class="pair-aText-th w-full p-2 border rounded-md" placeholder="ข้อความการ์ดใบที่ 2 (TH)">${getTextInLanguage(pair.aText, 'th')}</textarea>
+                    <label class="block text-sm font-bold text-gray-700 mt-2">Card 2 (EN) - (The Pair)</label>
+                    <textarea class="pair-aText-en w-full p-2 border rounded-md" placeholder="Card 2 Text (EN)">${getTextInLanguage(pair.aText, 'en')}</textarea>
+                </div>
+            `;
+            pairsContainer.appendChild(pairDiv);
+            pairDiv.querySelector('.remove-pair-btn').addEventListener('click', (e) => e.target.closest('.bg-gray-50').remove());
+        };
+
+        const resetSetCreator = () => {
+            currentSetId = null;
+            ['set-title-th', 'set-title-en', 'set-category-th', 'set-image-url'].forEach(id => document.getElementById(id).value = ''); // <--- เพิ่มอันนี้
+            pairsContainer.innerHTML = '';
+            addPairToForm();
+        };
+
+        document.getElementById('save-set-btn').addEventListener('click', async (e) => {
+            const btn = e.target;
+            btn.disabled = true;
+            btn.textContent = "Saving...";
+
+            const title_th = document.getElementById('set-title-th').value.trim();
+            const title_en = document.getElementById('set-title-en').value.trim();
+            if (!title_th && !title_en) {
+                showAlert('กรุณาใส่ชื่อชุดคำถาม (อย่างน้อย 1 ภาษา)');
+                btn.disabled = false; btn.textContent = "Save Set"; return;
+            }
+
+            const pairs = Array.from(pairsContainer.children).map((div, i) => ({
+                qText: {
+                    th: div.querySelector('.pair-qText-th').value.trim(),
+                    en: div.querySelector('.pair-qText-en').value.trim()
+                },
+                aText: {
+                    th: div.querySelector('.pair-aText-th').value.trim(),
+                    en: div.querySelector('.pair-aText-en').value.trim()
+                },
+                qId: `q${i + 1}`,
+                aId: `a${i + 1}`
+            }));
+
+            if (pairs.length === 0) {
+                showAlert('กรุณาเพิ่มอย่างน้อย 1 คู่');
+                btn.disabled = false; btn.textContent = "Save Set"; return;
+            }
+
+            // --- ✨ นี่คือ Logic ที่เพิ่มเข้ามา (เหมือน Quiz Page) ✨ ---
+            const manualImageUrl = document.getElementById('set-image-url').value.trim();
+            const selectedImageUrl = manualImageUrl
+                ? manualImageUrl // 1. ถ้ามี URL ที่กรอกเอง ให้ใช้
+                : DEFAULT_COVER_IMAGES[Math.floor(Math.random() * DEFAULT_COVER_IMAGES.length)]; // 2. ถ้าว่าง ให้สุ่ม
+
+            const setData = {
+                title: {th: title_th, en: title_en},
+                category: {th: document.getElementById('set-category-th').value.trim()},
+                imageUrl: selectedImageUrl, // <-- 3. ใช้รูปที่สุ่มได้ หรือรูปที่กรอก
+                pairs: pairs
+            };
+            // --- ✨ สิ้นสุดส่วนที่แก้ไข ✨ ---
+
+            try {
+                const saveFunction = functions.httpsCallable('saveMatchQuiz');
+                await saveFunction({quizId: currentSetId, quizData: setData});
+                showAlert(currentSetId ? 'อัปเดตชุดคำถามสำเร็จ!' : 'สร้างชุดคำถามสำเร็จ!');
+                viewMySets();
+            } catch (error) {
+                console.error("Error saving set:", error);
+                showAlert('เกิดข้อผิดพลาด: ' + error.message);
+            } finally {
+                btn.disabled = false; btn.textContent = "Save Set";
+            }
+        });
+
+        // --- Remark: Section 2: View My Sets ---
+
+        const viewMySets = async () => {
+            showScreen('my-sets-screen');
+            const listEl = document.getElementById('my-sets-list');
+            listEl.innerHTML = '<p>Loading sets...</p>';
+
+            try {
+                const q = db.collection(QUIZZES_COLLECTION).orderBy("createdAt", "desc");
+                const querySnapshot = await q.get();
+
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="col-span-full text-center">คุณยังไม่ได้สร้างชุดคำถามจับคู่</p>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                querySnapshot.forEach(docSnap => {
+                    const set = docSnap.data();
+                    const setId = docSnap.id;
+                    const lang = 'th'; // (ตั้งค่า default)
+                    const titleText = getTextInLanguage(set.title, lang) || 'N/A';
+                    const categoryText = getTextInLanguage(set.category, lang);
+
+                    const setCard = document.createElement('div');
+                    setCard.className = 'relative quiz-card bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105';
+                    setCard.innerHTML = `
+                        <div class="w-full h-32 bg-gray-200 flex items-center justify-center bg-cover bg-center" 
+                             style="${set.imageUrl ? `background-image: url('${set.imageUrl}');` : ''}">
+                            ${set.imageUrl ? '' : '<i class="fas fa-lock-open text-gray-400 text-4xl"></i>'}
+                        </div>
+
+                        <div class="p-4 flex-grow flex flex-col">
+
+                            <div class="flex gap-1 mb-2">
+                                <button data-id="${setId}" class="edit-set-btn text-xs bg-yellow-500 text-white px-2 py-1 rounded-md hover:bg-yellow-600">Edit</button>
+                                <button data-id="${setId}" class="delete-set-btn text-xs bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600">Delete</button>
+                                <button data-id="${setId}" data-title='${JSON.stringify(set.title)}' class="reports-set-btn text-xs bg-cyan-500 text-white px-2 py-1 rounded-md hover:bg-cyan-600">Reports</button>
+                            </div>
+
+                            ${categoryText ? `<span class="text-sm font-semibold text-indigo-500 mb-1">${categoryText}</span>` : ''}
+                            <h3 class="text-lg font-bold mb-2 text-gray-800">${titleText}</h3>
+                            <div class="flex justify-between items-center text-xs text-gray-500 border-t pt-3 mt-auto">
+                                <span class="flex items-center gap-1.5"><i class="fas fa-arrows-alt-h"></i>${set.pairs.length} Pairs</span>
+                                <span class="flex items-center gap-1.5"><i class="fas fa-users"></i>${set.playCount || 0} Plays</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-gray-50 grid grid-cols-1">
+                            <button data-id="${setId}" class="host-set-btn w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-play mr-2"></i>Start Game
+                            </button>
+                        </div>
+                    `;
+                    listEl.appendChild(setCard);
+                });
+
+                // Add event listeners
+                listEl.querySelectorAll('.host-set-btn').forEach(btn => btn.addEventListener('click', (e) => hostGame(e.target.dataset.id)));
+                listEl.querySelectorAll('.edit-set-btn').forEach(btn => btn.addEventListener('click', (e) => editSet(e.target.dataset.id)));
+                listEl.querySelectorAll('.delete-set-btn').forEach(btn => btn.addEventListener('click', (e) => deleteSet(e.target.dataset.id)));
+                listEl.querySelectorAll('.reports-set-btn').forEach(btn => btn.addEventListener('click', (e) => viewReports(e.target.dataset.id, JSON.parse(e.target.dataset.title))));
+
+            } catch (error) {
+                console.error("Error loading sets:", error);
+                listEl.innerHTML = '<p class="text-red-500 col-span-full">Error loading sets.</p>';
+            }
+        };
+
+        const editSet = async (setId) => {
+            try {
+                const setDoc = await db.collection(QUIZZES_COLLECTION).doc(setId).get();
+
+                // --- 1. นี่คือจุดที่แก้ไขครับ ---
+                // จาก: if (!setDoc.exists())
+                // เป็น: if (!setDoc.exists)
+                if (!setDoc.exists) {
+                    return showAlert('ไม่พบชุดคำถามนี้');
+                }
+
+                const set = setDoc.data();
+
+                // 2. รีเซ็ตฟอร์ม (ซึ่งจะสร้าง 1 คู่เปล่าๆ)
+                resetSetCreator();
+
+                // 3. ตั้งค่า ID และ Metadata
+                currentSetId = setId;
+                document.getElementById('set-title-th').value = getTextInLanguage(set.title, 'th');
+                document.getElementById('set-title-en').value = getTextInLanguage(set.title, 'en');
+                document.getElementById('set-category-th').value = getTextInLanguage(set.category, 'th');
+                document.getElementById('set-image-url').value = set.imageUrl || ''; // <--- เพิ่มบรรทัดนี้
+
+                // 4. ล้างคู่เปล่าๆ ที่เพิ่งสร้างทิ้ง
+                pairsContainer.innerHTML = '';
+
+                // 5. วนลูปเพื่อสร้างคู่ที่บันทึกไว้ (ถ้ามี)
+                if (set.pairs && set.pairs.length > 0) {
+                    set.pairs.forEach(p => addPairToForm(p));
+                } else {
+                    // ถ้าชุดคำถามนี้ไม่มีคู่ (เช่น บันทึกผิดพลาด) ให้เพิ่มคู่เปล่าๆ กลับมา
+                    addPairToForm();
+                }
+
+                // 6. แสดงหน้าจอ
+                showScreen('set-creator-screen');
+
+            } catch (error) {
+                // ถ้ามี Error อื่นๆ เกิดขึ้น ให้แสดงใน Console และแจ้งเตือน
+                console.error("Error in editSet:", error);
+                showAlert('Error loading set for edit');
+            }
+        };
+
+        const deleteSet = async (setId) => {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบชุดคำถามนี้? (การกระทำนี้ยกเลิกไม่ได้)')) return;
+            try {
+                const deleteFunction = functions.httpsCallable('deleteMatchQuiz');
+                await deleteFunction({quizId: setId});
+                showAlert('ลบชุดคำถามสำเร็จ');
+                viewMySets();
+            } catch (error) {
+                console.error("Error deleting set:", error);
+                showAlert('เกิดข้อผิดพลาด: ' + error.message);
+            }
+        };
+
+        // --- Remark: Section 3: Host Game Logic ---
+
+        let hostTimerInterval = null;
+
+        const hostGame = async (quizId) => {
+            showScreen('host-lobby-screen');
+            document.getElementById('player-list').innerHTML = '';
+            document.getElementById('player-count').textContent = '0';
+            document.getElementById('start-game-btn').disabled = true;
+
+            try {
+                // 1. เรียก Function เพื่อสร้างห้องและรับ PIN
+                const createSessionFunc = functions.httpsCallable('createMatchSession');
+                const result = await createSessionFunc({quizId: quizId});
+                const {sessionId, pin} = result.data;
+
+                currentGameSessionId = sessionId;
+                document.getElementById('game-pin-display').textContent = pin;
+
+                // 2. ดักฟังคนเข้าห้อง
+                listenToLobbyPlayers(sessionId);
+
+                // 3. ดักฟังสถานะห้อง (เผื่อเริ่มเกมแล้ว)
+                listenToHostGameSession(sessionId, quizId);
+
+            } catch (error) {
+                console.error("Error hosting game:", error);
+                showAlert('Failed to create game room: ' + error.message);
+                showScreen('my-sets-screen');
+            }
+        };
+
+        const listenToLobbyPlayers = (sessionId) => {
+            const playersRef = db.collection(SESSIONS_COLLECTION).doc(sessionId).collection('players');
+            if (playersUnsubscribe) playersUnsubscribe();
+
+            playersUnsubscribe = playersRef.onSnapshot((snapshot) => {
+                const playerList = document.getElementById('player-list');
+                playerList.innerHTML = '';
+                snapshot.docs.forEach(doc => {
+                    const playerEl = document.createElement('div');
+                    playerEl.className = 'bg-gray-200 p-2 rounded-md truncate';
+                    playerEl.textContent = doc.data().name;
+                    playerList.appendChild(playerEl);
+                });
+                document.getElementById('player-count').textContent = snapshot.size;
+                document.getElementById('start-game-btn').disabled = snapshot.size === 0;
+            });
+        };
+
+        // ผูกปุ่ม Start
+        document.getElementById('start-game-btn').addEventListener('click', async () => {
+            document.getElementById('start-game-btn').disabled = true;
+            try {
+                const startGameFunc = functions.httpsCallable('startGame');
+                await startGameFunc({sessionId: currentGameSessionId});
+                // ไม่ต้องทำอะไรต่อ, listenToHostGameSession จะจับการเปลี่ยนแปลง
+            } catch (error) {
+                showAlert('Error starting game: ' + error.message);
+                document.getElementById('start-game-btn').disabled = false;
+            }
+        });
+
+        const listenToHostGameSession = (sessionId, quizId) => {
+            const gameRef = db.collection(SESSIONS_COLLECTION).doc(sessionId);
+            if (gameUnsubscribe) gameUnsubscribe();
+
+            gameUnsubscribe = gameRef.onSnapshot(async (docSnap) => {
+                if (!docSnap.exists) return;
+                const game = docSnap.data();
+
+                if (game.status === 'in-progress') {
+                    showScreen('leaderboard-screen');
+                    updateHostLeaderboard(game);
+                    startHostTimer(game.gameStartTime);
+                } else if (game.status === 'finished') {
+                    if (countdownTimer) clearInterval(countdownTimer);
+                    // เมื่อเกมจบ, สร้าง Report และแสดงผล
+                    showAlert('เกมจบแล้ว! กำลังสร้าง Report...');
+                    // ดึง Title มาด้วย (เผื่อไว้)
+                    const quizDoc = await db.collection(QUIZZES_COLLECTION).doc(quizId).get();
+                    viewReports(quizId, quizDoc.data().title || {});
+                }
+            });
+        };
+
+        const updateHostLeaderboard = (game) => {
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '';
+            const players = game.leaderboard || [];
+            players.sort((a, b) => b.score - a.score);
+
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-2">${player.name}</td>
+                    <td class="p-2 status-${player.status}">${player.status}</td>
+                    <td class="p-2 font-bold">${player.score}</td>
+                `;
+                listEl.appendChild(row);
+            });
+        };
+
+        const startHostTimer = (gameStartTime) => {
+            if (countdownTimer) clearInterval(countdownTimer);
+            const timerEl = document.getElementById('host-timer-display');
+            countdownTimer = setInterval(() => {
+                const now = Math.floor(Date.now() / 1000);
+                const timeElapsed = now - gameStartTime;
+                const timeLeft = Math.max(0, TIME_LIMIT_SECONDS - timeElapsed);
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    timerEl.innerText = "00:00";
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerEl.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }, 1000);
+        };
+
+        document.getElementById('end-game-btn').addEventListener('click', async () => {
+            if (!confirm('แน่ใจหรือไม่ที่จะจบเกมนี้?')) return;
+            if (countdownTimer) clearInterval(countdownTimer);
+            try {
+                // เรียก resetGame ซึ่งจะไป trigger report
+                const resetFunc = functions.httpsCallable('resetGame');
+                await resetFunc({sessionId: currentGameSessionId});
+                // listener จะจับสถานะ 'finished' และย้ายหน้าจอ
+            } catch (error) {
+                showAlert('Error ending game: ' + error.message);
+            }
+        });
+
+
+        // --- Remark: Section 4: Report Logic ---
+
+        const viewReports = async (setId, setTitle) => {
+            currentSetForHistory = {id: setId, title: setTitle};
+            showScreen('history-screen');
+            const lang = 'th';
+            document.getElementById('history-set-title').textContent = getTextInLanguage(setTitle, lang);
+            const listEl = document.getElementById('history-list');
+            listEl.innerHTML = '<p>Loading History...</p>';
+
+            try {
+                // โค้ดใหม่ (v8)
+                const q = db.collection(REPORTS_COLLECTION)
+                    .where("quizId", "==", setId)
+                    .orderBy("playedAt", "desc");
+                const querySnapshot = await q.get();
+
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p>No reports available for this set.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                querySnapshot.forEach(docSnap => {
+                    const report = docSnap.data();
+                    const d = report.playedAt.toDate();
+                    const dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'report-item bg-gray-100 p-3 rounded-lg flex justify-between items-center';
+                    itemEl.innerHTML = `
+                        <div class="flex-grow cursor-pointer hover:bg-gray-200 -m-3 p-3 rounded-lg report-clickable-area">
+                            <p class="font-bold">${report.sessionName}</p>
+                            <p class="text-sm text-gray-500">${dateString} - ${report.summary.participantsCount} Players</p>
+                        </div>
+                        <button data-id="${docSnap.id}" class="delete-report-btn ml-4 bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs hover:bg-red-600">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    itemEl.querySelector('.report-clickable-area').addEventListener('click', () => renderReportScreen(report));
+                    itemEl.querySelector('.delete-report-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteReport(e.target.closest('button').dataset.id);
+                    });
+                    listEl.appendChild(itemEl);
+                });
+
+            } catch (error) {
+                console.error("Error loading reports:", error);
+                listEl.innerHTML = '<p class="text-red-500">Error loading reports.</p>';
+            }
+        };
+
+        const deleteReport = async (reportId) => {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบ Report นี้?')) return;
+            try {
+                await db.collection(REPORTS_COLLECTION).doc(reportId).delete();
+                showAlert('ลบ Report สำเร็จ');
+                // Refresh list
+                viewReports(currentSetForHistory.id, currentSetForHistory.title);
+            } catch (error) {
+                console.error("Error deleting report:", error);
+                showAlert('ลบ Report ล้มเหลว');
+            }
+        };
+
+        const renderReportScreen = (report) => {
+            showScreen('report-screen');
+            const lang = 'th';
+            document.getElementById('report-set-title').textContent = getTextInLanguage(report.quizTitle, lang);
+            document.getElementById('report-session-name').textContent = report.sessionName;
+
+            // Summary
+            document.getElementById('report-summary-participants').textContent = report.summary.participantsCount;
+            document.getElementById('report-summary-correct').textContent = report.summary.correctMatches;
+            document.getElementById('report-summary-wrong').textContent = report.summary.wrongMatches;
+            document.getElementById('report-summary-avg-time').textContent = `${report.summary.avgTimeInSec.toFixed(1)}s`;
+
+            // Participants List
+            const listEl = document.getElementById('report-participants-list');
+            listEl.innerHTML = '';
+            report.participants.sort((a, b) => b.score - a.score).forEach(p => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'bg-gray-50 p-4 rounded-lg';
+
+                let statusBar = '';
+                if (p.status === 'MATCHED') {
+                    statusBar = `<div class="w-full h-2 bg-green-500 rounded-full" title="Matched with ${p.matchedWithName} in ${p.timeTaken}s"></div>`;
+                } else if (p.status === 'WRONG_MATCH') {
+                    statusBar = `<div class="w-full h-2 bg-red-500 rounded-full" title="Wrong match with ${p.matchedWithName}"></div>`;
+                } else {
+                    statusBar = `<div class="w-full h-2 bg-gray-300 rounded-full" title="Did not match"></div>`;
+                }
+
+                itemEl.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-bold">${p.name}</p>
+                        <div class="text-right">
+                            <p class="font-semibold text-lg">${p.score} <span class="text-sm font-normal text-gray-600">Score</span></p>
+                            <p class="text-sm ${p.status === 'MATCHED' ? 'text-green-600' : (p.status === 'WRONG_MATCH' ? 'text-red-600' : 'text-gray-500')}">
+                                ${p.status}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex gap-1">${statusBar}</div>
+                `;
+                listEl.appendChild(itemEl);
+            });
+        };
+
+    </script>
+</body>
+
+</html>
