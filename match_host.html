@@ -19,7 +19,60 @@ background-color: #f0f2f5;
 .status-WRONG_MATCH { color: red; }
 .status-PENDING { color: orange; }
 .status-LOBBY { color: #888; }
+
+/* [!!! ADDED CSS !!!] */
+.podium-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 5px;
+    height: 250px;
+    perspective: 500px;
+}
+.podium-item {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 12px 12px 0 0;
+    color: #374151;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-bottom: 5px solid rgba(0, 0, 0, 0.2);
+    transform: translateY(250px);
+    opacity: 0;
+}
+@keyframes slideUp {
+    from { transform: translateY(250px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.podium-item.animate {
+    animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+.podium-1 {
+    height: 100%;
+    background: linear-gradient(to top, #ffd700, #fde68a);
+    animation-delay: 1.2s !important;
+}
+.podium-2 {
+    height: 80%;
+    background: linear-gradient(to top, #c0c0c0, #e5e7eb);
+    animation-delay: 0.6s !important;
+}
+.podium-3 {
+    height: 60%;
+    background: linear-gradient(to top, #cd7f32, #f9c288);
+    animation-delay: 0s !important;
+}
+.podium-rank { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+.podium-name { font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem; }
+.podium-score { font-size: 1rem; margin-top: 0.25rem; }
+.fa-crown { color: #f59e0b; font-size: 2rem; margin-bottom: 0.5rem; }
+/* [!!! END OF ADDED CSS !!!] */
+
 </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
 <div id="app-container" class="max-w-4xl mx-auto p-4 min-h-screen">
@@ -43,7 +96,6 @@ Home</a>
 <div id="set-creator-screen" class="screen">
 <div class="bg-white p-8 rounded-2xl shadow-xl">
 <h2 class="text-3xl font-bold mb-6">Create / Edit Lock & Key Set</h2>
-
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b pb-6">
 <div>
 <label class="block text-sm font-medium text-gray-700">Set Title (TH)</label>
@@ -107,14 +159,11 @@ disabled>Start Game!</button>
 <button class="back-btn mt-4 text-gray-500 hover:text-gray-700">&larr; Cancel and Back</button>
 </div>
 </div>
-
 <div id="leaderboard-screen" class="screen">
 <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
 <h2 class="text-3xl font-bold mb-4">Live Leaderboard</h2>
 <div id="host-timer-display" class="text-4xl font-bold text-red-500 mb-6">--:--</div>
-
 <p id="current-round-display" class="text-xl font-semibold mb-4 text-indigo-600">Loading Round...</p>
-
 <table class="w-full text-left">
 <thead>
 <tr>
@@ -126,19 +175,24 @@ disabled>Start Game!</button>
 <tbody id="leaderboard-list"></tbody>
 </table>
 
+<div id="final-podium-container" class="hidden mt-4">
+    <h2 class="text-3xl font-bold mb-4 text-center">🏆 Final Results 🏆</h2>
+    <div id="final-podium" class="podium-container"></div>
+</div>
+<div id="leaderboard-list-container" class="hidden mt-6">
+    <div id="leaderboard-list-others" class="space-y-2"></div>
+</div>
 <button id="next-round-btn"
 class="mt-8 w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition text-2xl shadow-lg"
 style="display: none;">
 <i class="fas fa-arrow-right mr-2"></i>Start Next Round
 </button>
-
 <button id="end-game-btn"
 class="mt-8 w-full bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 transition text-xl">
 End Game & View Report
 </button>
 </div>
 </div>
-
 <div id="history-screen" class="screen">
 <div class="bg-white p-8 rounded-2xl shadow-xl">
 <h2 class="text-3xl font-bold mb-1">Lock & Key Game History</h2>
@@ -186,7 +240,6 @@ End Game & View Report
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
-
 <script>
 // --- Remark: Firebase Config & Setup ---
 const firebaseConfig = {
@@ -198,15 +251,13 @@ messagingSenderId: "323647073409",
 appId: "1:323647073409:web:1445589b1bc6eb77bcf180"
 };
 firebase.initializeApp(firebaseConfig);
-
 // [!!!] ย้ายตัวแปร db, functions, auth มาไว้ข้างนอก
 // เพื่อให้ส่วนอื่นๆ (เช่น Set Creator) เรียกใช้ได้เลย
 const db = firebase.firestore();
-    db.settings({ experimentalForceLongPolling: true });
+db.settings({ experimentalForceLongPolling: true });
 const functions = firebase.functions();
 const auth = firebase.auth();
 const {serverTimestamp, increment} = firebase.firestore.FieldValue;
-
 // --- Remark: Path & Constants ---
 const appId = 'trc-funny-quiz';
 const DATA_PATH_PREFIX = `/artifacts/${appId}/public/data`;
@@ -220,6 +271,8 @@ const DEFAULT_COVER_IMAGES = [
 'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg'
 ];
 // --- Remark: Global State ---
+// [!!! ADDED SFX !!!]
+const sfx = { applause: new Audio("sfx-applause.mp3") };
 let userId = null;
 let currentSetId = null;
 let currentGameSessionId = null;
@@ -245,15 +298,14 @@ alertModal.style.display = 'none';
 });
 const getTextInLanguage = (data, lang = 'th') => {
 if (typeof data === 'object' && data !== null) {
-    if (data[lang]) return data[lang];
-    if (lang === 'th' && data.en) return data.en;
-    if (lang === 'en' && data.th) return data.th;
-    return data.th || data.en || '';
+if (data[lang]) return data[lang];
+if (lang === 'th' && data.en) return data.en;
+if (lang === 'en' && data.th) return data.th;
+return data.th || data.en || '';
 }
 if (typeof data === 'string') return data;
 return '';
 };
-
 // --- Remark: Auth & Navigation ---
 // [!!! FIXED !!!] - ย้าย db.settings มาไว้ "ข้างใน"
 // หลังจากที่ auth.signInAnonymously() ทำงานเสร็จ
@@ -264,10 +316,8 @@ userId = user.uid;
 await auth.signInAnonymously();
 userId = auth.currentUser.uid;
 }
-
 console.log("Host User ID:", userId);
 });
-
 document.querySelectorAll('.back-btn').forEach(btn => {
 btn.addEventListener('click', (e) => {
 const parentScreen = e.target.closest('.screen').id;
@@ -295,7 +345,6 @@ document.getElementById('view-my-sets-btn').addEventListener('click', () => view
 // ---
 const roundsContainer = document.getElementById('rounds-container');
 document.getElementById('add-round-btn').addEventListener('click', () => addRoundToForm());
-
 const addPairToForm = (targetPairsContainer, pair = {qText: {th: '', en: ''}, aText: {th: '', en: ''}}) => {
 const pairDiv = document.createElement('div');
 pairDiv.className = 'pair-block bg-gray-50 p-4 rounded-lg mb-4 border grid grid-cols-1 md:grid-cols-2 gap-4 relative';
@@ -317,12 +366,10 @@ pairDiv.innerHTML = `
 targetPairsContainer.appendChild(pairDiv);
 pairDiv.querySelector('.remove-pair-btn').addEventListener('click', (e) => e.target.closest('.pair-block').remove());
 };
-
 const addRoundToForm = (round = { concept: '', pairs: [] }) => {
 const roundIndex = roundsContainer.children.length + 1;
 const roundDiv = document.createElement('div');
 roundDiv.className = 'round-block bg-white border-2 border-dashed border-blue-300 p-5 rounded-lg';
-
 roundDiv.innerHTML = `
 <div class="flex justify-between items-center mb-4">
 <h4 class="text-lg font-bold text-blue-700">Round ${roundIndex}</h4>
@@ -340,13 +387,11 @@ value="${getTextInLanguage(round.concept, 'th') || getTextInLanguage(round.conce
 <i class="fas fa-plus mr-2"></i>เพิ่มคู่ (Add Pair to this Round)
 </button>
 `;
-
 roundsContainer.appendChild(roundDiv);
 const currentPairsContainer = roundDiv.querySelector('.round-pairs-container');
 roundDiv.querySelector('.add-pair-to-round-btn').addEventListener('click', () => {
 addPairToForm(currentPairsContainer);
 });
-
 roundDiv.querySelector('.remove-round-btn').addEventListener('click', (e) => {
 if (confirm('Are you sure you want to remove this entire round?')) {
 e.target.closest('.round-block').remove();
@@ -360,30 +405,25 @@ addPairToForm(currentPairsContainer, pair);
 addPairToForm(currentPairsContainer);
 }
 };
-
 const resetSetCreator = () => {
 currentSetId = null;
 ['set-title-th', 'set-title-en', 'set-category-th', 'set-image-url'].forEach(id => document.getElementById(id).value = '');
 roundsContainer.innerHTML = '';
 addRoundToForm();
 };
-
 // [!!!] นี่คือฟังก์ชัน Save ที่แก้ไข "Bug คู่ว่าง" แล้ว [!!!]
 document.getElementById('save-set-btn').addEventListener('click', async (e) => {
 const btn = e.target;
 btn.disabled = true;
 btn.textContent = "Saving...";
-
 const title_th = document.getElementById('set-title-th').value.trim();
 const title_en = document.getElementById('set-title-en').value.trim();
 if (!title_th && !title_en) {
 showAlert('กรุณาใส่ชื่อชุดคำถาม (อย่างน้อย 1 ภาษา)');
 btn.disabled = false; btn.textContent = "Save Set"; return;
 }
-
 const allRoundsData = [];
 const roundBlocks = roundsContainer.querySelectorAll('.round-block');
-
 if (roundBlocks.length === 0) {
 showAlert('กรุณาเพิ่มอย่างน้อย 1 รอบ');
 btn.disabled = false; btn.textContent = "Save Set"; return;
@@ -391,11 +431,9 @@ btn.disabled = false; btn.textContent = "Save Set"; return;
 for (let i = 0; i < roundBlocks.length; i++) {
 const roundBlock = roundBlocks[i];
 const conceptInput = roundBlock.querySelector('.round-concept').value.trim();
-const concept = conceptInput ? conceptInput : `Round ${i + 1}`; 
-
+const concept = conceptInput ? conceptInput : `Round ${i + 1}`;
 const pairsInRound = [];
 const pairBlocks = roundBlock.querySelectorAll('.pair-block');
-
 for (let j = 0; j < pairBlocks.length; j++) {
 const pairBlock = pairBlocks[j];
 const pairData = {
@@ -410,49 +448,42 @@ en: pairBlock.querySelector('.pair-aText-en').value.trim()
 qId: `q${j + 1}`,
 aId: `a${j + 1}`
 };
-
 // [FIX 1] - ถ้าคู่ว่างเปล่า ให้ข้ามไปเลย
 if (!pairData.qText.th && !pairData.qText.en && !pairData.aText.th && !pairData.aText.en) {
-continue; 
+continue;
 }
-
 // [FIX 2] - (สำคัญ) ถ้ามีแค่ฝั่งใดฝั่งหนึ่ง ให้แจ้งเตือน (นี่คือ Bug ที่คุณเจอ)
 if ((!pairData.qText.th && !pairData.qText.en) || (!pairData.aText.th && !pairData.aText.en)) {
-    showAlert(`รอบที่ ${i+1}, คู่ที่ ${j+1} ต้องมีข้อความอย่างน้อย 1 ภาษา (ทั้ง 2 การ์ด)`);
-    btn.disabled = false; btn.textContent = "Save Set"; return;
+showAlert(`รอบที่ ${i+1}, คู่ที่ ${j+1} ต้องมีข้อความอย่างน้อย 1 ภาษา (ทั้ง 2 การ์ด)`);
+btn.disabled = false; btn.textContent = "Save Set"; return;
 }
-
 pairsInRound.push(pairData);
 }
-
 // [FIX 3] - (สำคัญ) ตรวจสอบว่า "หลัง" จากข้ามคู่ที่ว่างเปล่าแล้ว 'pairsInRound' กลายเป็น Array ว่างหรือไม่
 if (pairsInRound.length === 0) {
-    showAlert(`รอบที่ ${i+1} ต้องมีอย่างน้อย 1 คู่ (ที่กรอกข้อมูลแล้ว)`);
-    btn.disabled = false; btn.textContent = "Save Set"; return;
+showAlert(`รอบที่ ${i+1} ต้องมีอย่างน้อย 1 คู่ (ที่กรอกข้อมูลแล้ว)`);
+btn.disabled = false; btn.textContent = "Save Set"; return;
 }
-
 allRoundsData.push({
-concept: { th: concept, en: concept }, 
+concept: { th: concept, en: concept },
 pairs: pairsInRound
 });
 }
-
 const manualImageUrl = document.getElementById('set-image-url').value.trim();
 const selectedImageUrl = manualImageUrl
 ? manualImageUrl
 : DEFAULT_COVER_IMAGES[Math.floor(Math.random() * DEFAULT_COVER_IMAGES.length)];
-
 const setData = {
 title: {th: title_th, en: title_en},
 category: {th: document.getElementById('set-category-th').value.trim()},
 imageUrl: selectedImageUrl,
 rounds: allRoundsData,
 };
-    // ⭐ เพิ่ม debug log
-    console.log("=== Saving Quiz Data ===");
-    console.log("Quiz ID:", currentSetId);
-    console.log("Data:", JSON.stringify(setData, null, 2));
-    
+//  ⭐  เพิ่ม debug log
+console.log("=== Saving Quiz Data ===");
+console.log("Quiz ID:", currentSetId);
+console.log("Data:", JSON.stringify(setData, null, 2));
+
 try {
 // (index.js ของคุณรองรับ 'rounds' อยู่แล้ว)
 const saveFunction = functions.httpsCallable('saveMatchQuiz');
@@ -466,7 +497,6 @@ showAlert('เกิดข้อผิดพลาด: ' + error.message); // Er
 btn.disabled = false; btn.textContent = "Save Set";
 }
 });
-
 // ---
 // Remark: [SECTION 2: View My Sets - แก้ไขเล็กน้อย]
 // ---
@@ -488,7 +518,6 @@ const setId = docSnap.id;
 const lang = 'th';
 const titleText = getTextInLanguage(set.title, lang) || 'N/A';
 const categoryText = getTextInLanguage(set.category, lang);
-
 let totalPairs = 0;
 if (set.rounds && Array.isArray(set.rounds)) {
 totalPairs = set.rounds.reduce((sum, round) => sum + (round.pairs ? round.pairs.length : 0), 0);
@@ -524,18 +553,15 @@ ${!set.rounds ? 'disabled' : ''}>
 `;
 listEl.appendChild(setCard);
 });
-
 listEl.querySelectorAll('.host-set-btn:not([disabled])').forEach(btn => btn.addEventListener('click', (e) => hostGame(e.target.dataset.id)));
 listEl.querySelectorAll('.edit-set-btn').forEach(btn => btn.addEventListener('click', (e) => editSet(e.target.dataset.id)));
 listEl.querySelectorAll('.delete-set-btn').forEach(btn => btn.addEventListener('click', (e) => deleteSet(e.target.dataset.id)));
 listEl.querySelectorAll('.reports-set-btn').forEach(btn => btn.addEventListener('click', (e) => viewReports(e.target.dataset.id, JSON.parse(e.target.dataset.title))));
-
 } catch (error) {
 console.error("Error loading sets:", error);
 listEl.innerHTML = '<p class="text-red-500 col-span-full">Error loading sets.</p>';
 }
 };
-
 const editSet = async (setId) => {
 try {
 const setDoc = await db.collection(QUIZZES_COLLECTION).doc(setId).get();
@@ -550,7 +576,6 @@ document.getElementById('set-title-en').value = getTextInLanguage(set.title, 'en
 document.getElementById('set-category-th').value = getTextInLanguage(set.category, 'th');
 document.getElementById('set-image-url').value = set.imageUrl || '';
 roundsContainer.innerHTML = '';
-
 if (set.rounds && set.rounds.length > 0) {
 set.rounds.forEach(round => {
 addRoundToForm(round);
@@ -596,7 +621,7 @@ const {sessionId, pin} = result.data;
 currentGameSessionId = sessionId;
 document.getElementById('game-pin-display').textContent = pin;
 listenToLobbyPlayers(sessionId);
-listenToHostGameSession(sessionId, quizId); 
+listenToHostGameSession(sessionId, quizId);
 } catch (error) {
 console.error("Error hosting game:", error);
 showAlert('Failed to create game room: ' + error.message);
@@ -616,7 +641,7 @@ playerEl.textContent = doc.data().name;
 playerList.appendChild(playerEl);
 });
 document.getElementById('player-count').textContent = snapshot.size;
-document.getElementById('start-game-btn').disabled = snapshot.size < 2; 
+document.getElementById('start-game-btn').disabled = snapshot.size < 2;
 });
 };
 document.getElementById('start-game-btn').addEventListener('click', async () => {
@@ -629,90 +654,107 @@ showAlert('Error starting game: ' + error.message);
 document.getElementById('start-game-btn').disabled = false;
 }
 });
-
 document.getElementById('next-round-btn').addEventListener('click', async (e) => {
-    const btn = e.target;
-    btn.disabled = true;
-    btn.textContent = "Starting...";
-    try {
-        const startGameFunc = functions.httpsCallable('startGame');
-        await startGameFunc({sessionId: currentGameSessionId});
-    } catch (error) {
-        if (!error.message.includes("Reached max rounds")) {
-             showAlert('Error starting next round: ' + error.message);
-        }
-    }
+const btn = e.target;
+btn.disabled = true;
+btn.textContent = "Starting...";
+try {
+const startGameFunc = functions.httpsCallable('startGame');
+await startGameFunc({sessionId: currentGameSessionId});
+} catch (error) {
+if (!error.message.includes("Reached max rounds")) {
+showAlert('Error starting next round: ' + error.message);
+}
+}
 });
-
 const listenToHostGameSession = (sessionId, quizId) => {
 const gameRef = db.collection(SESSIONS_COLLECTION).doc(sessionId);
 if (gameUnsubscribe) gameUnsubscribe();
 gameUnsubscribe = gameRef.onSnapshot(async (docSnap) => {
 if (!docSnap.exists) {
-    if (countdownTimer) clearInterval(countdownTimer);
-    return;
+if (countdownTimer) clearInterval(countdownTimer);
+return;
 }
 const game = docSnap.data();
-
 const roundDisplay = document.getElementById('current-round-display');
 const nextRoundBtn = document.getElementById('next-round-btn');
 const endGameBtn = document.getElementById('end-game-btn');
-
-if (game.status === 'round-in-progress') { 
+if (game.status === 'round-in-progress') {
 showScreen('leaderboard-screen');
-
 roundDisplay.textContent = `Round ${game.currentRound} / ${game.totalRounds} (${getTextInLanguage(game.currentRoundConcept, 'th') || getTextInLanguage(game.currentRoundConcept, 'en')})`;
 nextRoundBtn.style.display = 'none';
 endGameBtn.style.display = 'block';
-
-updateHostLeaderboard(game); 
+updateHostLeaderboard(game);
 startHostTimer(game.gameStartTime);
+} else if (game.status === 'finished') {
+    // [!!! MODIFIED SECTION (PODIUM LOGIC) !!!]
+    if (countdownTimer) clearInterval(countdownTimer);
+    
+    // 1. [NEW] แสดง Podium
+    showScreen('leaderboard-screen');
+    document.getElementById('final-podium-container').classList.remove('hidden');
+    document.getElementById('leaderboard-list').style.display = 'none'; // ซ่อนตาราง Live
+    document.getElementById('leaderboard-list-container').style.display = 'block'; // แสดง List อันดับ 4+
+    
+    // 2. [NEW] ซ่อนปุ่ม/ข้อความที่ไม่ใช้
+    document.getElementById('host-timer-display').style.display = 'none';
+    document.getElementById('current-round-display').style.display = 'none';
+    document.getElementById('next-round-btn').style.display = 'none';
 
-} else if (game.status === 'finished') { 
-if (countdownTimer) clearInterval(countdownTimer);
-showAlert('เกมจบแล้ว! กำลังสร้าง Report...');
-const quizDoc = await db.collection(QUIZZES_COLLECTION).doc(quizId).get();
-viewReports(quizId, quizDoc.data().title || {});
+    // 3. [NEW] เรียงคะแนน Leaderboard
+    const finalLeaderboard = game.leaderboard.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+
+    // 4. [NEW] วาด Podium และ List
+    renderPodium(finalLeaderboard.slice(0, 3));
+    renderLeaderboardList(finalLeaderboard.slice(3), 'leaderboard-list-others');
+
+    // 5. [NEW] เปลี่ยนปุ่ม End Game เป็น View Report
+    const endGameBtn = document.getElementById('end-game-btn');
+    endGameBtn.textContent = "View Report";
+    endGameBtn.style.display = 'block';
+    
+    // [สำคัญ] ลบ event listener เก่า (ถ้ามี) แล้วสร้างใหม่
+    const newEndGameBtn = endGameBtn.cloneNode(true);
+    endGameBtn.parentNode.replaceChild(newEndGameBtn, endGameBtn);
+    
+    newEndGameBtn.addEventListener('click', async () => {
+        // (โค้ดเดิมที่เคยอยู่ที่นี่)
+        const quizDoc = await db.collection(QUIZZES_COLLECTION).doc(quizId).get();
+        viewReports(quizId, quizDoc.data().title || {});
+    });
+    // [!!! END OF MODIFIED SECTION !!!]
 
 } else if (game.status === 'round-finished') {
 if (countdownTimer) clearInterval(countdownTimer);
-document.getElementById('host-timer-display').innerText = "00:00"; 
+document.getElementById('host-timer-display').innerText = "00:00";
 showAlert('จบรอบ! รอเริ่มรอบถัดไป...');
-
 roundDisplay.textContent = `Finished Round ${game.currentRound} / ${game.totalRounds}. Waiting for Host...`;
-
 const btn = nextRoundBtn;
 btn.disabled = false;
-
 if (game.currentRound >= game.totalRounds) {
-    btn.textContent = "Finish Game & View Report";
+btn.textContent = "Finish Game & View Report";
 } else {
-    btn.textContent = `Start Round ${game.currentRound + 1}`;
+btn.textContent = `Start Round ${game.currentRound + 1}`;
 }
-
 btn.style.display = 'block';
-endGameBtn.style.display = 'none'; 
+endGameBtn.style.display = 'none';
 }
 });
 };
-
 const updateHostLeaderboard = (game) => {
 const listEl = document.getElementById('leaderboard-list');
 listEl.innerHTML = '';
 const players = game.leaderboard || [];
-
-players.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0)); 
-
+players.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
 players.forEach(player => {
 const row = document.createElement('tr');
 if (player.status === 'MATCHED') row.className = 'bg-green-50';
 if (player.status === 'WRONG_MATCH') row.className = 'bg-red-50';
-
 row.innerHTML = `
 <td class="p-2">${player.name}</td>
 <td class="p-2 status-${player.status}">${player.status}</td>
 <td class="p-2 font-bold">${player.totalScore || 0}</td>
-`; 
+`;
 listEl.appendChild(row);
 });
 };
@@ -733,6 +775,67 @@ timerEl.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padSt
 }
 }, 1000);
 };
+
+// [!!! ADDED PODIUM FUNCTIONS !!!]
+const renderPodium = (top3) => {
+    const podiumEl = document.getElementById('final-podium');
+    podiumEl.innerHTML = '';
+    const podiumOrder = [1, 0, 2]; // [อันดับ 2, อันดับ 1, อันดับ 3]
+    const podiumItems = podiumOrder.map(rankIndex => top3[rankIndex]).filter(p => p);
+    podiumItems.forEach(player => {
+        if (!player) return;
+        const rank = top3.findIndex(p => p.uid === player.uid) + 1;
+        const podiumDiv = document.createElement('div');
+        podiumDiv.className = `podium-item podium-${rank}`;
+        podiumDiv.innerHTML = `
+            ${rank === 1 ? '<i class="fas fa-crown"></i>' : ''}
+            <div class="podium-rank">${rank}</div>
+            <div class="podium-name">${player.name}</div>
+            <div class="podium-score">${player.totalScore || 0} Score</div>
+        `;
+        podiumEl.appendChild(podiumDiv);
+    });
+
+    setTimeout(() => {
+        sfx.applause.play().catch(() => { });
+        document.querySelectorAll('.podium-item').forEach(el => el.classList.add('animate'));
+        var duration = 5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+        var interval = setInterval(function () {
+            var timeLeft = animationEnd - Date.now();
+            if (timeLeft <= 0) return clearInterval(interval);
+            var particleCount = 50 * (timeLeft / duration);
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }, 250);
+    }, 100);
+};
+
+const renderLeaderboardList = (players, targetListId) => {
+    const listEl = document.getElementById(targetListId);
+    listEl.innerHTML = '';
+    if (players.length === 0) {
+        listEl.innerHTML = '<p class="text-center text-gray-500 mt-4">- No other players -</p>';
+        return;
+    }
+    players.forEach((player, i) => {
+        const rank = i + 4; // เริ่มจากอันดับ 4
+        const itemEl = document.createElement('div');
+        itemEl.className = 'flex justify-between items-center p-3 rounded-lg bg-gray-100';
+        itemEl.innerHTML = `
+            <div class="flex items-center gap-3">
+                <span class="font-bold w-8 text-center text-lg">${rank}</span>
+                <span>${player.name}</span>
+            </div>
+            <span class="font-bold text-indigo-600">${player.totalScore || 0} Score</span>
+        `;
+        listEl.appendChild(itemEl);
+    });
+};
+// [!!! END OF ADDED PODIUM FUNCTIONS !!!]
+
 document.getElementById('end-game-btn').addEventListener('click', async () => {
 if (!confirm('แน่ใจหรือไม่ที่จะจบเกมนี้? (ผู้เล่นทุกคนจะถูกตัดจบ)')) return;
 if (countdownTimer) clearInterval(countdownTimer);
@@ -744,7 +847,6 @@ showAlert('Error ending game: ' + error.message);
 }
 });
 // --- Remark: Section 4: Report Logic (แก้ไขการแสดงผล) ---
-
 const viewReports = async (setId, setTitle) => {
 currentSetForHistory = {id: setId, title: setTitle};
 showScreen('history-screen');
@@ -753,16 +855,26 @@ document.getElementById('history-set-title').textContent = getTextInLanguage(set
 const listEl = document.getElementById('history-list');
 listEl.innerHTML = '<p>Loading History...</p>';
 try {
+// [!!! FIXED QUERY !!!] - ลบ orderBy ออก หรือไปสร้าง Index ใน Firebase
 const q = db.collection(REPORTS_COLLECTION)
-.where("quizId", "==", setId)
-.orderBy("playedAt", "desc");
+.where("quizId", "==", setId);
+// .orderBy("playedAt", "desc"); // <-- บรรทัดนี้ทำให้ Error ถ้าไม่มี Index
+
 const querySnapshot = await q.get();
 if (querySnapshot.empty) {
 listEl.innerHTML = '<p>No reports available for this set.</p>';
 return;
 }
 listEl.innerHTML = '';
-querySnapshot.forEach(docSnap => {
+
+// [!!! FIXED QUERY !!!] - เรียงลำดับด้วย JS แทน
+const sortedDocs = querySnapshot.docs.sort((a, b) => {
+    const timeA = a.data().playedAt.toDate();
+    const timeB = b.data().playedAt.toDate();
+    return timeB - timeA; // B - A = มากไปน้อย (ล่าสุดก่อน)
+});
+
+sortedDocs.forEach(docSnap => { // <-- เปลี่ยนมา loop `sortedDocs`
 const report = docSnap.data();
 const d = report.playedAt.toDate();
 const dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -786,7 +898,8 @@ listEl.appendChild(itemEl);
 });
 } catch (error) {
 console.error("Error loading reports:", error);
-listEl.innerHTML = '<p class="text-red-500">Error loading reports.</p>';
+// [!!! FIXED QUERY !!!] - เพิ่มคำแนะนำเรื่อง Index
+listEl.innerHTML = '<p class="text-red-500">Error loading reports. (Ensure a Firestore Index exists for quizId and playedAt)</p>';
 }
 };
 const deleteReport = async (reportId) => {
@@ -800,7 +913,6 @@ console.error("Error deleting report:", error);
 showAlert('ลบ Report ล้มเหลว');
 }
 };
-
 const renderReportScreen = (report) => {
 showScreen('report-screen');
 const lang = 'th';
@@ -814,9 +926,7 @@ document.getElementById('report-summary-avg-time').textContent = `${(report.summ
 // Participants List
 const listEl = document.getElementById('report-participants-list');
 listEl.innerHTML = '';
-
-report.participants.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0)); 
-
+report.participants.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
 report.participants.forEach(p => {
 const itemEl = document.createElement('div');
 itemEl.className = 'bg-gray-50 p-4 rounded-lg';
