@@ -201,34 +201,54 @@ End Game & View Report
 <button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to Set List</button>
 </div>
 </div>
-<div id="report-screen" class="screen">
-<div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl">
-<h2 id="report-set-title" class="text-2xl md:text-3xl font-bold">Report Title</h2>
-<p id="report-session-name" class="text-gray-500 mb-4">Session Name</p>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-<div class="bg-blue-100 text-blue-900 p-3 md:p-5 rounded-xl shadow-md">
-<p class="font-semibold">Participants</p>
-<p id="report-summary-participants" class="text-3xl font-bold">-</p>
-</div>
-<div class="bg-green-100 text-green-900 p-3 md:p-5 rounded-xl shadow-md">
-<p class="font-semibold">Correct Pairs</p>
-<p id="report-summary-correct" class="text-3xl font-bold">-</p>
-</div>
-<div class="bg-red-100 text-red-900 p-3 md:p-5 rounded-xl shadow-md">
-<p class="font-semibold">Wrong Pairs</p>
-<p id="report-summary-wrong" class="text-3xl font-bold">-</p>
-</div>
-<div class="bg-amber-100 text-amber-900 p-3 md:p-5 rounded-xl shadow-md">
-<p class="font-semibold">Avg. Time</p>
-<p id="report-summary-avg-time" class="text-3xl font-bold">-</p>
-</div>
-</div>
-<h3 class="text-xl font-bold mb-4">Participants</h3>
-<div id="report-participants-list" class="space-y-4">
-</div>
-<button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to history</button>
-</div>
-</div>
+    <div id="report-screen" class="screen">
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl">
+
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex-grow">
+                    <h2 id="report-set-title" class="text-2xl md:text-3xl font-bold">Report Title</h2>
+                    <p id="report-session-name" class="text-gray-500">Session Name</p>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Completed</span>
+                    <button id="share-report-btn" class="bg-blue-500 text-white font-bold py-1 px-3 rounded-md text-sm hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-envelope mr-1"></i> Share
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div class="bg-amber-100 text-amber-900 p-3 md:p-5 rounded-xl shadow-md">
+                    <p class="font-semibold">Accuracy</p>
+                    <p id="report-summary-accuracy" class="text-3xl font-bold">-%</p>
+                </div>
+                <div class="bg-blue-100 text-blue-900 p-3 md:p-5 rounded-xl shadow-md">
+                    <p class="font-semibold">Completion</p>
+                    <p id="report-summary-completion" class="text-3xl font-bold">-%</p>
+                </div>
+                <div class="bg-violet-100 text-violet-900 p-3 md:p-5 rounded-xl shadow-md">
+                    <p class="font-semibold">Participants</p>
+                    <p id="report-summary-participants" class="text-3xl font-bold">-</p>
+                </div>
+                <div class="bg-teal-100 text-teal-900 p-3 md:p-5 rounded-xl shadow-md">
+                    <p class="font-semibold">Rounds</p>
+                    <p id="report-summary-questions" class="text-3xl font-bold">-</p>
+                </div>
+            </div>
+
+            <div class="border-b border-gray-200 mb-4">
+                <nav class="flex space-x-4" aria-label="Tabs">
+                    <button id="tab-btn-participants" class="tab-btn active font-medium px-1 py-2 border-b-2 border-transparent">Participants</button>
+                    <button id="tab-btn-questions" class="tab-btn font-medium px-1 py-2 border-b-2 border-transparent">Rounds (Questions)</button>
+                </nav>
+            </div>
+
+            <div id="tab-content-participants" class="tab-content"></div>
+            <div id="tab-content-questions" class="tab-content hidden"></div>
+
+            <button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to history</button>
+        </div>
+    </div>
 <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
 <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm">
 <p id="alert-message" class="mb-4"></p>
@@ -913,46 +933,278 @@ console.error("Error deleting report:", error);
 showAlert('ลบ Report ล้มเหลว');
 }
 };
-const renderReportScreen = (report) => {
-showScreen('report-screen');
-const lang = 'th';
-document.getElementById('report-set-title').textContent = getTextInLanguage(report.quizTitle, lang);
-document.getElementById('report-session-name').textContent = report.sessionName;
-// Summary
-document.getElementById('report-summary-participants').textContent = report.summary.participantsCount;
-document.getElementById('report-summary-correct').textContent = report.summary.correctMatches;
-document.getElementById('report-summary-wrong').textContent = report.summary.wrongMatches;
-document.getElementById('report-summary-avg-time').textContent = `${(report.summary.avgTimeInSec || 0).toFixed(1)}s`;
-// Participants List
-const listEl = document.getElementById('report-participants-list');
-listEl.innerHTML = '';
-report.participants.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-report.participants.forEach(p => {
-const itemEl = document.createElement('div');
-itemEl.className = 'bg-gray-50 p-4 rounded-lg';
-let statusBar = '';
-if (p.status === 'MATCHED') {
-statusBar = `<div class="w-full h-2 bg-green-500 rounded-full" title="Matched (Last Round) with ${p.matchedWithName || ''} in ${p.timeTaken || 0}s"></div>`;
-} else if (p.status === 'WRONG_MATCH') {
-statusBar = `<div class="w-full h-2 bg-red-500 rounded-full" title="Wrong match (Last Round) with ${p.matchedWithName || ''}"></div>`;
-} else {
-statusBar = `<div class="w-full h-2 bg-gray-300 rounded-full" title="Status: ${p.status}"></div>`;
-}
-itemEl.innerHTML = `
-<div class="flex justify-between items-center mb-2">
-<p class="font-bold">${p.name}</p>
-<div class="text-right">
-<p class="font-semibold text-lg">${p.totalScore || 0} <span class="text-sm font-normal text-gray-600">Score</span></p>
-<p class="text-sm ${p.status === 'MATCHED' ? 'text-green-600' : (p.status === 'WRONG_MATCH' ? 'text-red-600' : 'text-gray-500')}">
-(Last: ${p.status})
-</p>
-</div>
-</div>
-<div class="flex gap-1">${statusBar}</div>
-`;
-listEl.appendChild(itemEl);
-});
-};
+    // 1. ฟังก์ชัน Share Email (ปรับจาก Quiz Page)
+    const shareReportByEmail = (report) => {
+        const recipientEmail = prompt("Please enter recipient email (use commas to separate multiple emails ,):");
+        if (recipientEmail) {
+            const lang = 'th';
+            const subject = `Summary Lock & Key: ${getTextInLanguage(report.quizTitle, lang)} (${report.sessionName})`;
+
+            let body = `Game Results Summary Lock & Key:\n\n`;
+            body += `Title: ${getTextInLanguage(report.quizTitle, lang)}\n`;
+            body += `Session: ${report.sessionName}\n`;
+            body += `------------------------------------\n`;
+            body += `Summary:\n`;
+            body += `- Participants: ${report.summary.participantsCount} Participants\n`;
+
+            // [!!!] เพิ่ม Accuracy และ Rounds ที่คำนวณใหม่
+            if (report.summary.accuracy) {
+                 body += `- Accuracy: ${report.summary.accuracy}%\n`;
+            } else {
+                // Fallback for old reports
+                body += `- Correct Pairs: ${report.summary.correctMatches}\n`;
+            }
+            if (report.summary.questionsCount) {
+                 body += `- Rounds: ${report.summary.questionsCount} Rounds\n\n`;
+            }
+
+            body += `Leaderboard:\n`;
+            report.participants.forEach((p, index) => {
+                // [!!!] เพิ่ม Accuracy (ถ้ามี)
+                const accuracyStat = p.accuracy ? ` (Accuracy ${p.accuracy}%)` : '';
+                body += `${index + 1}. ${p.name} - ${p.totalScore} Score${accuracyStat}\n`;
+            });
+            body += `\n------------------------------------\n`;
+
+            // [!!!] ตรวจสอบว่ามี quizRounds (ข้อมูลใหม่) หรือไม่
+            if (report.quizRounds && report.questionsData) {
+                body += `Rounds Summary:\n\n`;
+                report.quizRounds.forEach((round, index) => {
+                    const roundNum = index + 1;
+                    const roundConcept = getTextInLanguage(round.concept, lang);
+                    const questionData = report.questionsData.find(q => q.round === roundNum);
+
+                    body += `${roundNum}. ${roundConcept} (Accuracy ${questionData.accuracy}%)\n`;
+                    round.pairs.forEach(pair => {
+                        body += `  ✔️  ${getTextInLanguage(pair.qText, lang)} <-> ${getTextInLanguage(pair.aText, lang)}\n`;
+                    });
+                    body += `\n`;
+                });
+            }
+
+            body += `\nCreated By TRC Funny Quiz`;
+            try {
+                navigator.clipboard.writeText(body);
+                showAlert('Report Copied Successfully! Paste It in Your Email');
+                const encodedSubject = encodeURIComponent(subject);
+                const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}`;
+                window.location.href = mailtoLink;
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showAlert('You Cannot Copy This Content');
+            }
+        }
+    };
+
+    // 2. ฟังก์ชันวาดแท็บ Participants (ปรับจาก Quiz Page)
+    const renderParticipants = (participants, totalRounds) => {
+        const container = document.getElementById('tab-content-participants');
+        container.innerHTML = '<div class="space-y-4"></div>';
+        const listEl = container.querySelector('.space-y-4');
+        if (!participants || participants.length === 0) {
+            listEl.innerHTML = '<p>No Participants Available</p>';
+            return;
+        }
+
+        participants.forEach(p => {
+            let progressBar = '';
+            // [!!!] ตรวจสอบว่ามี roundHistory (ข้อมูลใหม่) หรือไม่
+            if (p.roundHistory && totalRounds > 0) {
+                 for (let i = 1; i <= totalRounds; i++) {
+                    const roundResult = (p.roundHistory || []).find(h => h.round === i);
+                    let barClass = 'bg-gray-300'; // Not played / Spectator
+                    if (roundResult) {
+                        barClass = roundResult.isCorrect ? 'bg-green-500' : 'bg-red-500';
+                    }
+                    progressBar += `<div class="flex-1 h-2 ${barClass} rounded"></div>`;
+                }
+            } else {
+                // Fallback for old reports
+                let barClass = 'bg-gray-300';
+                if (p.status === 'MATCHED') barClass = 'bg-green-500';
+                if (p.status === 'WRONG_MATCH') barClass = 'bg-red-500';
+                progressBar = `<div class="w-full h-2 ${barClass} rounded-full" title="Status: ${p.status}"></div>`;
+            }
+
+            // [!!!] คำนวณ Accuracy (ถ้ามีข้อมูลใหม่)
+            const accuracy = p.accuracy ? p.accuracy : (p.status === 'MATCHED' ? 100 : 0);
+            const accuracyText = p.accuracy !== undefined ? `${accuracy}% (${p.correctCount}/${p.totalRounds})` : `(Last: ${p.status})`;
+
+            const itemEl = document.createElement('div');
+            itemEl.className = 'bg-gray-50 p-4 rounded-lg';
+            itemEl.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <p class="font-bold">${p.name}</p>
+                    <div class="text-right">
+                        <p class="font-semibold text-lg">${p.totalScore || 0} <span class="text-sm font-normal text-gray-600">Score</span></p>
+                        <p class="text-sm text-gray-600">${accuracyText}</p>
+                    </div>
+                </div>
+                <div class="flex gap-1">${progressBar}</div>`;
+            listEl.appendChild(itemEl);
+        });
+    };
+
+    // 3. ฟังก์ชันวาดแท็บ Questions (Rounds) (ปรับจาก Quiz Page)
+    const renderQuestions = (quizRounds, questionsData) => {
+        const container = document.getElementById('tab-content-questions');
+        container.innerHTML = '<div class="space-y-4"></div>';
+        const listEl = container.querySelector('.space-y-4');
+
+        // [!!!] ตรวจสอบว่ามี quizRounds (ข้อมูลใหม่) หรือไม่
+        if (!quizRounds || quizRounds.length === 0) {
+            listEl.innerHTML = '<p>No Rounds/Questions data available for this old report.</p>';
+            return;
+        }
+        const lang = 'th';
+
+        quizRounds.forEach((round, index) => {
+            const roundNum = index + 1;
+            const qData = questionsData.find(q => q.round === roundNum) || { correct: 0, incorrect: 0, accuracy: 0 };
+
+            const pairsHtml = round.pairs.map(pair => 
+                `<div class="flex items-center py-1">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    <p class="text-gray-700">${getTextInLanguage(pair.qText, lang)}</p>
+                    <i class="fas fa-exchange-alt text-gray-400 mx-2"></i>
+                    <p class="text-gray-700">${getTextInLanguage(pair.aText, lang)}</p>
+                </div>`
+            ).join('');
+
+            const totalAnswers = qData.correct + qData.incorrect;
+            const correctWidth = totalAnswers > 0 ? (qData.correct / totalAnswers) * 100 : 0;
+            const incorrectWidth = totalAnswers > 0 ? (qData.incorrect / totalAnswers) * 100 : 0;
+
+            const itemEl = document.createElement('div');
+            itemEl.className = 'bg-gray-50 p-4 rounded-lg';
+            itemEl.innerHTML = `
+                <div class="flex justify-between items-center text-sm text-gray-600 mb-2">
+                    <span>Round ${roundNum}</span>
+                    <div class="flex items-center gap-4">
+                        <span><i class="fas fa-check-circle text-green-500 mr-1"></i> ${qData.accuracy}% Accuracy</span>
+                    </div>
+                </div>
+                <p class="font-semibold mb-3">${getTextInLanguage(round.concept, lang)}</p>
+                <div class="text-sm mb-4">${pairsHtml}</div>
+                <div class="space-y-2 text-xs text-gray-700">
+                    <div class="flex items-center justify-between">
+                        <span>Correct Matches (${qData.correct})</span>
+                        <span>Wrong Matches (${qData.incorrect})</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 flex">
+                        <div class="bg-green-500 h-2.5 rounded-l-full" style="width: ${correctWidth}%"></div>
+                        <div class="bg-red-500 h-2.5 rounded-r-full" style="width: ${incorrectWidth}%"></div>
+                    </div>
+                </div>`;
+            listEl.appendChild(itemEl);
+        });
+    };
+
+    // 4. ฟังก์ชันหลัก (renderReportScreen) - (ตัวใหม่ที่รื้อระบบแล้ว)
+    const renderReportScreen = (report) => {
+        showScreen('report-screen');
+        const lang = 'th';
+
+        let totalRounds = 0;
+        let overallAccuracy = 0;
+        let completion = 0;
+        let questionsData = []; // [!!!]
+
+        // --- 1. วิเคราะห์ข้อมูล (ตรวจสอบว่าเป็น Report ใหม่หรือเก่า) ---
+        if (report.quizRounds && report.participants[0].roundHistory !== undefined) {
+            // --- 1A. (ข้อมูลใหม่) มี roundHistory ---
+            totalRounds = report.quizRounds.length;
+            let totalCorrectAttempts = 0;
+            let totalAttempts = 0;
+
+            report.participants.forEach(p => {
+                p.correctCount = 0;
+                p.totalRounds = 0; 
+                (p.roundHistory || []).forEach(h => {
+                    p.totalRounds++;
+                    if (h.isCorrect) {
+                        p.correctCount++;
+                    }
+                });
+                totalCorrectAttempts += p.correctCount;
+                totalAttempts += p.totalRounds;
+                p.accuracy = p.totalRounds > 0 ? Math.round((p.correctCount / p.totalRounds) * 100) : 0;
+            });
+            report.participants.sort((a, b) => b.totalScore - a.totalScore);
+
+            for (let i = 1; i <= totalRounds; i++) {
+                let correct = 0;
+                let incorrect = 0;
+                report.participants.forEach(p => {
+                    const roundResult = (p.roundHistory || []).find(h => h.round === i);
+                    if (roundResult) {
+                        if (roundResult.isCorrect) correct++;
+                        else incorrect++;
+                    }
+                });
+                const total = correct + incorrect;
+                questionsData.push({
+                    round: i,
+                    correct: correct,
+                    incorrect: incorrect,
+                    accuracy: total > 0 ? Math.round((correct / total) * 100) : 0
+                });
+            }
+            report.questionsData = questionsData; 
+
+            overallAccuracy = totalAttempts > 0 ? Math.round((totalCorrectAttempts / totalAttempts) * 100) : 0;
+            completion = (totalRounds * report.participants.length) > 0 ? Math.round((totalAttempts / (totalRounds * report.participants.length)) * 100) : 0;
+
+        } else {
+            // --- 1B. (ข้อมูลเก่า) ไม่มี roundHistory ---
+            totalRounds = report.summary.totalRoundsPlayed || 1; // Fallback
+            report.participants.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+            // (ใช้ข้อมูลสรุปเก่า)
+            overallAccuracy = Math.round((report.summary.correctMatches * 2) / (report.summary.correctMatches * 2 + report.summary.wrongMatches * 2) * 100) || 0;
+            completion = 100; // (ข้อมูลเก่าไม่มีทางรู้)
+        }
+
+        // --- 2. อัปเดต Summary Boxes ---
+        document.getElementById('report-set-title').textContent = getTextInLanguage(report.quizTitle, lang);
+        document.getElementById('report-session-name').textContent = report.sessionName;
+        document.getElementById('report-summary-accuracy').textContent = `${overallAccuracy}%`;
+        document.getElementById('report-summary-completion').textContent = `${completion}%`;
+        document.getElementById('report-summary-participants').textContent = report.participants.length;
+        document.getElementById('report-summary-questions').textContent = totalRounds;
+
+        // (บันทึกค่า accuracy ไว้ใน report object เพื่อให้ Share email ใช้งานได้)
+        report.summary.accuracy = overallAccuracy;
+        report.summary.questionsCount = totalRounds;
+
+        // --- 3. ผูกปุ่ม Share ---
+        const shareButton = document.getElementById('share-report-btn');
+        const newShareButton = shareButton.cloneNode(true); 
+        newShareButton.addEventListener('click', () => shareReportByEmail(report));
+        shareButton.parentNode.replaceChild(newShareButton, shareButton);
+
+        // --- 4. วาด Tabs ---
+        renderParticipants(report.participants, totalRounds);
+        renderQuestions(report.quizRounds, questionsData); // (ถ้า report.quizRounds เป็น undefined, มันจะแสดงข้อความ "No data")
+
+        // --- 5. ผูกปุ่ม Tabs ---
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabButtons.forEach(btn => {
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+
+            newBtn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                newBtn.classList.add('active');
+                tabContents.forEach(c => c.classList.add('hidden'));
+                const contentId = newBtn.id.replace('btn', 'content');
+                document.getElementById(contentId).classList.remove('hidden');
+            });
+        });
+
+        document.getElementById('tab-btn-participants').click();
+    };
+
 </script>
 </body>
 </html>
