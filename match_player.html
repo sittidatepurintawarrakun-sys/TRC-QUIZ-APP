@@ -1,767 +1,846 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Join Matching Game (Multi-Language)</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-<style>
-body { font-family: 'Kanit', sans-serif; background-color: #f0f2f5; }
-.screen { display: none; }
-.screen.active { display: block; }
-.card {
-background: #f4f4f4;
-padding: 25px;
-font-size: 1.4em;
-border-radius: 8px;
-min-height: 50px;
-line-height: 1.4;
-}
-.my-code {
-background: #fffbe0;
-padding: 20px;
-font-size: 2.5em;
-font-weight: bold;
-letter-spacing: 3px;
-border: 2px dashed #ffc107;
-border-radius: 8px;
-color: #333;
-}
-.status-lobby { color: #555; background-color: #f8f9fa; }
-.status-pending { color: #856404; background-color: #fff3cd; }
-.status-matched { color: #155724; background-color: #d4edda; font-size: 1.2em; }
-.status-error,
-.status-WRONG_MATCH { color: #721c24; background-color: #f8d7da; font-size: 1.2em; }
-#timer-display {
-font-size: 3em;
-font-weight: bold;
-color: #1a2b4d;
-margin-bottom: 10px;
-}
-
-/* [!!! ADDED CSS !!!] */
-.podium-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 5px;
-    height: 250px;
-    perspective: 500px;
-}
-.podium-item {
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 1rem;
-    border-radius: 12px 12px 0 0;
-    color: #374151;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    border-bottom: 5px solid rgba(0, 0, 0, 0.2);
-    transform: translateY(250px);
-    opacity: 0;
-}
-@keyframes slideUp {
-    from { transform: translateY(250px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-.podium-item.animate {
-    animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-.podium-1 {
-    height: 100%;
-    background: linear-gradient(to top, #ffd700, #fde68a);
-    animation-delay: 1.2s !important;
-}
-.podium-2 {
-    height: 80%;
-    background: linear-gradient(to top, #c0c0c0, #e5e7eb);
-    animation-delay: 0.6s !important;
-}
-.podium-3 {
-    height: 60%;
-    background: linear-gradient(to top, #cd7f32, #f9c288);
-    animation-delay: 0s !important;
-}
-.podium-rank { font-size: 2.5rem; font-weight: 700; line-height: 1; }
-.podium-name { font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem; }
-.podium-score { font-size: 1rem; margin-top: 0.25rem; }
-.fa-crown { color: #f59e0b; font-size: 2rem; margin-bottom: 0.5rem; }
-/* [!!! END OF ADDED CSS !!!] */
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Matching Game (Survivor Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #f0f2f5; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .card {
+            background: #f4f4f4;
+            padding: 25px;
+            font-size: 1.4em;
+            border-radius: 8px;
+            min-height: 50px;
+            line-height: 1.4;
+        }
+        .my-code {
+            background: #fffbe0;
+            padding: 20px;
+            font-size: 2.5em;
+            font-weight: bold;
+            letter-spacing: 3px;
+            border: 2px dashed #ffc107;
+            border-radius: 8px;
+            color: #333;
+        }
+        .status-lobby { color: #555; background-color: #f8f9fa; }
+        .status-pending { color: #856404; background-color: #fff3cd; }
+        .status-matched { color: #155724; background-color: #d4edda; font-size: 1.2em; }
+        .status-error,
+        .status-WRONG_MATCH { color: #721c24; background-color: #f8d7da; font-size: 1.2em; }
+        #timer-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #1a2b4d;
+            margin-bottom: 10px;
+        }
+        /* [!!! ADDED CSS !!!] */
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 5px;
+            height: 250px;
+            perspective: 500px;
+        }
+        .podium-item {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 12px 12px 0 0;
+            color: #374151;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-bottom: 5px solid rgba(0, 0, 0, 0.2);
+            transform: translateY(250px);
+            opacity: 0;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(250px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .podium-item.animate {
+            animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .podium-1 {
+            height: 100%;
+            background: linear-gradient(to top, #ffd700, #fde68a);
+            animation-delay: 1.2s !important;
+        }
+        .podium-2 {
+            height: 80%;
+            background: linear-gradient(to top, #c0c0c0, #e5e7eb);
+            animation-delay: 0.6s !important;
+        }
+        .podium-3 {
+            height: 60%;
+            background: linear-gradient(to top, #cd7f32, #f9c288);
+            animation-delay: 0s !important;
+        }
+        .podium-rank { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+        .podium-name { font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem; }
+        .podium-score { font-size: 1rem; margin-top: 0.25rem; }
+        .fa-crown { color: #f59e0b; font-size: 2rem; margin-bottom: 0.5rem; }
+        /* [!!! END OF ADDED CSS !!!] */
+    </style>
 </head>
 <body class="flex items-center justify-center min-h-screen">
-<div class="absolute top-4 right-4 z-10">
-<button id="lang-toggle-btn" class="bg-white text-gray-700 font-bold py-2 px-4 rounded-lg shadow hover:bg-gray-100 transition">
-<i class="fas fa-globe mr-2"></i><span id="lang-toggle-text">EN</span>
-</button>
-</div>
-
-<div class="max-w-md w-full p-4">
-
-<div id="player-join-screen" class="screen active">
-<div class="bg-white p-8 rounded-2xl shadow-xl text-center">
-<h2 class="text-3xl font-bold mb-6" data-text-key="joinTitle">Join Lock & Key Game</h2>
-<input type="text" id="game-pin-input" placeholder="Game Pin (4 Digit)" maxlength="4"
-class="w-full text-center text-2xl p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500 tracking-widest"
-data-text-key="joinPinPlaceholder">
-<input type="text" id="player-name-input" placeholder="Your Name"
-class="w-full text-center p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500"
-data-text-key="joinNamePlaceholder">
-<button id="join-game-btn"
-class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400"
-data-text-key="joinButton">Join</button>
-<a href="Match.html" class="back-btn mt-6 text-gray-500 hover:text-gray-700 inline-block"
-data-text-key="backToHome">&larr; Back to Home</a>
-</div>
-</div>
-<div id="player-lobby-screen" class="screen">
-<div class="bg-white p-8 rounded-2xl shadow-xl text-center">
-<i class="fas fa-spinner fa-spin text-5xl text-green-500 mb-4"></i>
-<h2 class="text-3xl font-bold" data-text-key="lobbyTitle">Already Joined!</h2>
-<p class="text-gray-600 mt-2 mb-6" data-text-key="lobbyWaiting">Waiting for the Host to Start...</p>
-<div class="border-t pt-6">
-<h3 class="text-2xl font-bold text-gray-800 mb-4" data-text-key="lobbyHowToTitle">  💡   วิธีการเล่น   💡  </h3>
-<div class="bg-gray-50 p-5 rounded-lg text-left text-gray-700 space-y-3">
-<p>
-<i class="fas fa-id-card-clip w-6 text-center text-blue-500 mr-2"></i>
-<span data-text-key="lobbyHowTo1">1. ...</span>
-</p>
-<p>
-<i class="fas fa-walking w-6 text-center text-green-500 mr-2"></i>
-<span data-text-key="lobbyHowTo2">2. ...</span>
-</p>
-<p>
-<i class="fas fa-exchange-alt w-6 text-center text-indigo-500 mr-2"></i>
-<span data-text-key="lobbyHowTo3">3. ...</span>
-</p>
-<p>
-<i class="fas fa-keyboard w-6 text-center text-red-500 mr-2"></i>
-<span data-text-key="lobbyHowTo4">4. ...</span>
-</p>
-<p>
-<i class="fas fa-exclamation-triangle w-6 text-center text-yellow-500 mr-2"></i>
-<span data-text-key="lobbyHowTo5">5. ...</span>
-</p>
-</div>
-</div>
-</div>
-</div>
-<div id="game-container" class="screen">
-<div class="bg-white p-8 rounded-2xl shadow-xl">
-<div id="timer-display">--:--</div>
-<div id="round-info" class="text-center mb-4 border-b pb-4">
-<p class="text-xl font-bold text-indigo-600" id="round-concept-display">กำลังโหลดรอบ...</p>
-<p class="text-sm text-gray-500" id="round-counter-display">Round -/-</p>
-</div>
-<div id="total-score-display" class="text-center mb-4 p-3 bg-blue-50 rounded-lg">
-<span class="text-lg text-gray-600" data-text-key="gameTotalScore">คะแนนสะสม:</span>
-<span id="total-score-value" class="text-3xl font-bold text-blue-800">0</span>
-</div>
-<div id="status-message" class="status-lobby p-3 rounded-lg mb-4"></div>
-
-<div id="my-info-section" style="display: none;">
-<div class="card-section mb-4">
-<h3 class="font-bold mb-2" data-text-key="gameYourCard">การ์ดของคุณ (รอบนี้):</h3>
-<div class="card" id="my-card">...</div>
-</div>
-<div class="code-section mb-4" style="display: none;">
-<h3 class="font-bold mb-2" data-text-key="gameYourCode">รหัสของคุณ (รอบนี้):</h3>
-<div class="my-code" id="my-code">...</div>
-<p class="text-sm text-gray-600 mt-2" data-text-key="gameShowCode">โชว์รหัสนี้ให้คู่ของคุณ</p>
-</div>
-</div>
-
-<hr id="match-divider" class="my-6" style="display: none;">
-
-<div id="match-section" style="display: none;">
-<h3 class="font-bold mb-2" data-text-key="gameMatchTitle">จับคู่:</h3>
-<p class="text-gray-600 mb-4" data-text-key="gameMatchDesc">กรอกรหัสของคนที่ถือการ์ด "คู่" ของคุณ</p>
-<input type="text" id="partner-code-input" placeholder="กรอกรหัส 4 ตัว" maxlength="4"
-class="w-full text-center text-xl p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-500 tracking-widest"
-data-text-key="gameMatchPlaceholder">
-<button id="submit-match-btn"
-class="w-full bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-600 transition disabled:bg-gray-400"
-data-text-key="gameMatchButton">
-ยืนยันการจับคู่
-</button>
-</div>
-</div>
-</div>
-
-<div id="player-end-screen" class="screen">
-    <div class="bg-white p-8 rounded-2xl shadow-xl">
-        <h2 id="leaderboard-title" class="text-3xl font-bold mb-2 text-center">🏆 Final Results 🏆</h2>
-
-        <div id="final-podium-container" class="mt-4">
-            <div id="final-podium" class="podium-container"></div>
-        </div>
-        
-        <div id="leaderboard-list-container" class="mt-6">
-            <div id="leaderboard-list-others" class="space-y-2"></div>
-        </div>
-
-        <p id="player-final-rank" class="text-center text-2xl mt-8 font-bold"></p>
-
-        <a href="Match.html"
-            id="player-back-home-btn" 
-            class="back-btn mt-8 w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition inline-block text-center"
-            data-text-key="backToHome">
-            <i class="fas fa-home mr-2"></i>Back to Home
-        </a>
+    <div class="absolute top-4 right-4 z-10">
+        <button id="lang-toggle-btn" class="bg-white text-gray-700 font-bold py-2 px-4 rounded-lg shadow hover:bg-gray-100 transition">
+            <i class="fas fa-globe mr-2"></i><span id="lang-toggle-text">EN</span>
+        </button>
     </div>
-</div>
-</div>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
 
-<script>
-// --- Remark: Firebase Config & Setup (ไม่มีการแก้ไข) ---
-const firebaseConfig = {
-apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg",
-authDomain: "trc-funny-quiz.firebaseapp.com",
-projectId: "trc-funny-quiz",
-storageBucket: "trc-funny-quiz.appspot.com",
-messagingSenderId: "323647073409",
-appId: "1:323647073409:web:1445589b1bc6eb77bcf180"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-db.settings({experimentalForceLongPolling: true});
-const functions = firebase.functions();
-const auth = firebase.auth();
-const {serverTimestamp} = firebase.firestore.FieldValue;
-
-// --- Remark: Path & Constants ---
-const appId = 'trc-funny-quiz';
-const DATA_PATH_PREFIX = `/artifacts/${appId}/public/data`;
-const SESSIONS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameSessions`;
-const TIME_LIMIT_SECONDS = 180;
-// --- Remark: DOM Elements ---
-const screens = document.querySelectorAll('.screen');
-const joinGameBtn = document.getElementById('join-game-btn');
-const gamePinInput = document.getElementById('game-pin-input');
-const playerNameInput = document.getElementById('player-name-input');
-// Game screen elements
-const timerDisplay = document.getElementById('timer-display');
-const statusMessage = document.getElementById('status-message');
-const myInfoSection = document.getElementById('my-info-section');
-const myCardEl = document.getElementById('my-card');
-const matchSection = document.getElementById('match-section');
-const submitBtn = document.getElementById('submit-match-btn');
-const partnerCodeInput = document.getElementById('partner-code-input');
-const matchDivider = document.getElementById('match-divider');
-const roundConceptDisplay = document.getElementById('round-concept-display');
-const roundCounterDisplay = document.getElementById('round-counter-display');
-const totalScoreValue = document.getElementById('total-score-value');
-// [NEW] - Language button
-const langToggleBtn = document.getElementById('lang-toggle-btn');
-const langToggleText = document.getElementById('lang-toggle-text');
-// --- Remark: Global State ---
-// [!!! ADDED SFX !!!]
-const sfx = { applause: new Audio("sfx-applause.mp3") };
-let myPlayerId = null;
-let currentGameSessionId = null;
-let myPlayerRef = null;
-let gameSessionRef = null;
-let unsubscribePlayer = null;
-let unsubscribeGame = null;
-let countdownTimer = null;
-
-// [NEW] --- Remark: Language & UI Text ---
-let currentLang = 'th'; // 'th' หรือ 'en'
-
-const UI_TEXT = {
-th: {
-// General
-backToHome: "กลับหน้าหลัก",
-loading: "กำลังโหลด...",
-checking: "กำลังตรวจสอบ...",
-errorPrefix: "ผิดพลาด",
-codeWarning: "กรุณากรอกรหัส 4 ตัว",
-gameFinished: "เกมจบแล้ว! ขอบคุณที่เล่นครับ",
-// Screen 1: Join
-joinTitle: "เข้าร่วมเกม Lock & Key",
-joinPinPlaceholder: "รหัสเกม (4 ตัว)",
-joinNamePlaceholder: "ชื่อของคุณ",
-joinButton: "เข้าร่วม",
-// Screen 2: Lobby
-lobbyTitle: "เข้าร่วมแล้ว!",
-lobbyWaiting: "กำลังรอ Host เริ่มเกม...",
-lobbyHowToTitle: "วิธีการเล่น",
-lobbyHowTo1: "เมื่อเกมเริ่ม คุณจะได้รับการ์ด 1 ใบ และ รหัส 4 ตัว",
-lobbyHowTo2: "เดินตามหา \"คู่\" ของคุณ",
-lobbyHowTo3: "แลกเปลี่ยนรหัสกัน (คุณต้องรู้รหัส 4 ตัว **ของคู่คุณ**)",
-lobbyHowTo4: "กรอกรหัส 4 ตัว **ของคู่คุณ** บนหน้าจอของคุณ",
-lobbyHowTo5: "**ระวัง!** คุณมีโอกาสตอบได้แค่ครั้งเดียว! (ผิด = จบเกมรอบนั้น)",
-// Screen 3: Game
-gameTotalScore: "คะแนนสะสม:",
-gameYourCard: "การ์ดของคุณ (รอบนี้):",
-gameYourCode: "รหัสของคุณ (รอบนี้):",
-gameShowCode: "โชว์รหัสนี้ให้คู่ของคุณ",
-gameMatchTitle: "จับคู่:",
-gameMatchDesc: "กรอกรหัสของคนที่ถือการ์ด \"คู่\" ของคุณ",
-gameMatchPlaceholder: "กรอกรหัส 4 ตัว",
-gameMatchButton: "ยืนยันการจับคู่",
-// Screen 4: End
-endTitle: "เกมจบแล้ว!",
-// Dynamic Statuses
-findPartner: "ออกตามหาคู่ของคุณ!",
-roundFinished: "จบรอบ! กำลังรอ Host เริ่มรอบถัดไป...",
-spectator: "คุณเป็นผู้สังเกตการณ์ในรอบนี้ (เนื่องจากมีผู้เล่นเลขคี่)",
-matched: (score, total) => `จับคู่สำเร็จ! รอบนี้ +${score} | รวม ${total} คะแนน`,
-wrongMatch: (score, total) => `จับคู่ผิด! รอบนี้ ${score} | รวม ${total} คะแนน`,
-},
-en: {
-// General
-backToHome: "Back to Home",
-loading: "Loading...",
-checking: "Checking...",
-errorPrefix: "Error",
-codeWarning: "Please enter a 4-digit code",
-gameFinished: "Game Finished! Thank you for playing!",
-// Screen 1: Join
-joinTitle: "Join Lock & Key Game",
-joinPinPlaceholder: "Game Pin (4 Digit)",
-joinNamePlaceholder: "Your Name",
-joinButton: "Join",
-// Screen 2: Lobby
-lobbyTitle: "Already Joined!",
-lobbyWaiting: "Waiting for the Host to Start the Game...",
-lobbyHowToTitle: "How to Play",
-lobbyHowTo1: "When the game starts, you'll get 1 card and a 4-digit code.",
-lobbyHowTo2: "Walk around and find your \"Pair\".",
-lobbyHowTo3: "Exchange codes (You need to get **your partner's** code).",
-lobbyHowTo4: "Enter **your partner's** 4-digit code on your screen.",
-lobbyHowTo5: "**Warning!** You only have one chance! (Wrong = Round over).",
-// Screen 3: Game
-gameTotalScore: "Total Score:",
-gameYourCard: "Your Card (This Round):",
-gameYourCode: "Your Code (This Round):",
-gameShowCode: "Show this code to your partner",
-gameMatchTitle: "Match:",
-gameMatchDesc: "Enter the code of the person holding your \"Pair\" card",
-gameMatchPlaceholder: "Enter 4-digit code",
-gameMatchButton: "Confirm Match",
-// Screen 4: End
-endTitle: "Game Finished!",
-// Dynamic Statuses
-findPartner: "Find your partner!",
-roundFinished: "Round Finished! Waiting for Host to start next round...",
-spectator: "You are a spectator for this round (odd number of players).",
-matched: (score, total) => `Match Success! Round +${score} | Total ${total} Score`,
-wrongMatch: (score, total) => `Wrong Match! Round ${score} | Total ${total} Score`,
-}
-};
-// --- Remark: Utility Functions ( [!!! MODIFIED !!!] ) ---
-const showScreen = (screenId) => {
-screens.forEach(s => s.classList.remove('active'));
-document.getElementById(screenId).classList.add('active');
-};
-const showAlert = (message) => alert(message);
-/**
-* [NEW] - ฟังก์ชันดึงข้อความ (Dynamic Data)
-* - อัปเกรดให้รองรับ currentLang
-*/
-const getTextInLanguage = (data) => {
-if (typeof data === 'object' && data !== null) {
-// 1. พยายามดึงภาษาที่เลือก (th หรือ en)
-if (data[currentLang]) return data[currentLang];
-// 2. ถ้าไม่มี, ให้ดึงภาษาที่ *ไม่ใช่* ภาษาที่เลือก (Fallback)
-if (currentLang === 'th' && data.en) return data.en;
-if (currentLang === 'en' && data.th) return data.th;
-// 3. ถ้าไม่มีอีก, ให้ดึงอันไหนก็ได้
-return data.th || data.en || '';
-}
-if (typeof data === 'string') return data;
-return '';
-};
-/**
-* [NEW] - ฟังก์ชันอัปเดต UI (Static Text)
-* - ใช้วาดข้อความใน UI ใหม่ทั้งหมดเมื่อสลับภาษา
-*/
-const updateStaticUIText = () => {
-const t = UI_TEXT[currentLang];
-document.querySelectorAll('[data-text-key]').forEach(el => {
-const key = el.dataset.textKey;
-if (t[key]) {
-if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-el.placeholder = t[key];
-} else if (el.classList.contains('back-btn')) {
-// (Hardcode &larr; เพราะมันเป็น HTML entity)
-el.innerHTML = `&larr; ${t[key]}`;
-} else {
-el.textContent = t[key];
-}
-}
-});
-// อัปเดตปุ่ม End Screen
-const endBtn = document.querySelector('#player-end-screen .back-btn');
-if(endBtn) endBtn.innerHTML = `<i class="fas fa-home mr-2"></i>${t.backToHome}`;
-};
-// --- [NEW] Remark: Language Toggle Event ---
-langToggleBtn.addEventListener('click', () => {
-currentLang = (currentLang === 'th') ? 'en' : 'th';
-langToggleText.textContent = (currentLang === 'th') ? 'EN' : 'TH';
-
-// 1. อัปเดต Static UI ทั้งหมด
-updateStaticUIText();
-
-// 2. อัปเดต Dynamic UI (ถ้ามีข้อมูล)
-if (gameSessionRef) {
-gameSessionRef.get().then(doc => {
-if (doc.exists) {
-const gameData = doc.data();
-roundConceptDisplay.textContent = getTextInLanguage(gameData.currentRoundConcept) || UI_TEXT[currentLang].loading;
-}
-});
-}
-if (myPlayerRef) {
-myPlayerRef.get().then(doc => {
-if (doc.exists) {
-const playerData = doc.data();
-// อัปเดตการ์ด
-myCardEl.innerHTML = getTextInLanguage(playerData.cardText) || UI_TEXT[currentLang].loading;
-// อัปเดต Status Message (สำคัญ)
-updateUI(playerData, true); // (true = force update)
-}
-});
-}
-});
-// --- Remark: 0. Login อัตโนมัติ (ไม่มีการแก้ไข) ---
-auth.onAuthStateChanged(async (user) => {
-if (user) {
-myPlayerId = user.uid;
-console.log("Player User ID (Anonymously):", myPlayerId);
-} else {
-await auth.signInAnonymously();
-}
-// [NEW] - เมื่อ Login เสร็จ, ให้อัปเดต UI เป็นภาษาที่ตั้งค่าไว้
-updateStaticUIText();
-});
-// --- Remark: 1. เข้าร่วมเกม ( [!!! MODIFIED !!!] ) ---
-// [REMARK] เพิ่มการ Alert โดยใช้ UI_TEXT
-joinGameBtn.addEventListener('click', async () => {
-const pin = gamePinInput.value.trim();
-const name = playerNameInput.value.trim();
-// [MODIFIED] - ใช้ภาษาจาก UI_TEXT
-if (!pin || !name) return showAlert(UI_TEXT[currentLang].joinNamePlaceholder + ' & ' + UI_TEXT[currentLang].joinPinPlaceholder);
-if (!myPlayerId) return showAlert('กำลังเชื่อมต่อ... กรุณาลองอีกครั้ง');
-
-joinGameBtn.disabled = true;
-joinGameBtn.textContent = UI_TEXT[currentLang].checking;
-try {
-const joinGameFunc = functions.httpsCallable('joinGame');
-const result = await joinGameFunc({pin: pin, name: name});
-const {sessionId, playerId} = result.data;
-if (!sessionId || !playerId) throw new Error("Server did not return session.");
-currentGameSessionId = sessionId;
-myPlayerId = playerId;
-
-gameSessionRef = db.collection(SESSIONS_COLLECTION).doc(currentGameSessionId);
-myPlayerRef = gameSessionRef.collection("players").doc(myPlayerId);
-
-listenToGameSession();
-listenToPlayerData();
-
-showScreen('player-lobby-screen');
-} catch (error) {
-console.error("เข้าร่วมล้มเหลว:", error);
-showAlert(error.message || 'ไม่พบห้องเกม หรือเกมเริ่มไปแล้ว');
-joinGameBtn.disabled = false;
-// [MODIFIED] - คืนค่าปุ่มเป็นภาษาปัจจุบัน
-joinGameBtn.textContent = UI_TEXT[currentLang].joinButton;
-}
-});
-// --- Remark: 2. ดักฟังสถานะ "ห้องเกม" ( [!!! MODIFIED !!!] ) ---
-// [REMARK] อัปเดตให้ใช้ UI_TEXT
-const listenToGameSession = () => {
-if (unsubscribeGame) unsubscribeGame();
-unsubscribeGame = gameSessionRef.onSnapshot((doc) => {
-if (!doc.exists) return cleanupAndExit(UI_TEXT[currentLang].gameFinished); // [REMARK] ใช้ข้อความจบเกม
-
-const gameData = doc.data();
-const t = UI_TEXT[currentLang];
-// [MODIFIED] - อัปเดตข้อมูลรอบ (ใช้ getTextInLanguage)
-roundConceptDisplay.textContent = getTextInLanguage(gameData.currentRoundConcept) || t.loading;
-roundCounterDisplay.textContent = `Round ${gameData.currentRound} / ${gameData.totalRounds}`;
-switch (gameData.status) {
-case 'round-in-progress':
-showScreen('game-container');
-startTimer(gameData.gameStartTime);
-break;
-case 'round-finished':
-if (countdownTimer) clearInterval(countdownTimer);
-timerDisplay.innerText = "00:00";
-showScreen('game-container');
-// [MODIFIED] - ใช้ UI_TEXT
-statusMessage.innerText = t.roundFinished;
-statusMessage.className = "status-pending p-3 rounded-lg mb-4";
-matchSection.style.display = 'none';
-break;
-
-case 'finished':
-    // [!!! REPLACED SECTION (PODIUM LOGIC) !!!]
-    
-    // 1. หยุด Timer (ถ้ามี)
-    if (countdownTimer) clearInterval(countdownTimer);
-    timerDisplay.innerText = "00:00";
-
-    // 2. แสดงหน้าจอสุดท้าย (ที่ตอนนี้เป็น Podium)
-    showScreen('player-end-screen');
-    
-    // 3. เรียงคะแนน Leaderboard
-    const finalLeaderboard = (gameData.leaderboard || []).sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-    
-    // 4. วาด Podium และ List
-    renderPodium(finalLeaderboard.slice(0, 3));
-    renderLeaderboardList(finalLeaderboard.slice(3), 'leaderboard-list-others'); // (ใช้ ID ที่เราสร้างใน HTML ใหม่)
-
-    // 5. ค้นหาและแสดงอันดับของตัวเอง
-    const rankEl = document.getElementById('player-final-rank');
-    const myRank = finalLeaderboard.findIndex(p => p.uid === myPlayerId) + 1;
-    if (myRank > 0) {
-        rankEl.textContent = `Your Rank: ${myRank}`;
-    } else {
-        rankEl.textContent = 'Thank You For Playing!';
-    }
-    
-    // 6. [สำคัญ] ผูกปุ่ม Back to Home ให้เรียก cleanupAndExit
-    const backHomeBtn = document.getElementById('player-back-home-btn');
-    if (backHomeBtn) {
-        // ลบ listener เก่า (ถ้ามี) และสร้างใหม่
-        const newBackHomeBtn = backHomeBtn.cloneNode(true);
-        newBackHomeBtn.textContent = t.backToHome; // อัปเดตภาษา
-        newBackHomeBtn.innerHTML = `<i class="fas fa-home mr-2"></i>${newBackHomeBtn.textContent}`;
-        backHomeBtn.parentNode.replaceChild(newBackHomeBtn, backHomeBtn);
-
-        newBackHomeBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // หยุดการลิงก์
-            cleanupAndExit(t.gameFinished); // ล้างค่าใน local
-            window.location.href = e.target.href; // ไปหน้า Home
-        });
-    }
-    // [!!! END OF REPLACED SECTION !!!]
-    break;
-
-case 'pending':
-showScreen('player-lobby-screen');
-break;
-}
-});
-};
-// --- Remark: 3. ดักฟังสถานะ "ตัวเอง" (ไม่มีการแก้ไข) ---
-const listenToPlayerData = () => {
-if (unsubscribePlayer) unsubscribePlayer();
-unsubscribePlayer = myPlayerRef.onSnapshot((doc) => {
-if (!doc.exists) return cleanupAndExit(UI_TEXT[currentLang].gameFinished);
-const playerData = doc.data();
-updateUI(playerData);
-}, (error) => {
-console.error("Player listener error:", error);
-showAlert("การเชื่อมต่อข้อมูลผู้เล่นขัดข้อง");
-});
-};
-// --- Remark: 4. อัปเดตหน้าจอตามสถานะ ( [!!! HEAVILY MODIFIED !!!] ) ---
-// [REMARK] อัปเดตให้ใช้ UI_TEXT ทั้งหมด
-const updateUI = (playerData, forceUpdate = false) => {
-
-const t = UI_TEXT[currentLang];
-
-// [MODIFIED] - อัปเดตคะแนนสะสม
-totalScoreValue.textContent = playerData.totalScore || 0;
-// [MODIFIED] - อัปเดตการ์ด (ใช้ getTextInLanguage)
-if (playerData.personalCode) {
-myInfoSection.style.display = 'block';
-matchDivider.style.display = 'block';
-myCardEl.innerHTML = getTextInLanguage(playerData.cardText) || t.loading;
-
-const myCodeEl = document.getElementById('my-code');
-if (myCodeEl) {
-myCodeEl.innerText = playerData.personalCode;
-myCodeEl.closest('.code-section').style.display = 'block';
-}
-} else {
-myInfoSection.style.display = 'none';
-matchDivider.style.display = 'none';
-}
-// [REMARK] อัปเดตสถานะ "ผู้เล่น" (ใช้ UI_TEXT)
-switch (playerData.status) {
-case "LOBBY":
-showScreen('player-lobby-screen');
-matchSection.style.display = 'none';
-break;
-
-case "PLAYING":
-showScreen('game-container');
-matchSection.style.display = 'block';
-submitBtn.disabled = false;
-partnerCodeInput.value = "";
-// [MODIFIED]
-statusMessage.innerText = t.findPartner;
-statusMessage.className = "p-3 rounded-lg mb-4";
-break;
-
-case "MATCHED":
-showScreen('game-container');
-// [MODIFIED] - ใช้ฟังก์ชันจาก UI_TEXT
-statusMessage.innerText = t.matched(playerData.roundScore, playerData.totalScore);
-statusMessage.className = "status-matched p-3 rounded-lg mb-4";
-matchSection.style.display = 'none';
-break;
-
-case "WRONG_MATCH":
-showScreen('game-container');
-// [MODIFIED] - ใช้ฟังก์ชันจาก UI_TEXT
-statusMessage.innerText = t.wrongMatch(playerData.roundScore, playerData.totalScore);
-statusMessage.className = "status-error p-3 rounded-lg mb-4";
-matchSection.style.display = 'none';
-break;
-case "SPECTATOR":
-showScreen('game-container');
-// [MODIFIED]
-statusMessage.innerText = t.spectator;
-statusMessage.className = "status-lobby p-3 rounded-lg mb-4";
-matchSection.style.display = 'none';
-myInfoSection.style.display = 'none';
-matchDivider.style.display = 'none';
-break;
-}
-};
-// --- Remark: 5. กดยืนยันการจับคู่ ( [!!! MODIFIED !!!] ) ---
-// [REMARK] อัปเดตให้ใช้ UI_TEXT
-submitBtn.addEventListener('click', async () => {
-const t = UI_TEXT[currentLang];
-const partnerCode = partnerCodeInput.value.trim().toUpperCase();
-
-// [MODIFIED]
-if (!partnerCode || partnerCode.length !== 4) return alert(t.codeWarning);
-
-submitBtn.disabled = true;
-// [MODIFIED]
-statusMessage.innerText = t.checking;
-statusMessage.className = "status-pending p-3 rounded-lg mb-4";
-
-const submitMatchFunction = functions.httpsCallable("submitPartnerCode");
-try {
-await submitMatchFunction({
-partnerCode: partnerCode,
-sessionId: currentGameSessionId
-});
-} catch (error) {
-console.error("Error calling function:", error);
-// [MODIFIED]
-statusMessage.innerText = `${t.errorPrefix}: ${error.message}`;
-statusMessage.className = "status-error p-3 rounded-lg mb-4";
-
-}
-});
-// --- Remark: 7. Timer (ไม่มีการแก้ไข) ---
-const startTimer = (gameStartTime) => {
-if (countdownTimer) clearInterval(countdownTimer);
-countdownTimer = setInterval(() => {
-const now = Math.floor(Date.now() / 1000);
-const timeElapsed = now - gameStartTime;
-const timeLeft = TIME_LIMIT_SECONDS - timeElapsed;
-
-if (timeLeft <= 0) {
-clearInterval(countdownTimer);
-timerDisplay.innerText = "00:00";
-} else {
-const minutes = Math.floor(timeLeft / 60);
-const seconds = timeLeft % 60;
-timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-}, 1000);
-};
-
-// [!!! ADDED PODIUM FUNCTIONS !!!]
-const renderPodium = (top3) => {
-    const podiumEl = document.getElementById('final-podium');
-    podiumEl.innerHTML = '';
-    const podiumOrder = [1, 0, 2]; // [อันดับ 2, อันดับ 1, อันดับ 3]
-    const podiumItems = podiumOrder.map(rankIndex => top3[rankIndex]).filter(p => p);
-    podiumItems.forEach(player => {
-        if (!player) return;
-        const rank = top3.findIndex(p => p.uid === player.uid) + 1;
-        const podiumDiv = document.createElement('div');
-        podiumDiv.className = `podium-item podium-${rank}`;
-        podiumDiv.innerHTML = `
-            ${rank === 1 ? '<i class="fas fa-crown"></i>' : ''}
-            <div class="podium-rank">${rank}</div>
-            <div class="podium-name">${player.name}</div>
-            <div class="podium-score">${player.totalScore || 0} Score</div>
-        `;
-        podiumEl.appendChild(podiumDiv);
-    });
-
-    setTimeout(() => {
-        sfx.applause.play().catch(() => { });
-        document.querySelectorAll('.podium-item').forEach(el => el.classList.add('animate'));
-        var duration = 5 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-        var interval = setInterval(function () {
-            var timeLeft = animationEnd - Date.now();
-            if (timeLeft <= 0) return clearInterval(interval);
-            var particleCount = 50 * (timeLeft / duration);
-            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-        }, 250);
-    }, 100);
-};
-
-const renderLeaderboardList = (players, targetListId) => {
-    const listEl = document.getElementById(targetListId);
-    listEl.innerHTML = '';
-    if (players.length === 0) {
-        listEl.innerHTML = '<p class="text-center text-gray-500 mt-4">- No other players -</p>';
-        return;
-    }
-    players.forEach((player, i) => {
-        const rank = i + 4; // เริ่มจากอันดับ 4
-        const itemEl = document.createElement('div');
-        itemEl.className = 'flex justify-between items-center p-3 rounded-lg bg-gray-100';
-        itemEl.innerHTML = `
-            <div class="flex items-center gap-3">
-                <span class="font-bold w-8 text-center text-lg">${rank}</span>
-                <span>${player.name}</span>
+    <div class="max-w-md w-full p-4">
+        
+        <div id="player-join-screen" class="screen active">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <h2 class="text-3xl font-bold mb-6" data-text-key="joinTitle">Join Lock & Key Game</h2>
+                <input type="text" id="game-pin-input" placeholder="Game Pin (4 Digit)" maxlength="4"
+                    class="w-full text-center text-2xl p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500 tracking-widest"
+                    data-text-key="joinPinPlaceholder">
+                <input type="text" id="player-name-input" placeholder="Your Name"
+                    class="w-full text-center p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-green-500"
+                    data-text-key="joinNamePlaceholder">
+                <button id="join-game-btn"
+                    class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400"
+                    data-text-key="joinButton">Join</button>
+                <a href="Match.html" class="back-btn mt-6 text-gray-500 hover:text-gray-700 inline-block"
+                    data-text-key="backToHome">&larr; Back to Home</a>
             </div>
-            <span class="font-bold text-indigo-600">${player.totalScore || 0} Score</span>
-        `;
-        listEl.appendChild(itemEl);
-    });
-};
-// [!!! END OF ADDED PODIUM FUNCTIONS !!!]
+        </div>
+
+        <div id="player-lobby-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <i class="fas fa-spinner fa-spin text-5xl text-green-500 mb-4"></i>
+                <h2 class="text-3xl font-bold" data-text-key="lobbyTitle">Already Joined!</h2>
+                <p class="text-gray-600 mt-2 mb-6" data-text-key="lobbyWaiting">Waiting for the Host to Start...</p>
+                
+                <div class="border-t pt-6">
+                     <h3 class="text-2xl font-bold text-gray-800 mb-4" data-text-key="lobbyHowToTitle">   💡    วิธีการเล่น    💡   </h3>
+                     <div class="bg-gray-50 p-5 rounded-lg text-left text-gray-700 space-y-3">
+                        <p>
+                            <i class="fas fa-id-card-clip w-6 text-center text-blue-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo1">1. ...</span>
+                        </p>
+                        <p>
+                            <i class="fas fa-walking w-6 text-center text-green-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo2">2. ...</span>
+                        </p>
+                        <p>
+                            <i class="fas fa-exchange-alt w-6 text-center text-indigo-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo3">3. ...</span>
+                        </p>
+                        <p>
+                            <i class="fas fa-keyboard w-6 text-center text-red-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo4">4. ...</span>
+                        </p>
+                        <p>
+                            <i class="fas fa-exclamation-triangle w-6 text-center text-yellow-500 mr-2"></i>
+                            <span data-text-key="lobbyHowTo5">5. ...</span>
+                        </p>
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <div id="timer-display">--:--</div>
+                <div id="round-info" class="text-center mb-4 border-b pb-4">
+                    <p class="text-xl font-bold text-indigo-600" id="round-concept-display">กำลังโหลดรอบ...</p>
+                    <p class="text-sm text-gray-500" id="round-counter-display">Round -/-</p>
+                </div>
+                
+                <div id="total-score-display" class="text-center mb-4 p-3 bg-blue-50 rounded-lg">
+                    <span class="text-lg text-gray-600" data-text-key="gameTotalScore">คะแนนสะสม:</span>
+                    <span id="total-score-value" class="text-3xl font-bold text-blue-800">0</span>
+                </div>
+
+                <div id="status-message" class="status-lobby p-3 rounded-lg mb-4"></div>
+
+                <div id="my-info-section" style="display: none;">
+                    <div class="card-section mb-4">
+                        <h3 class="font-bold mb-2" data-text-key="gameYourCard">การ์ดของคุณ (รอบนี้):</h3>
+                        <div class="card" id="my-card">...</div>
+                    </div>
+                    
+                    <div class="code-section mb-4" style="display: none;">
+                        <h3 class="font-bold mb-2" data-text-key="gameYourCode">รหัสของคุณ (รอบนี้):</h3>
+                        <div class="my-code" id="my-code">...</div>
+                        <p class="text-sm text-gray-600 mt-2" data-text-key="gameShowCode">โชว์รหัสนี้ให้คู่ของคุณ</p>
+                    </div>
+                </div>
+
+                <hr id="match-divider" class="my-6" style="display: none;">
+
+                <div id="match-section" style="display: none;">
+                    <h3 class="font-bold mb-2" data-text-key="gameMatchTitle">จับคู่:</h3>
+                    <p class="text-gray-600 mb-4" data-text-key="gameMatchDesc">กรอกรหัสของคนที่ถือการ์ด "คู่" ของคุณ</p>
+                    <input type="text" id="partner-code-input" placeholder="กรอกรหัส 4 ตัว" maxlength="4"
+                        class="w-full text-center text-xl p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-indigo-500 tracking-widest"
+                        data-text-key="gameMatchPlaceholder">
+                    <button id="submit-match-btn"
+                        class="w-full bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-600 transition disabled:bg-gray-400"
+                        data-text-key="gameMatchButton">
+                        ยืนยันการจับคู่
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="player-end-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 id="leaderboard-title" class="text-3xl font-bold mb-2 text-center"> 🏆  Final Results  🏆 </h2>
+                
+                <div id="final-podium-container" class="mt-4">
+                    <div id="final-podium" class="podium-container"></div>
+                </div>
+
+                <div id="leaderboard-list-container" class="mt-6">
+                    <div id="leaderboard-list-others" class="space-y-2"></div>
+                </div>
+                
+                <p id="player-final-rank" class="text-center text-2xl mt-8 font-bold"></p>
+
+                <a href="Match.html" 
+                   id="player-back-home-btn"
+                   class="back-btn mt-8 w-full bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition inline-block text-center"
+                   data-text-key="backToHome">
+                   <i class="fas fa-home mr-2"></i>Back to Home
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
+
+    <script>
+        // --- Firebase Config & Setup ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg",
+            authDomain: "trc-funny-quiz.firebaseapp.com",
+            projectId: "trc-funny-quiz",
+            storageBucket: "trc-funny-quiz.appspot.com",
+            messagingSenderId: "323647073409",
+            appId: "1:323647073409:web:1445589b1bc6eb77bcf180"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        db.settings({experimentalForceLongPolling: true});
+        const functions = firebase.functions();
+        const auth = firebase.auth();
+        const {serverTimestamp} = firebase.firestore.FieldValue;
+
+        // --- Path & Constants ---
+        const appId = 'trc-funny-quiz';
+        const DATA_PATH_PREFIX = `/artifacts/${appId}/public/data`;
+        const SESSIONS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameSessions`;
+        const TIME_LIMIT_SECONDS = 180;
+        const LOCAL_STORAGE_KEY = 'trc_match_player_v4_5'; // [NEW] Key สำหรับเก็บ Session
+
+        // --- DOM Elements ---
+        const screens = document.querySelectorAll('.screen');
+        const joinGameBtn = document.getElementById('join-game-btn');
+        const gamePinInput = document.getElementById('game-pin-input');
+        const playerNameInput = document.getElementById('player-name-input');
+        
+        // Game screen elements
+        const timerDisplay = document.getElementById('timer-display');
+        const statusMessage = document.getElementById('status-message');
+        const myInfoSection = document.getElementById('my-info-section');
+        const myCardEl = document.getElementById('my-card');
+        const matchSection = document.getElementById('match-section');
+        const submitBtn = document.getElementById('submit-match-btn');
+        const partnerCodeInput = document.getElementById('partner-code-input');
+        const matchDivider = document.getElementById('match-divider');
+        const roundConceptDisplay = document.getElementById('round-concept-display');
+        const roundCounterDisplay = document.getElementById('round-counter-display');
+        const totalScoreValue = document.getElementById('total-score-value');
+        
+        // Language button
+        const langToggleBtn = document.getElementById('lang-toggle-btn');
+        const langToggleText = document.getElementById('lang-toggle-text');
+
+        // --- Global State ---
+        const sfx = { applause: new Audio("sfx-applause.mp3") };
+        let myPlayerId = null;
+        let currentGameSessionId = null;
+        let myPlayerRef = null;
+        let gameSessionRef = null;
+        let unsubscribePlayer = null;
+        let unsubscribeGame = null;
+        let countdownTimer = null;
+        let currentLang = 'th';
+
+        // --- [NEW] V4.5: Helper Functions for Survivor Mode ---
+        
+        // 1. Save Session (เรียกตอน Join สำเร็จ)
+        const saveSessionToLocal = (data) => {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
+                ...data,
+                timestamp: Date.now()
+            }));
+        };
+
+        // 2. Clear Session (เรียกตอนจบเกม หรือกดออกเอง)
+        const clearLocalSession = () => {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+        };
+
+        // 3. Auto Reconnect Logic
+        const tryAutoReconnect = async () => {
+            const savedRaw = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!savedRaw) return;
+
+            try {
+                const saved = JSON.parse(savedRaw);
+                const TWO_HOURS = 2 * 60 * 60 * 1000;
+                
+                // ถ้า Session เก่าเกิน 2 ชม. ให้ลบทิ้ง
+                if (Date.now() - saved.timestamp > TWO_HOURS) {
+                    clearLocalSession();
+                    return;
+                }
+
+                console.log("🧟 Found Zombie Session! Resurrecting...", saved);
+                
+                // Restore State
+                currentGameSessionId = saved.sessionId;
+                // myPlayerId ได้มาจาก Auth อยู่แล้ว แต่เช็คเพื่อความชัวร์
+                if (myPlayerId !== saved.playerId) {
+                    console.warn("Player ID mismatch. Clearing session.");
+                    clearLocalSession();
+                    return;
+                }
+
+                // Restore Input UI (เผื่อดู)
+                gamePinInput.value = saved.pin || '';
+                playerNameInput.value = saved.name || '';
+                
+                // Disable Join Button to show we are working
+                joinGameBtn.disabled = true;
+                joinGameBtn.textContent = UI_TEXT[currentLang].checking;
+
+                // Re-connect to Firestore
+                gameSessionRef = db.collection(SESSIONS_COLLECTION).doc(currentGameSessionId);
+                myPlayerRef = gameSessionRef.collection("players").doc(myPlayerId);
+
+                // Check if session still valid (exists and not finished)
+                const doc = await gameSessionRef.get();
+                if (!doc.exists) {
+                    console.log("Session not found on server.");
+                    clearLocalSession();
+                    joinGameBtn.disabled = false;
+                    joinGameBtn.textContent = UI_TEXT[currentLang].joinButton;
+                    return;
+                }
+                
+                if (doc.data().status === 'finished') {
+                    console.log("Game already finished.");
+                    clearLocalSession(); // จะได้ไม่ Reconnect วนลูป
+                    // ปล่อยให้ flow ปกติทำงาน (อยู่หน้า Join)
+                     joinGameBtn.disabled = false;
+                     joinGameBtn.textContent = UI_TEXT[currentLang].joinButton;
+                    return;
+                }
+
+                // If alive, Start Listeners
+                listenToGameSession();
+                listenToPlayerData();
+                
+                // Jump to Lobby immediately
+                showScreen('player-lobby-screen');
+
+            } catch (e) {
+                console.error("Resurrection failed:", e);
+                clearLocalSession();
+                joinGameBtn.disabled = false;
+                joinGameBtn.textContent = UI_TEXT[currentLang].joinButton;
+            }
+        };
+
+        // 4. Anti-Flee: Prevent Accidental Close
+        window.addEventListener('beforeunload', (e) => {
+            // ทำงานเฉพาะตอนที่อยู่ในเกมแล้ว (มี Session ID)
+            if (currentGameSessionId && myPlayerId) {
+                e.preventDefault();
+                e.returnValue = ''; // Standard for showing alert
+            }
+        });
 
 
-// --- Remark: 8. จบเกม (ไม่มีการแก้ไข) ---
-const cleanupAndExit = (message) => {
-if (unsubscribePlayer) unsubscribePlayer();
-if (unsubscribeGame) unsubscribeGame();
-if (countdownTimer) clearInterval(countdownTimer);
+        // --- Language & UI Text ---
+        const UI_TEXT = {
+            th: {
+                backToHome: "กลับหน้าหลัก",
+                loading: "กำลังโหลด...",
+                checking: "กำลังตรวจสอบ...",
+                errorPrefix: "ผิดพลาด",
+                codeWarning: "กรุณากรอกรหัส 4 ตัว",
+                gameFinished: "เกมจบแล้ว! ขอบคุณที่เล่นครับ",
+                joinTitle: "เข้าร่วมเกม Lock & Key",
+                joinPinPlaceholder: "รหัสเกม (4 ตัว)",
+                joinNamePlaceholder: "ชื่อของคุณ",
+                joinButton: "เข้าร่วม",
+                lobbyTitle: "เข้าร่วมแล้ว!",
+                lobbyWaiting: "กำลังรอ Host เริ่มเกม...",
+                lobbyHowToTitle: "วิธีการเล่น",
+                lobbyHowTo1: "เมื่อเกมเริ่ม คุณจะได้รับการ์ด 1 ใบ และ รหัส 4 ตัว",
+                lobbyHowTo2: "เดินตามหา \"คู่\" ของคุณ",
+                lobbyHowTo3: "แลกเปลี่ยนรหัสกัน (คุณต้องรู้รหัส 4 ตัว **ของคู่คุณ**)",
+                lobbyHowTo4: "กรอกรหัส 4 ตัว **ของคู่คุณ** บนหน้าจอของคุณ",
+                lobbyHowTo5: "**ระวัง!** คุณมีโอกาสตอบได้แค่ครั้งเดียว! (ผิด = จบเกมรอบนั้น)",
+                gameTotalScore: "คะแนนสะสม:",
+                gameYourCard: "การ์ดของคุณ (รอบนี้):",
+                gameYourCode: "รหัสของคุณ (รอบนี้):",
+                gameShowCode: "โชว์รหัสนี้ให้คู่ของคุณ",
+                gameMatchTitle: "จับคู่:",
+                gameMatchDesc: "กรอกรหัสของคนที่ถือการ์ด \"คู่\" ของคุณ",
+                gameMatchPlaceholder: "กรอกรหัส 4 ตัว",
+                gameMatchButton: "ยืนยันการจับคู่",
+                endTitle: "เกมจบแล้ว!",
+                findPartner: "ออกตามหาคู่ของคุณ!",
+                roundFinished: "จบรอบ! กำลังรอ Host เริ่มรอบถัดไป...",
+                spectator: "คุณเป็นผู้สังเกตการณ์ในรอบนี้ (เนื่องจากมีผู้เล่นเลขคี่)",
+                matched: (score, total) => `จับคู่สำเร็จ! รอบนี้ +${score} | รวม ${total} คะแนน`,
+                wrongMatch: (score, total) => `จับคู่ผิด! รอบนี้ ${score} | รวม ${total} คะแนน`,
+            },
+            en: {
+                backToHome: "Back to Home",
+                loading: "Loading...",
+                checking: "Checking...",
+                errorPrefix: "Error",
+                codeWarning: "Please enter a 4-digit code",
+                gameFinished: "Game Finished! Thank you for playing!",
+                joinTitle: "Join Lock & Key Game",
+                joinPinPlaceholder: "Game Pin (4 Digit)",
+                joinNamePlaceholder: "Your Name",
+                joinButton: "Join",
+                lobbyTitle: "Already Joined!",
+                lobbyWaiting: "Waiting for the Host to Start the Game...",
+                lobbyHowToTitle: "How to Play",
+                lobbyHowTo1: "When the game starts, you'll get 1 card and a 4-digit code.",
+                lobbyHowTo2: "Walk around and find your \"Pair\".",
+                lobbyHowTo3: "Exchange codes (You need to get **your partner's** code).",
+                lobbyHowTo4: "Enter **your partner's** 4-digit code on your screen.",
+                lobbyHowTo5: "**Warning!** You only have one chance! (Wrong = Round over).",
+                gameTotalScore: "Total Score:",
+                gameYourCard: "Your Card (This Round):",
+                gameYourCode: "Your Code (This Round):",
+                gameShowCode: "Show this code to your partner",
+                gameMatchTitle: "Match:",
+                gameMatchDesc: "Enter the code of the person holding your \"Pair\" card",
+                gameMatchPlaceholder: "Enter 4-digit code",
+                gameMatchButton: "Confirm Match",
+                endTitle: "Game Finished!",
+                findPartner: "Find your partner!",
+                roundFinished: "Round Finished! Waiting for Host to start next round...",
+                spectator: "You are a spectator for this round (odd number of players).",
+                matched: (score, total) => `Match Success! Round +${score} | Total ${total} Score`,
+                wrongMatch: (score, total) => `Wrong Match! Round ${score} | Total ${total} Score`,
+            }
+        };
 
-// (บรรทัดนี้ถูกย้ายไปทำงานใน case 'finished' แล้ว)
-// document.getElementById('player-final-message').textContent = message;
-// showScreen('player-end-screen'); 
+        // --- Utility Functions ---
+        const showScreen = (screenId) => {
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        };
+        const showAlert = (message) => alert(message);
+        
+        const getTextInLanguage = (data) => {
+            if (typeof data === 'object' && data !== null) {
+                if (data[currentLang]) return data[currentLang];
+                if (currentLang === 'th' && data.en) return data.en;
+                if (currentLang === 'en' && data.th) return data.th;
+                return data.th || data.en || '';
+            }
+            if (typeof data === 'string') return data;
+            return '';
+        };
 
-// [!!!] เราจะ Alert แทน เพราะหน้าจอ End Screen คือ Podium แล้ว [!!!]
-alert(message);
-showScreen('player-join-screen'); // กลับไปหน้า Join
+        const updateStaticUIText = () => {
+            const t = UI_TEXT[currentLang];
+            document.querySelectorAll('[data-text-key]').forEach(el => {
+                const key = el.dataset.textKey;
+                if (t[key]) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = t[key];
+                    } else if (el.classList.contains('back-btn')) {
+                        el.innerHTML = `&larr; ${t[key]}`;
+                    } else {
+                        el.textContent = t[key];
+                    }
+                }
+            });
+            const endBtn = document.querySelector('#player-end-screen .back-btn');
+            if(endBtn) endBtn.innerHTML = `<i class="fas fa-home mr-2"></i>${t.backToHome}`;
+        };
 
-myPlayerId = null;
-currentGameSessionId = null;
-myPlayerRef = null;
-gameSessionRef = null;
-};
-</script>
+        langToggleBtn.addEventListener('click', () => {
+            currentLang = (currentLang === 'th') ? 'en' : 'th';
+            langToggleText.textContent = (currentLang === 'th') ? 'EN' : 'TH';
+            updateStaticUIText();
+            
+            // Refresh Dynamic Content if in game
+            if (gameSessionRef) {
+                gameSessionRef.get().then(doc => {
+                    if (doc.exists) {
+                        const gameData = doc.data();
+                        roundConceptDisplay.textContent = getTextInLanguage(gameData.currentRoundConcept) || UI_TEXT[currentLang].loading;
+                    }
+                });
+            }
+            if (myPlayerRef) {
+                myPlayerRef.get().then(doc => {
+                    if (doc.exists) {
+                        const playerData = doc.data();
+                        myCardEl.innerHTML = getTextInLanguage(playerData.cardText) || UI_TEXT[currentLang].loading;
+                        updateUI(playerData, true);
+                    }
+                });
+            }
+        });
+
+        // --- Auth & Reconnect Entry Point ---
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                myPlayerId = user.uid;
+                console.log("Player User ID:", myPlayerId);
+                // [NEW] Attempt Reconnect
+                await tryAutoReconnect();
+            } else {
+                await auth.signInAnonymously();
+            }
+            updateStaticUIText();
+        });
+
+        // --- 1. Join Game ---
+        joinGameBtn.addEventListener('click', async () => {
+            const pin = gamePinInput.value.trim();
+            const name = playerNameInput.value.trim();
+
+            if (!pin || !name) return showAlert(UI_TEXT[currentLang].joinNamePlaceholder + ' & ' + UI_TEXT[currentLang].joinPinPlaceholder);
+            if (!myPlayerId) return showAlert('กำลังเชื่อมต่อ... กรุณาลองอีกครั้ง');
+
+            joinGameBtn.disabled = true;
+            joinGameBtn.textContent = UI_TEXT[currentLang].checking;
+
+            try {
+                const joinGameFunc = functions.httpsCallable('joinGame');
+                const result = await joinGameFunc({pin: pin, name: name});
+                const {sessionId, playerId} = result.data;
+                
+                if (!sessionId || !playerId) throw new Error("Server did not return session.");
+
+                currentGameSessionId = sessionId;
+                myPlayerId = playerId;
+
+                // [NEW] Save Session for Reconnect
+                saveSessionToLocal({
+                    sessionId, playerId, pin, name
+                });
+
+                gameSessionRef = db.collection(SESSIONS_COLLECTION).doc(currentGameSessionId);
+                myPlayerRef = gameSessionRef.collection("players").doc(myPlayerId);
+
+                listenToGameSession();
+                listenToPlayerData();
+                showScreen('player-lobby-screen');
+
+            } catch (error) {
+                console.error("เข้าร่วมล้มเหลว:", error);
+                showAlert(error.message || 'ไม่พบห้องเกม หรือเกมเริ่มไปแล้ว');
+                joinGameBtn.disabled = false;
+                joinGameBtn.textContent = UI_TEXT[currentLang].joinButton;
+            }
+        });
+
+        // --- 2. Listen to Game Session ---
+        const listenToGameSession = () => {
+            if (unsubscribeGame) unsubscribeGame();
+            unsubscribeGame = gameSessionRef.onSnapshot((doc) => {
+                if (!doc.exists) return cleanupAndExit(UI_TEXT[currentLang].gameFinished);
+                
+                const gameData = doc.data();
+                const t = UI_TEXT[currentLang];
+
+                roundConceptDisplay.textContent = getTextInLanguage(gameData.currentRoundConcept) || t.loading;
+                roundCounterDisplay.textContent = `Round ${gameData.currentRound} / ${gameData.totalRounds}`;
+
+                switch (gameData.status) {
+                    case 'round-in-progress':
+                        // [NEW LOGIC] - Even if host forced next round, this status triggers.
+                        showScreen('game-container');
+                        startTimer(gameData.gameStartTime);
+                        break;
+                    
+                    case 'round-finished':
+                        if (countdownTimer) clearInterval(countdownTimer);
+                        timerDisplay.innerText = "00:00";
+                        showScreen('game-container');
+                        statusMessage.innerText = t.roundFinished;
+                        statusMessage.className = "status-pending p-3 rounded-lg mb-4";
+                        matchSection.style.display = 'none';
+                        break;
+                    
+                    case 'finished':
+                        if (countdownTimer) clearInterval(countdownTimer);
+                        timerDisplay.innerText = "00:00";
+                        showScreen('player-end-screen');
+
+                        // Podium Logic
+                        const finalLeaderboard = (gameData.leaderboard || []).sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+                        renderPodium(finalLeaderboard.slice(0, 3));
+                        renderLeaderboardList(finalLeaderboard.slice(3), 'leaderboard-list-others');
+
+                        const rankEl = document.getElementById('player-final-rank');
+                        const myRank = finalLeaderboard.findIndex(p => p.uid === myPlayerId) + 1;
+                        if (myRank > 0) {
+                            rankEl.textContent = `Your Rank: ${myRank}`;
+                        } else {
+                            rankEl.textContent = 'Thank You For Playing!';
+                        }
+
+                        // Update Home Button
+                        const backHomeBtn = document.getElementById('player-back-home-btn');
+                        if (backHomeBtn) {
+                            const newBackHomeBtn = backHomeBtn.cloneNode(true);
+                            newBackHomeBtn.textContent = t.backToHome; 
+                            newBackHomeBtn.innerHTML = `<i class="fas fa-home mr-2"></i>${newBackHomeBtn.textContent}`;
+                            backHomeBtn.parentNode.replaceChild(newBackHomeBtn, backHomeBtn);
+                            
+                            newBackHomeBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                cleanupAndExit(t.gameFinished); 
+                                window.location.href = e.target.href; 
+                            });
+                        }
+                        
+                        // [NEW] Clear Session on Finish
+                        clearLocalSession();
+                        break;
+
+                    case 'pending':
+                        showScreen('player-lobby-screen');
+                        break;
+                }
+            });
+        };
+
+        // --- 3. Listen to Player Data ---
+        const listenToPlayerData = () => {
+            if (unsubscribePlayer) unsubscribePlayer();
+            unsubscribePlayer = myPlayerRef.onSnapshot((doc) => {
+                if (!doc.exists) return cleanupAndExit(UI_TEXT[currentLang].gameFinished);
+                const playerData = doc.data();
+                updateUI(playerData);
+            }, (error) => {
+                console.error("Player listener error:", error);
+                // ไม่ Alert พร่ำเพรื่อตอนปิด tab
+            });
+        };
+
+        // --- 4. Update UI ---
+        const updateUI = (playerData, forceUpdate = false) => {
+            const t = UI_TEXT[currentLang];
+            
+            totalScoreValue.textContent = playerData.totalScore || 0;
+
+            if (playerData.personalCode) {
+                myInfoSection.style.display = 'block';
+                matchDivider.style.display = 'block';
+                myCardEl.innerHTML = getTextInLanguage(playerData.cardText) || t.loading;
+                
+                const myCodeEl = document.getElementById('my-code');
+                if (myCodeEl) {
+                    myCodeEl.innerText = playerData.personalCode;
+                    myCodeEl.closest('.code-section').style.display = 'block';
+                }
+            } else {
+                myInfoSection.style.display = 'none';
+                matchDivider.style.display = 'none';
+            }
+
+            switch (playerData.status) {
+                case "LOBBY":
+                    showScreen('player-lobby-screen');
+                    matchSection.style.display = 'none';
+                    break;
+                case "PLAYING":
+                    showScreen('game-container');
+                    matchSection.style.display = 'block';
+                    submitBtn.disabled = false;
+                    partnerCodeInput.value = "";
+                    statusMessage.innerText = t.findPartner;
+                    statusMessage.className = "p-3 rounded-lg mb-4";
+                    break;
+                case "MATCHED":
+                    showScreen('game-container');
+                    statusMessage.innerText = t.matched(playerData.roundScore, playerData.totalScore);
+                    statusMessage.className = "status-matched p-3 rounded-lg mb-4";
+                    matchSection.style.display = 'none';
+                    break;
+                case "WRONG_MATCH":
+                    showScreen('game-container');
+                    statusMessage.innerText = t.wrongMatch(playerData.roundScore, playerData.totalScore);
+                    statusMessage.className = "status-error p-3 rounded-lg mb-4";
+                    matchSection.style.display = 'none';
+                    break;
+                case "SPECTATOR":
+                    showScreen('game-container');
+                    statusMessage.innerText = t.spectator;
+                    statusMessage.className = "status-lobby p-3 rounded-lg mb-4";
+                    matchSection.style.display = 'none';
+                    myInfoSection.style.display = 'none';
+                    matchDivider.style.display = 'none';
+                    break;
+            }
+        };
+
+        // --- 5. Submit Match ---
+        submitBtn.addEventListener('click', async () => {
+            const t = UI_TEXT[currentLang];
+            const partnerCode = partnerCodeInput.value.trim().toUpperCase();
+            
+            if (!partnerCode || partnerCode.length !== 4) return alert(t.codeWarning);
+            
+            submitBtn.disabled = true;
+            statusMessage.innerText = t.checking;
+            statusMessage.className = "status-pending p-3 rounded-lg mb-4";
+
+            const submitMatchFunction = functions.httpsCallable("submitPartnerCode");
+            try {
+                await submitMatchFunction({
+                    partnerCode: partnerCode,
+                    sessionId: currentGameSessionId
+                });
+            } catch (error) {
+                console.error("Error calling function:", error);
+                statusMessage.innerText = `${t.errorPrefix}: ${error.message}`;
+                statusMessage.className = "status-error p-3 rounded-lg mb-4";
+            }
+        });
+
+        // --- 6. Timer ---
+        const startTimer = (gameStartTime) => {
+            if (countdownTimer) clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                const now = Math.floor(Date.now() / 1000);
+                const timeElapsed = now - gameStartTime;
+                const timeLeft = TIME_LIMIT_SECONDS - timeElapsed;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    timerDisplay.innerText = "00:00";
+                    // Client doesn't force next round logic here. 
+                    // It waits for Server/Host to trigger new round or status change.
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }, 1000);
+        };
+
+        // --- 7. Podium Functions ---
+        const renderPodium = (top3) => {
+            const podiumEl = document.getElementById('final-podium');
+            podiumEl.innerHTML = '';
+            const podiumOrder = [1, 0, 2];
+            const podiumItems = podiumOrder.map(rankIndex => top3[rankIndex]).filter(p => p);
+
+            podiumItems.forEach(player => {
+                if (!player) return;
+                const rank = top3.findIndex(p => p.uid === player.uid) + 1;
+                const podiumDiv = document.createElement('div');
+                podiumDiv.className = `podium-item podium-${rank}`;
+                podiumDiv.innerHTML = `
+                    ${rank === 1 ? '<i class="fas fa-crown"></i>' : ''}
+                    <div class="podium-rank">${rank}</div>
+                    <div class="podium-name">${player.name}</div>
+                    <div class="podium-score">${player.totalScore || 0} Score</div>
+                `;
+                podiumEl.appendChild(podiumDiv);
+            });
+
+            setTimeout(() => {
+                sfx.applause.play().catch(() => { });
+                document.querySelectorAll('.podium-item').forEach(el => el.classList.add('animate'));
+                
+                var duration = 5 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+                var interval = setInterval(function () {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                }, 250);
+            }, 100);
+        };
+
+        const renderLeaderboardList = (players, targetListId) => {
+            const listEl = document.getElementById(targetListId);
+            listEl.innerHTML = '';
+            if (players.length === 0) {
+                listEl.innerHTML = '<p class="text-center text-gray-500 mt-4">- No other players -</p>';
+                return;
+            }
+            players.forEach((player, i) => {
+                const rank = i + 4;
+                const itemEl = document.createElement('div');
+                itemEl.className = 'flex justify-between items-center p-3 rounded-lg bg-gray-100';
+                itemEl.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold w-8 text-center text-lg">${rank}</span>
+                        <span>${player.name}</span>
+                    </div>
+                    <span class="font-bold text-indigo-600">${player.totalScore || 0} Score</span>
+                `;
+                listEl.appendChild(itemEl);
+            });
+        };
+
+        // --- 8. Cleanup ---
+        const cleanupAndExit = (message) => {
+            if (unsubscribePlayer) unsubscribePlayer();
+            if (unsubscribeGame) unsubscribeGame();
+            if (countdownTimer) clearInterval(countdownTimer);
+
+            // [NEW] Clear Session
+            clearLocalSession();
+
+            alert(message);
+            showScreen('player-join-screen');
+            
+            myPlayerId = null;
+            currentGameSessionId = null;
+            myPlayerRef = null;
+            gameSessionRef = null;
+            
+            // Re-enable Join Button
+            joinGameBtn.disabled = false;
+            joinGameBtn.textContent = UI_TEXT[currentLang].joinButton;
+        };
+
+    </script>
 </body>
 </html>

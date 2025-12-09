@@ -1,1210 +1,1285 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matching Game - Host Panel (Multi-Round)</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<style>
-body {
-font-family: 'Kanit', sans-serif;
-background-color: #f0f2f5;
-}
-.screen { display: none; }
-.screen.active { display: block; }
-.tab-btn.active { border-bottom-color: #4f46e5; color: #4f46e5; }
-.status-MATCHED { color: green; font-weight: bold; }
-.status-WRONG_MATCH { color: red; }
-.status-PENDING { color: orange; }
-.status-LOBBY { color: #888; }
-
-/* [!!! ADDED CSS !!!] */
-.podium-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 5px;
-    height: 250px;
-    perspective: 500px;
-}
-.podium-item {
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 1rem;
-    border-radius: 12px 12px 0 0;
-    color: #374151;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    border-bottom: 5px solid rgba(0, 0, 0, 0.2);
-    transform: translateY(250px);
-    opacity: 0;
-}
-@keyframes slideUp {
-    from { transform: translateY(250px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-.podium-item.animate {
-    animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-.podium-1 {
-    height: 100%;
-    background: linear-gradient(to top, #ffd700, #fde68a);
-    animation-delay: 1.2s !important;
-}
-.podium-2 {
-    height: 80%;
-    background: linear-gradient(to top, #c0c0c0, #e5e7eb);
-    animation-delay: 0.6s !important;
-}
-.podium-3 {
-    height: 60%;
-    background: linear-gradient(to top, #cd7f32, #f9c288);
-    animation-delay: 0s !important;
-}
-.podium-rank { font-size: 2.5rem; font-weight: 700; line-height: 1; }
-.podium-name { font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem; }
-.podium-score { font-size: 1rem; margin-top: 0.25rem; }
-.fa-crown { color: #f59e0b; font-size: 2rem; margin-bottom: 0.5rem; }
-/* [!!! END OF ADDED CSS !!!] */
-
-</style>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching Game - Host Panel (Survivor Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .tab-btn.active { border-bottom-color: #4f46e5; color: #4f46e5; }
+        .status-MATCHED { color: green; font-weight: bold; }
+        .status-WRONG_MATCH { color: red; }
+        .status-PENDING { color: orange; }
+        .status-LOBBY { color: #888; }
+        
+        /* Podium CSS */
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 5px;
+            height: 250px;
+            perspective: 500px;
+        }
+        .podium-item {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 12px 12px 0 0;
+            color: #374151;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-bottom: 5px solid rgba(0, 0, 0, 0.2);
+            transform: translateY(250px);
+            opacity: 0;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(250px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .podium-item.animate {
+            animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .podium-1 {
+            height: 100%;
+            background: linear-gradient(to top, #ffd700, #fde68a);
+            animation-delay: 1.2s !important;
+        }
+        .podium-2 {
+            height: 80%;
+            background: linear-gradient(to top, #c0c0c0, #e5e7eb);
+            animation-delay: 0.6s !important;
+        }
+        .podium-3 {
+            height: 60%;
+            background: linear-gradient(to top, #cd7f32, #f9c288);
+            animation-delay: 0s !important;
+        }
+        .podium-rank { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+        .podium-name { font-size: 1.25rem; font-weight: 600; margin-top: 0.5rem; }
+        .podium-score { font-size: 1rem; margin-top: 0.25rem; }
+        .fa-crown { color: #f59e0b; font-size: 2rem; margin-bottom: 0.5rem; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
-<div id="app-container" class="max-w-4xl mx-auto p-4 min-h-screen">
-<div id="host-home-screen" class="screen active">
-<div class="bg-white p-8 rounded-2xl shadow-xl text-center">
-<h2 class="text-3xl font-bold mb-6">Manage Lock & Key Game</h2>
-<div class="flex flex-col md:flex-row gap-4 justify-center">
-<button id="create-set-btn"
-class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition shadow-md">
-<i class="fas fa-plus mr-2"></i>Create a new quiz
-</button>
-<button id="view-my-sets-btn"
-class="bg-gradient-to-r from-purple-500 to-violet-500 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-violet-600 transition shadow-md">
-<i class="fas fa-list-ul mr-2"></i>Pcik an available quiz set
-</button>
-</div>
-<a href="Match.html" class="back-btn mt-8 text-gray-500 hover:text-gray-700 inline-block">&larr; Back to
-Home</a>
-</div>
-</div>
-<div id="set-creator-screen" class="screen">
-<div class="bg-white p-8 rounded-2xl shadow-xl">
-<h2 class="text-3xl font-bold mb-6">Create / Edit Lock & Key Set</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b pb-6">
-<div>
-<label class="block text-sm font-medium text-gray-700">Set Title (TH)</label>
-<input type="text" id="set-title-th" placeholder="ชื่อชุดคำถาม"
-class="w-full p-3 border rounded-lg mt-1">
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-700">Set Title (EN)</label>
-<input type="text" id="set-title-en" placeholder="Set Title"
-class="w-full p-3 border rounded-lg mt-1">
-</div>
-<div class="md:col-span-2">
-<label class="block text-sm font-medium text-gray-700">Category (TH)</label>
-<input type="text" id="set-category-th" placeholder="หมวดหมู่ (เช่น Safety, HR)"
-class="w-full p-3 border rounded-lg mt-1">
-</div>
-<div class="md:col-span-2">
-<label class="block text-sm font-medium text-gray-700">Image URL (Optional)</label>
-<input type="url" id="set-image-url"
-placeholder="URL รูปภาพ (เช่น https://example.com/image.jpg)"
-class="w-full p-3 border rounded-lg mt-1">
-</div>
-</div>
-<h3 class="text-xl font-bold mb-4">Game Rounds</h3>
-<div id="rounds-container" class="space-y-6">
-</div>
-<button id="add-round-btn"
-class="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition w-full">
-<i class="fas fa-plus mr-2"></i>เพิ่มรอบ (Add Round)
-</button>
-<div class="mt-6 flex gap-4">
-<button id="save-set-btn"
-class="flex-1 bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400">
-<i class="fas fa-save mr-2"></i>Save Set
-</button>
-<button
-class="back-btn flex-1 bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition">Cancel</button>
-</div>
-</div>
-</div>
-<div id="my-sets-screen" class="screen">
-<div class="bg-white p-8 rounded-2xl shadow-xl">
-<h2 class="text-3xl font-bold mb-6">My Matching Sets</h2>
-<div id="my-sets-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-</div>
-<button class="back-btn mt-8 text-gray-500 hover:text-gray-700">&larr; Back</button>
-</div>
-</div>
-<div id="host-lobby-screen" class="screen">
-<div class="bg-white p-8 rounded-2xl shadow-xl text-center">
-<p class="text-gray-600">Players, enter this code to join:</p>
-<div class="my-4 bg-indigo-600 text-white p-4 rounded-lg">
-<p class="text-lg">Game PIN</p>
-<p id="game-pin-display" class="text-6xl font-bold tracking-widest">----</p>
-</div>
-<h3 class="text-2xl font-bold mt-6 mb-4">Joined Players (<span id="player-count">0</span>)</h3>
-<div id="player-list" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center"></div>
-<button id="start-game-btn"
-class="mt-8 w-full bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition text-2xl shadow-lg disabled:bg-gray-400"
-disabled>Start Game!</button>
-<button class="back-btn mt-4 text-gray-500 hover:text-gray-700">&larr; Cancel and Back</button>
-</div>
-</div>
-<div id="leaderboard-screen" class="screen">
-<div class="bg-white p-8 rounded-2xl shadow-xl text-center">
-<h2 class="text-3xl font-bold mb-4">Live Leaderboard</h2>
-<div id="host-timer-display" class="text-4xl font-bold text-red-500 mb-6">--:--</div>
-<p id="current-round-display" class="text-xl font-semibold mb-4 text-indigo-600">Loading Round...</p>
-<table class="w-full text-left">
-<thead>
-<tr>
-<th class="p-2 bg-gray-100">Name</th>
-<th class="p-2 bg-gray-100">Status</th>
-<th class="p-2 bg-gray-100">Score</th>
-</tr>
-</thead>
-<tbody id="leaderboard-list"></tbody>
-</table>
-
-<div id="final-podium-container" class="hidden mt-4">
-    <h2 class="text-3xl font-bold mb-4 text-center">🏆 Final Results 🏆</h2>
-    <div id="final-podium" class="podium-container"></div>
-</div>
-<div id="leaderboard-list-container" class="hidden mt-6">
-    <div id="leaderboard-list-others" class="space-y-2"></div>
-</div>
-<button id="next-round-btn"
-class="mt-8 w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition text-2xl shadow-lg"
-style="display: none;">
-<i class="fas fa-arrow-right mr-2"></i>Start Next Round
-</button>
-<button id="end-game-btn"
-class="mt-8 w-full bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 transition text-xl">
-End Game & View Report
-</button>
-</div>
-</div>
-<div id="history-screen" class="screen">
-<div class="bg-white p-8 rounded-2xl shadow-xl">
-<h2 class="text-3xl font-bold mb-1">Lock & Key Game History</h2>
-<p class="text-gray-500 mb-6">For: <span id="history-set-title" class="font-semibold"></span></p>
-<div id="history-list" class="space-y-3"></div>
-<button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to Set List</button>
-</div>
-</div>
-    <div id="report-screen" class="screen">
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl">
-
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-grow">
-                    <h2 id="report-set-title" class="text-2xl md:text-3xl font-bold">Report Title</h2>
-                    <p id="report-session-name" class="text-gray-500">Session Name</p>
-                </div>
-                <div class="flex flex-col items-end gap-2">
-                    <span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Completed</span>
-                    <button id="share-report-btn" class="bg-blue-500 text-white font-bold py-1 px-3 rounded-md text-sm hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-envelope mr-1"></i> Share
+    <div id="app-container" class="max-w-4xl mx-auto p-4 min-h-screen">
+        
+        <div id="host-home-screen" class="screen active">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <h2 class="text-3xl font-bold mb-6">Manage Lock & Key Game</h2>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <button id="create-set-btn"
+                        class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-indigo-600 transition shadow-md">
+                        <i class="fas fa-plus mr-2"></i>Create a new quiz
+                    </button>
+                    <button id="view-my-sets-btn"
+                        class="bg-gradient-to-r from-purple-500 to-violet-500 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-600 hover:to-violet-600 transition shadow-md">
+                        <i class="fas fa-list-ul mr-2"></i>Pick an available quiz set
                     </button>
                 </div>
+                <a href="Match.html" class="back-btn mt-8 text-gray-500 hover:text-gray-700 inline-block">&larr; Back to Home</a>
             </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div class="bg-amber-100 text-amber-900 p-3 md:p-5 rounded-xl shadow-md">
-                    <p class="font-semibold">Accuracy</p>
-                    <p id="report-summary-accuracy" class="text-3xl font-bold">-%</p>
-                </div>
-                <div class="bg-blue-100 text-blue-900 p-3 md:p-5 rounded-xl shadow-md">
-                    <p class="font-semibold">Completion</p>
-                    <p id="report-summary-completion" class="text-3xl font-bold">-%</p>
-                </div>
-                <div class="bg-violet-100 text-violet-900 p-3 md:p-5 rounded-xl shadow-md">
-                    <p class="font-semibold">Participants</p>
-                    <p id="report-summary-participants" class="text-3xl font-bold">-</p>
-                </div>
-                <div class="bg-teal-100 text-teal-900 p-3 md:p-5 rounded-xl shadow-md">
-                    <p class="font-semibold">Rounds</p>
-                    <p id="report-summary-questions" class="text-3xl font-bold">-</p>
-                </div>
-            </div>
-
-            <div class="border-b border-gray-200 mb-4">
-                <nav class="flex space-x-4" aria-label="Tabs">
-                    <button id="tab-btn-participants" class="tab-btn active font-medium px-1 py-2 border-b-2 border-transparent">Participants</button>
-                    <button id="tab-btn-questions" class="tab-btn font-medium px-1 py-2 border-b-2 border-transparent">Rounds (Questions)</button>
-                </nav>
-            </div>
-
-            <div id="tab-content-participants" class="tab-content"></div>
-            <div id="tab-content-questions" class="tab-content hidden"></div>
-
-            <button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to history</button>
         </div>
-    </div>
-<div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-<div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm">
-<p id="alert-message" class="mb-4"></p>
-<button id="alert-ok-btn" class="bg-indigo-500 text-white px-4 py-2 rounded-lg">OK</button>
-</div>
-</div>
-</div>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
-<script>
-// --- Remark: Firebase Config & Setup ---
-const firebaseConfig = {
-apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg",
-authDomain: "trc-funny-quiz.firebaseapp.com",
-projectId: "trc-funny-quiz",
-storageBucket: "trc-funny-quiz.appspot.com",
-messagingSenderId: "323647073409",
-appId: "1:323647073409:web:1445589b1bc6eb77bcf180"
-};
-firebase.initializeApp(firebaseConfig);
-// [!!!] ย้ายตัวแปร db, functions, auth มาไว้ข้างนอก
-// เพื่อให้ส่วนอื่นๆ (เช่น Set Creator) เรียกใช้ได้เลย
-const db = firebase.firestore();
-db.settings({ experimentalForceLongPolling: true });
-const functions = firebase.functions();
-const auth = firebase.auth();
-const {serverTimestamp, increment} = firebase.firestore.FieldValue;
-// --- Remark: Path & Constants ---
-const appId = 'trc-funny-quiz';
-const DATA_PATH_PREFIX = `/artifacts/${appId}/public/data`;
-const QUIZZES_COLLECTION = `${DATA_PATH_PREFIX}/matchingQuizzes`;
-const SESSIONS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameSessions`;
-const REPORTS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameReports`;
-const DEFAULT_COVER_IMAGES = [
-'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg',
-'https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg',
-'https://images.pexels.com/photos/3244513/pexels-photo-3244513.jpeg',
-'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg'
-];
-// --- Remark: Global State ---
-// [!!! ADDED SFX !!!]
-const sfx = { applause: new Audio("sfx-applause.mp3") };
-let userId = null;
-let currentSetId = null;
-let currentGameSessionId = null;
-let currentSetForHistory = null;
-let gameUnsubscribe = null;
-let playersUnsubscribe = null;
-let countdownTimer = null;
-const TIME_LIMIT_SECONDS = 180;
-// --- Remark: Utility Functions ---
-const screens = document.querySelectorAll('.screen');
-const alertModal = document.getElementById('alert-modal');
-const alertMessage = document.getElementById('alert-message');
-const showScreen = (screenId) => {
-screens.forEach(s => s.classList.remove('active'));
-document.getElementById(screenId).classList.add('active');
-};
-const showAlert = (message) => {
-alertMessage.textContent = message;
-alertModal.style.display = 'flex';
-};
-document.getElementById('alert-ok-btn').addEventListener('click', () => {
-alertModal.style.display = 'none';
-});
-const getTextInLanguage = (data, lang = 'th') => {
-if (typeof data === 'object' && data !== null) {
-if (data[lang]) return data[lang];
-if (lang === 'th' && data.en) return data.en;
-if (lang === 'en' && data.th) return data.th;
-return data.th || data.en || '';
-}
-if (typeof data === 'string') return data;
-return '';
-};
-// --- Remark: Auth & Navigation ---
-// [!!! FIXED !!!] - ย้าย db.settings มาไว้ "ข้างใน"
-// หลังจากที่ auth.signInAnonymously() ทำงานเสร็จ
-auth.onAuthStateChanged(async (user) => {
-if (user) {
-userId = user.uid;
-} else {
-await auth.signInAnonymously();
-userId = auth.currentUser.uid;
-}
-console.log("Host User ID:", userId);
-});
-document.querySelectorAll('.back-btn').forEach(btn => {
-btn.addEventListener('click', (e) => {
-const parentScreen = e.target.closest('.screen').id;
-if (['set-creator-screen', 'my-sets-screen'].includes(parentScreen)) {
-showScreen('host-home-screen');
-}
-if (parentScreen === 'host-lobby-screen') {
-showScreen('my-sets-screen');
-}
-if (parentScreen === 'history-screen') {
-showScreen('my-sets-screen');
-}
-if (parentScreen === 'report-screen') {
-showScreen('history-screen');
-}
-});
-});
-document.getElementById('create-set-btn').addEventListener('click', () => {
-resetSetCreator();
-showScreen('set-creator-screen');
-});
-document.getElementById('view-my-sets-btn').addEventListener('click', () => viewMySets());
-// ---
-// Remark: [!!! SECTION 1: Set Creator (CRUD) - แก้ไขหลัก !!!]
-// ---
-const roundsContainer = document.getElementById('rounds-container');
-document.getElementById('add-round-btn').addEventListener('click', () => addRoundToForm());
-const addPairToForm = (targetPairsContainer, pair = {qText: {th: '', en: ''}, aText: {th: '', en: ''}}) => {
-const pairDiv = document.createElement('div');
-pairDiv.className = 'pair-block bg-gray-50 p-4 rounded-lg mb-4 border grid grid-cols-1 md:grid-cols-2 gap-4 relative';
-pairDiv.innerHTML = `
-<button class="remove-pair-btn text-red-500 hover:text-red-700 font-bold text-xl absolute top-2 right-3">&times;</button>
-<div>
-<label class="block text-sm font-bold text-gray-700">Card 1 (TH)</label>
-<textarea class="pair-qText-th w-full p-2 border rounded-md" placeholder="ข้อความการ์ดใบที่ 1 (TH)">${getTextInLanguage(pair.qText, 'th')}</textarea>
-<label class="block text-sm font-bold text-gray-700 mt-2">Card 1 (EN)</label>
-<textarea class="pair-qText-en w-full p-2 border rounded-md" placeholder="Card 1 Text (EN)">${getTextInLanguage(pair.qText, 'en')}</textarea>
-</div>
-<div>
-<label class="block text-sm font-bold text-gray-700">Card 2 (TH) - (คู่กัน)</label>
-<textarea class="pair-aText-th w-full p-2 border rounded-md" placeholder="ข้อความการ์ดใบที่ 2 (TH)">${getTextInLanguage(pair.aText, 'th')}</textarea>
-<label class="block text-sm font-bold text-gray-700 mt-2">Card 2 (EN) - (The Pair)</label>
-<textarea class="pair-aText-en w-full p-2 border rounded-md" placeholder="Card 2 Text (EN)">${getTextInLanguage(pair.aText, 'en')}</textarea>
-</div>
-`;
-targetPairsContainer.appendChild(pairDiv);
-pairDiv.querySelector('.remove-pair-btn').addEventListener('click', (e) => e.target.closest('.pair-block').remove());
-};
-const addRoundToForm = (round = { concept: '', pairs: [] }) => {
-const roundIndex = roundsContainer.children.length + 1;
-const roundDiv = document.createElement('div');
-roundDiv.className = 'round-block bg-white border-2 border-dashed border-blue-300 p-5 rounded-lg';
-roundDiv.innerHTML = `
-<div class="flex justify-between items-center mb-4">
-<h4 class="text-lg font-bold text-blue-700">Round ${roundIndex}</h4>
-<button class="remove-round-btn text-red-500 hover:text-red-700 font-bold text-xl">&times; Remove Round</button>
-</div>
-<div class="mb-4">
-<label class="block text-sm font-medium text-gray-700">Round Concept (TH/EN)</label>
-<input type="text" class="round-concept w-full p-2 border rounded-lg mt-1"
-placeholder="เช่น ข้อ 1: ความรุนแรง"
-value="${getTextInLanguage(round.concept, 'th') || getTextInLanguage(round.concept, 'en')}">
-</div>
-<div class="round-pairs-container border-t pt-4 mt-4 space-y-3">
-</div>
-<button class="add-pair-to-round-btn mt-4 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition w-full">
-<i class="fas fa-plus mr-2"></i>เพิ่มคู่ (Add Pair to this Round)
-</button>
-`;
-roundsContainer.appendChild(roundDiv);
-const currentPairsContainer = roundDiv.querySelector('.round-pairs-container');
-roundDiv.querySelector('.add-pair-to-round-btn').addEventListener('click', () => {
-addPairToForm(currentPairsContainer);
-});
-roundDiv.querySelector('.remove-round-btn').addEventListener('click', (e) => {
-if (confirm('Are you sure you want to remove this entire round?')) {
-e.target.closest('.round-block').remove();
-}
-});
-if (round.pairs && round.pairs.length > 0) {
-round.pairs.forEach(pair => {
-addPairToForm(currentPairsContainer, pair);
-});
-} else {
-addPairToForm(currentPairsContainer);
-}
-};
-const resetSetCreator = () => {
-currentSetId = null;
-['set-title-th', 'set-title-en', 'set-category-th', 'set-image-url'].forEach(id => document.getElementById(id).value = '');
-roundsContainer.innerHTML = '';
-addRoundToForm();
-};
-// [!!!] นี่คือฟังก์ชัน Save ที่แก้ไข "Bug คู่ว่าง" แล้ว [!!!]
-document.getElementById('save-set-btn').addEventListener('click', async (e) => {
-const btn = e.target;
-btn.disabled = true;
-btn.textContent = "Saving...";
-const title_th = document.getElementById('set-title-th').value.trim();
-const title_en = document.getElementById('set-title-en').value.trim();
-if (!title_th && !title_en) {
-showAlert('กรุณาใส่ชื่อชุดคำถาม (อย่างน้อย 1 ภาษา)');
-btn.disabled = false; btn.textContent = "Save Set"; return;
-}
-const allRoundsData = [];
-const roundBlocks = roundsContainer.querySelectorAll('.round-block');
-if (roundBlocks.length === 0) {
-showAlert('กรุณาเพิ่มอย่างน้อย 1 รอบ');
-btn.disabled = false; btn.textContent = "Save Set"; return;
-}
-for (let i = 0; i < roundBlocks.length; i++) {
-const roundBlock = roundBlocks[i];
-const conceptInput = roundBlock.querySelector('.round-concept').value.trim();
-const concept = conceptInput ? conceptInput : `Round ${i + 1}`;
-const pairsInRound = [];
-const pairBlocks = roundBlock.querySelectorAll('.pair-block');
-for (let j = 0; j < pairBlocks.length; j++) {
-const pairBlock = pairBlocks[j];
-const pairData = {
-qText: {
-th: pairBlock.querySelector('.pair-qText-th').value.trim(),
-en: pairBlock.querySelector('.pair-qText-en').value.trim()
-},
-aText: {
-th: pairBlock.querySelector('.pair-aText-th').value.trim(),
-en: pairBlock.querySelector('.pair-aText-en').value.trim()
-},
-qId: `q${j + 1}`,
-aId: `a${j + 1}`
-};
-// [FIX 1] - ถ้าคู่ว่างเปล่า ให้ข้ามไปเลย
-if (!pairData.qText.th && !pairData.qText.en && !pairData.aText.th && !pairData.aText.en) {
-continue;
-}
-// [FIX 2] - (สำคัญ) ถ้ามีแค่ฝั่งใดฝั่งหนึ่ง ให้แจ้งเตือน (นี่คือ Bug ที่คุณเจอ)
-if ((!pairData.qText.th && !pairData.qText.en) || (!pairData.aText.th && !pairData.aText.en)) {
-showAlert(`รอบที่ ${i+1}, คู่ที่ ${j+1} ต้องมีข้อความอย่างน้อย 1 ภาษา (ทั้ง 2 การ์ด)`);
-btn.disabled = false; btn.textContent = "Save Set"; return;
-}
-pairsInRound.push(pairData);
-}
-// [FIX 3] - (สำคัญ) ตรวจสอบว่า "หลัง" จากข้ามคู่ที่ว่างเปล่าแล้ว 'pairsInRound' กลายเป็น Array ว่างหรือไม่
-if (pairsInRound.length === 0) {
-showAlert(`รอบที่ ${i+1} ต้องมีอย่างน้อย 1 คู่ (ที่กรอกข้อมูลแล้ว)`);
-btn.disabled = false; btn.textContent = "Save Set"; return;
-}
-allRoundsData.push({
-concept: { th: concept, en: concept },
-pairs: pairsInRound
-});
-}
-const manualImageUrl = document.getElementById('set-image-url').value.trim();
-const selectedImageUrl = manualImageUrl
-? manualImageUrl
-: DEFAULT_COVER_IMAGES[Math.floor(Math.random() * DEFAULT_COVER_IMAGES.length)];
-const setData = {
-title: {th: title_th, en: title_en},
-category: {th: document.getElementById('set-category-th').value.trim()},
-imageUrl: selectedImageUrl,
-rounds: allRoundsData,
-};
-//  ⭐  เพิ่ม debug log
-console.log("=== Saving Quiz Data ===");
-console.log("Quiz ID:", currentSetId);
-console.log("Data:", JSON.stringify(setData, null, 2));
 
-try {
-// (index.js ของคุณรองรับ 'rounds' อยู่แล้ว)
-const saveFunction = functions.httpsCallable('saveMatchQuiz');
-await saveFunction({quizId: currentSetId, quizData: setData});
-showAlert(currentSetId ? 'อัปเดตชุดคำถามสำเร็จ!' : 'สร้างชุดคำถามสำเร็จ!');
-viewMySets();
-} catch (error) {
-console.error("Error saving set:", error);
-showAlert('เกิดข้อผิดพลาด: ' + error.message); // Error นี้จะมาจาก Server (ถ้ามี)
-} finally {
-btn.disabled = false; btn.textContent = "Save Set";
-}
-});
-// ---
-// Remark: [SECTION 2: View My Sets - แก้ไขเล็กน้อย]
-// ---
-const viewMySets = async () => {
-showScreen('my-sets-screen');
-const listEl = document.getElementById('my-sets-list');
-listEl.innerHTML = '<p>Loading sets...</p>';
-try {
-const q = db.collection(QUIZZES_COLLECTION).orderBy("createdAt", "desc");
-const querySnapshot = await q.get();
-if (querySnapshot.empty) {
-listEl.innerHTML = '<p class="col-span-full text-center">คุณยังไม่ได้สร้างชุดคำถามจับคู่</p>';
-return;
-}
-listEl.innerHTML = '';
-querySnapshot.forEach(docSnap => {
-const set = docSnap.data();
-const setId = docSnap.id;
-const lang = 'th';
-const titleText = getTextInLanguage(set.title, lang) || 'N/A';
-const categoryText = getTextInLanguage(set.category, lang);
-let totalPairs = 0;
-if (set.rounds && Array.isArray(set.rounds)) {
-totalPairs = set.rounds.reduce((sum, round) => sum + (round.pairs ? round.pairs.length : 0), 0);
-} else if (set.pairs && Array.isArray(set.pairs)) {
-totalPairs = set.pairs.length; // รองรับข้อมูลเก่า
-}
-const setCard = document.createElement('div');
-setCard.className = 'relative quiz-card bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105';
-setCard.innerHTML = `
-<div class="w-full h-32 bg-gray-200 flex items-center justify-center bg-cover bg-center"
-style="${set.imageUrl ? `background-image: url('${set.imageUrl}');` : ''}">
-${set.imageUrl ? '' : '<i class="fas fa-lock-open text-gray-400 text-4xl"></i>'}
-</div>
-<div class="p-4 flex-grow flex flex-col">
-<div class="flex gap-1 mb-2">
-<button data-id="${setId}" class="edit-set-btn text-xs bg-yellow-500 text-white px-2 py-1 rounded-md hover:bg-yellow-600">Edit</button>
-<button data-id="${setId}" class="delete-set-btn text-xs bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600">Delete</button>
-<button data-id="${setId}" data-title='${JSON.stringify(set.title)}' class="reports-set-btn text-xs bg-cyan-500 text-white px-2 py-1 rounded-md hover:bg-cyan-600">Reports</button>
-</div>
-${categoryText ? `<span class="text-sm font-semibold text-indigo-500 mb-1">${categoryText}</span>` : ''}
-<h3 class="text-lg font-bold mb-2 text-gray-800">${titleText}</h3>
-<div class="flex justify-between items-center text-xs text-gray-500 border-t pt-3 mt-auto">
-<span class="flex items-center gap-1.5"><i class="fas fa-arrows-alt-h"></i>${totalPairs} Pairs (${set.rounds ? set.rounds.length : 0} Rounds)</span>
-<span class="flex items-center gap-1.5"><i class="fas fa-users"></i>${set.playCount || 0} Plays</span>
-</div>
-</div>
-<div class="p-3 bg-gray-50 grid grid-cols-1">
-<button data-id="${setId}" class="host-set-btn w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors ${!set.rounds ? 'opacity-50 cursor-not-allowed' : ''}"
-${!set.rounds ? 'disabled' : ''}>
-<i class="fas fa-play mr-2"></i>Start Game
-</button>
-</div>
-`;
-listEl.appendChild(setCard);
-});
-listEl.querySelectorAll('.host-set-btn:not([disabled])').forEach(btn => btn.addEventListener('click', (e) => hostGame(e.target.dataset.id)));
-listEl.querySelectorAll('.edit-set-btn').forEach(btn => btn.addEventListener('click', (e) => editSet(e.target.dataset.id)));
-listEl.querySelectorAll('.delete-set-btn').forEach(btn => btn.addEventListener('click', (e) => deleteSet(e.target.dataset.id)));
-listEl.querySelectorAll('.reports-set-btn').forEach(btn => btn.addEventListener('click', (e) => viewReports(e.target.dataset.id, JSON.parse(e.target.dataset.title))));
-} catch (error) {
-console.error("Error loading sets:", error);
-listEl.innerHTML = '<p class="text-red-500 col-span-full">Error loading sets.</p>';
-}
-};
-const editSet = async (setId) => {
-try {
-const setDoc = await db.collection(QUIZZES_COLLECTION).doc(setId).get();
-if (!setDoc.exists) {
-return showAlert('ไม่พบชุดคำถามนี้');
-}
-const set = setDoc.data();
-resetSetCreator();
-currentSetId = setId;
-document.getElementById('set-title-th').value = getTextInLanguage(set.title, 'th');
-document.getElementById('set-title-en').value = getTextInLanguage(set.title, 'en');
-document.getElementById('set-category-th').value = getTextInLanguage(set.category, 'th');
-document.getElementById('set-image-url').value = set.imageUrl || '';
-roundsContainer.innerHTML = '';
-if (set.rounds && set.rounds.length > 0) {
-set.rounds.forEach(round => {
-addRoundToForm(round);
-});
-} else if (set.pairs && set.pairs.length > 0) {
-showAlert('This is an old quiz format. Converting to 1-Round format.');
-addRoundToForm({ concept: 'Imported Round 1', pairs: set.pairs });
-} else {
-addRoundToForm();
-}
-showScreen('set-creator-screen');
-} catch (error) {
-console.error("Error in editSet:", error);
-showAlert('Error loading set for edit: ' + error.message);
-}
-};
-const deleteSet = async (setId) => {
-if (!confirm('คุณแน่ใจหรือไม่ที่จะลบชุดคำถามนี้? (การกระทำนี้ยกเลิกไม่ได้)')) return;
-try {
-const deleteFunction = functions.httpsCallable('deleteMatchQuiz');
-await deleteFunction({quizId: setId});
-showAlert('ลบชุดคำถามสำเร็จ');
-viewMySets();
-} catch (error) {
-console.error("Error deleting set:", error);
-showAlert('เกิดข้อผิดพลาด: ' + error.message);
-}
-};
-// ---
-// Remark: [SECTION 3 & 4: Host Game & Report Logic]
-// [!!!] นี่คือส่วนโค้ดที่ "แก้ไข" ให้รองรับ Multi-Round [!!!]
-// ---
-let hostTimerInterval = null;
-const hostGame = async (quizId) => {
-showScreen('host-lobby-screen');
-document.getElementById('player-list').innerHTML = '';
-document.getElementById('player-count').textContent = '0';
-document.getElementById('start-game-btn').disabled = true;
-try {
-const createSessionFunc = functions.httpsCallable('createMatchSession');
-const result = await createSessionFunc({quizId: quizId});
-const {sessionId, pin} = result.data;
-currentGameSessionId = sessionId;
-document.getElementById('game-pin-display').textContent = pin;
-listenToLobbyPlayers(sessionId);
-listenToHostGameSession(sessionId, quizId);
-} catch (error) {
-console.error("Error hosting game:", error);
-showAlert('Failed to create game room: ' + error.message);
-showScreen('my-sets-screen');
-}
-};
-const listenToLobbyPlayers = (sessionId) => {
-const playersRef = db.collection(SESSIONS_COLLECTION).doc(sessionId).collection('players');
-if (playersUnsubscribe) playersUnsubscribe();
-playersUnsubscribe = playersRef.onSnapshot((snapshot) => {
-const playerList = document.getElementById('player-list');
-playerList.innerHTML = '';
-snapshot.docs.forEach(doc => {
-const playerEl = document.createElement('div');
-playerEl.className = 'bg-gray-200 p-2 rounded-md truncate';
-playerEl.textContent = doc.data().name;
-playerList.appendChild(playerEl);
-});
-document.getElementById('player-count').textContent = snapshot.size;
-document.getElementById('start-game-btn').disabled = snapshot.size < 2;
-});
-};
-document.getElementById('start-game-btn').addEventListener('click', async () => {
-document.getElementById('start-game-btn').disabled = true;
-try {
-const startGameFunc = functions.httpsCallable('startGame');
-await startGameFunc({sessionId: currentGameSessionId});
-} catch (error) {
-showAlert('Error starting game: ' + error.message);
-document.getElementById('start-game-btn').disabled = false;
-}
-});
-document.getElementById('next-round-btn').addEventListener('click', async (e) => {
-const btn = e.target;
-btn.disabled = true;
-btn.textContent = "Starting...";
-try {
-const startGameFunc = functions.httpsCallable('startGame');
-await startGameFunc({sessionId: currentGameSessionId});
-} catch (error) {
-if (!error.message.includes("Reached max rounds")) {
-showAlert('Error starting next round: ' + error.message);
-}
-}
-});
-const listenToHostGameSession = (sessionId, quizId) => {
-const gameRef = db.collection(SESSIONS_COLLECTION).doc(sessionId);
-if (gameUnsubscribe) gameUnsubscribe();
-gameUnsubscribe = gameRef.onSnapshot(async (docSnap) => {
-if (!docSnap.exists) {
-if (countdownTimer) clearInterval(countdownTimer);
-return;
-}
-const game = docSnap.data();
-const roundDisplay = document.getElementById('current-round-display');
-const nextRoundBtn = document.getElementById('next-round-btn');
-const endGameBtn = document.getElementById('end-game-btn');
-if (game.status === 'round-in-progress') {
-showScreen('leaderboard-screen');
-roundDisplay.textContent = `Round ${game.currentRound} / ${game.totalRounds} (${getTextInLanguage(game.currentRoundConcept, 'th') || getTextInLanguage(game.currentRoundConcept, 'en')})`;
-nextRoundBtn.style.display = 'none';
-endGameBtn.style.display = 'block';
-updateHostLeaderboard(game);
-startHostTimer(game.gameStartTime);
-} else if (game.status === 'finished') {
-    // [!!! MODIFIED SECTION (PODIUM LOGIC) !!!]
-    if (countdownTimer) clearInterval(countdownTimer);
-    
-    // 1. [NEW] แสดง Podium
-    showScreen('leaderboard-screen');
-    document.getElementById('final-podium-container').classList.remove('hidden');
-    document.getElementById('leaderboard-list').style.display = 'none'; // ซ่อนตาราง Live
-    document.getElementById('leaderboard-list-container').style.display = 'block'; // แสดง List อันดับ 4+
-    
-    // 2. [NEW] ซ่อนปุ่ม/ข้อความที่ไม่ใช้
-    document.getElementById('host-timer-display').style.display = 'none';
-    document.getElementById('current-round-display').style.display = 'none';
-    document.getElementById('next-round-btn').style.display = 'none';
+        <div id="set-creator-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-6">Create / Edit Lock & Key Set</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b pb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Set Title (TH)</label>
+                        <input type="text" id="set-title-th" placeholder="ชื่อชุดคำถาม" class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Set Title (EN)</label>
+                        <input type="text" id="set-title-en" placeholder="Set Title" class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Category (TH)</label>
+                        <input type="text" id="set-category-th" placeholder="หมวดหมู่ (เช่น Safety, HR)" class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Image URL (Optional)</label>
+                        <input type="url" id="set-image-url" placeholder="URL รูปภาพ (เช่น https://example.com/image.jpg)" class="w-full p-3 border rounded-lg mt-1">
+                    </div>
+                </div>
 
-    // 3. [NEW] เรียงคะแนน Leaderboard
-    const finalLeaderboard = game.leaderboard.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+                <h3 class="text-xl font-bold mb-4">Game Rounds</h3>
+                <div id="rounds-container" class="space-y-6"></div>
+                
+                <button id="add-round-btn" class="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition w-full">
+                    <i class="fas fa-plus mr-2"></i>เพิ่มรอบ (Add Round)
+                </button>
 
-    // 4. [NEW] วาด Podium และ List
-    renderPodium(finalLeaderboard.slice(0, 3));
-    renderLeaderboardList(finalLeaderboard.slice(3), 'leaderboard-list-others');
-
-    // 5. [NEW] เปลี่ยนปุ่ม End Game เป็น View Report
-    const endGameBtn = document.getElementById('end-game-btn');
-    endGameBtn.textContent = "View Report";
-    endGameBtn.style.display = 'block';
-    
-    // [สำคัญ] ลบ event listener เก่า (ถ้ามี) แล้วสร้างใหม่
-    const newEndGameBtn = endGameBtn.cloneNode(true);
-    endGameBtn.parentNode.replaceChild(newEndGameBtn, endGameBtn);
-    
-    newEndGameBtn.addEventListener('click', async () => {
-        // (โค้ดเดิมที่เคยอยู่ที่นี่)
-        const quizDoc = await db.collection(QUIZZES_COLLECTION).doc(quizId).get();
-        viewReports(quizId, quizDoc.data().title || {});
-    });
-    // [!!! END OF MODIFIED SECTION !!!]
-
-} else if (game.status === 'round-finished') {
-if (countdownTimer) clearInterval(countdownTimer);
-document.getElementById('host-timer-display').innerText = "00:00";
-showAlert('จบรอบ! รอเริ่มรอบถัดไป...');
-roundDisplay.textContent = `Finished Round ${game.currentRound} / ${game.totalRounds}. Waiting for Host...`;
-const btn = nextRoundBtn;
-btn.disabled = false;
-if (game.currentRound >= game.totalRounds) {
-btn.textContent = "Finish Game & View Report";
-} else {
-btn.textContent = `Start Round ${game.currentRound + 1}`;
-}
-btn.style.display = 'block';
-endGameBtn.style.display = 'none';
-}
-});
-};
-const updateHostLeaderboard = (game) => {
-const listEl = document.getElementById('leaderboard-list');
-listEl.innerHTML = '';
-const players = game.leaderboard || [];
-players.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-players.forEach(player => {
-const row = document.createElement('tr');
-if (player.status === 'MATCHED') row.className = 'bg-green-50';
-if (player.status === 'WRONG_MATCH') row.className = 'bg-red-50';
-row.innerHTML = `
-<td class="p-2">${player.name}</td>
-<td class="p-2 status-${player.status}">${player.status}</td>
-<td class="p-2 font-bold">${player.totalScore || 0}</td>
-`;
-listEl.appendChild(row);
-});
-};
-const startHostTimer = (gameStartTime) => {
-if (countdownTimer) clearInterval(countdownTimer);
-const timerEl = document.getElementById('host-timer-display');
-countdownTimer = setInterval(() => {
-const now = Math.floor(Date.now() / 1000);
-const timeElapsed = now - gameStartTime;
-const timeLeft = Math.max(0, TIME_LIMIT_SECONDS - timeElapsed);
-if (timeLeft <= 0) {
-clearInterval(countdownTimer);
-timerEl.innerText = "00:00";
-} else {
-const minutes = Math.floor(timeLeft / 60);
-const seconds = timeLeft % 60;
-timerEl.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-}, 1000);
-};
-
-// [!!! ADDED PODIUM FUNCTIONS !!!]
-const renderPodium = (top3) => {
-    const podiumEl = document.getElementById('final-podium');
-    podiumEl.innerHTML = '';
-    const podiumOrder = [1, 0, 2]; // [อันดับ 2, อันดับ 1, อันดับ 3]
-    const podiumItems = podiumOrder.map(rankIndex => top3[rankIndex]).filter(p => p);
-    podiumItems.forEach(player => {
-        if (!player) return;
-        const rank = top3.findIndex(p => p.uid === player.uid) + 1;
-        const podiumDiv = document.createElement('div');
-        podiumDiv.className = `podium-item podium-${rank}`;
-        podiumDiv.innerHTML = `
-            ${rank === 1 ? '<i class="fas fa-crown"></i>' : ''}
-            <div class="podium-rank">${rank}</div>
-            <div class="podium-name">${player.name}</div>
-            <div class="podium-score">${player.totalScore || 0} Score</div>
-        `;
-        podiumEl.appendChild(podiumDiv);
-    });
-
-    setTimeout(() => {
-        sfx.applause.play().catch(() => { });
-        document.querySelectorAll('.podium-item').forEach(el => el.classList.add('animate'));
-        var duration = 5 * 1000;
-        var animationEnd = Date.now() + duration;
-        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-        function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-        var interval = setInterval(function () {
-            var timeLeft = animationEnd - Date.now();
-            if (timeLeft <= 0) return clearInterval(interval);
-            var particleCount = 50 * (timeLeft / duration);
-            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-        }, 250);
-    }, 100);
-};
-
-const renderLeaderboardList = (players, targetListId) => {
-    const listEl = document.getElementById(targetListId);
-    listEl.innerHTML = '';
-    if (players.length === 0) {
-        listEl.innerHTML = '<p class="text-center text-gray-500 mt-4">- No other players -</p>';
-        return;
-    }
-    players.forEach((player, i) => {
-        const rank = i + 4; // เริ่มจากอันดับ 4
-        const itemEl = document.createElement('div');
-        itemEl.className = 'flex justify-between items-center p-3 rounded-lg bg-gray-100';
-        itemEl.innerHTML = `
-            <div class="flex items-center gap-3">
-                <span class="font-bold w-8 text-center text-lg">${rank}</span>
-                <span>${player.name}</span>
+                <div class="mt-6 flex gap-4">
+                    <button id="save-set-btn" class="flex-1 bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400">
+                        <i class="fas fa-save mr-2"></i>Save Set
+                    </button>
+                    <button class="back-btn flex-1 bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 transition">Cancel</button>
+                </div>
             </div>
-            <span class="font-bold text-indigo-600">${player.totalScore || 0} Score</span>
-        `;
-        listEl.appendChild(itemEl);
-    });
-};
-// [!!! END OF ADDED PODIUM FUNCTIONS !!!]
+        </div>
 
-document.getElementById('end-game-btn').addEventListener('click', async () => {
-if (!confirm('แน่ใจหรือไม่ที่จะจบเกมนี้? (ผู้เล่นทุกคนจะถูกตัดจบ)')) return;
-if (countdownTimer) clearInterval(countdownTimer);
-try {
-const resetFunc = functions.httpsCallable('resetGame');
-await resetFunc({sessionId: currentGameSessionId});
-} catch (error) {
-showAlert('Error ending game: ' + error.message);
-}
-});
-// --- Remark: Section 4: Report Logic (แก้ไขการแสดงผล) ---
-const viewReports = async (setId, setTitle) => {
-currentSetForHistory = {id: setId, title: setTitle};
-showScreen('history-screen');
-const lang = 'th';
-document.getElementById('history-set-title').textContent = getTextInLanguage(setTitle, lang);
-const listEl = document.getElementById('history-list');
-listEl.innerHTML = '<p>Loading History...</p>';
-try {
-// [!!! FIXED QUERY !!!] - ลบ orderBy ออก หรือไปสร้าง Index ใน Firebase
-const q = db.collection(REPORTS_COLLECTION)
-.where("quizId", "==", setId);
-// .orderBy("playedAt", "desc"); // <-- บรรทัดนี้ทำให้ Error ถ้าไม่มี Index
+        <div id="my-sets-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-6">My Matching Sets</h2>
+                <div id="my-sets-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <button class="back-btn mt-8 text-gray-500 hover:text-gray-700">&larr; Back</button>
+            </div>
+        </div>
 
-const querySnapshot = await q.get();
-if (querySnapshot.empty) {
-listEl.innerHTML = '<p>No reports available for this set.</p>';
-return;
-}
-listEl.innerHTML = '';
+        <div id="host-lobby-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <p class="text-gray-600">Players, enter this code to join:</p>
+                <div class="my-4 bg-indigo-600 text-white p-4 rounded-lg">
+                    <p class="text-lg">Game PIN</p>
+                    <p id="game-pin-display" class="text-6xl font-bold tracking-widest">----</p>
+                </div>
+                <h3 class="text-2xl font-bold mt-6 mb-4">Joined Players (<span id="player-count">0</span>)</h3>
+                <div id="player-list" class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center"></div>
+                
+                <button id="start-game-btn" class="mt-8 w-full bg-red-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-600 transition text-2xl shadow-lg disabled:bg-gray-400" disabled>
+                    Start Game!
+                </button>
+                <button class="back-btn mt-4 text-gray-500 hover:text-gray-700">&larr; Cancel and Back</button>
+            </div>
+        </div>
 
-// [!!! FIXED QUERY !!!] - เรียงลำดับด้วย JS แทน
-const sortedDocs = querySnapshot.docs.sort((a, b) => {
-    const timeA = a.data().playedAt.toDate();
-    const timeB = b.data().playedAt.toDate();
-    return timeB - timeA; // B - A = มากไปน้อย (ล่าสุดก่อน)
-});
+        <div id="leaderboard-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl text-center">
+                <h2 class="text-3xl font-bold mb-4">Live Leaderboard</h2>
+                <div id="host-timer-display" class="text-4xl font-bold text-red-500 mb-6">--:--</div>
+                <p id="current-round-display" class="text-xl font-semibold mb-4 text-indigo-600">Loading Round...</p>
+                
+                <table class="w-full text-left">
+                    <thead>
+                        <tr>
+                            <th class="p-2 bg-gray-100">Name</th>
+                            <th class="p-2 bg-gray-100">Status</th>
+                            <th class="p-2 bg-gray-100">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-list"></tbody>
+                </table>
 
-sortedDocs.forEach(docSnap => { // <-- เปลี่ยนมา loop `sortedDocs`
-const report = docSnap.data();
-const d = report.playedAt.toDate();
-const dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-const itemEl = document.createElement('div');
-itemEl.className = 'report-item bg-gray-100 p-3 rounded-lg flex justify-between items-center';
-itemEl.innerHTML = `
-<div class="flex-grow cursor-pointer hover:bg-gray-200 -m-3 p-3 rounded-lg report-clickable-area">
-<p class="font-bold">${report.sessionName}</p>
-<p class="text-sm text-gray-500">${dateString} - ${report.summary.participantsCount} Players</p>
-</div>
-<button data-id="${docSnap.id}" class="delete-report-btn ml-4 bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs hover:bg-red-600">
-<i class="fas fa-trash"></i>
-</button>
-`;
-itemEl.querySelector('.report-clickable-area').addEventListener('click', () => renderReportScreen(report));
-itemEl.querySelector('.delete-report-btn').addEventListener('click', (e) => {
-e.stopPropagation();
-deleteReport(e.target.closest('button').dataset.id);
-});
-listEl.appendChild(itemEl);
-});
-} catch (error) {
-console.error("Error loading reports:", error);
-// [!!! FIXED QUERY !!!] - เพิ่มคำแนะนำเรื่อง Index
-listEl.innerHTML = '<p class="text-red-500">Error loading reports. (Ensure a Firestore Index exists for quizId and playedAt)</p>';
-}
-};
-const deleteReport = async (reportId) => {
-if (!confirm('คุณแน่ใจหรือไม่ที่จะลบ Report นี้?')) return;
-try {
-await db.collection(REPORTS_COLLECTION).doc(reportId).delete();
-showAlert('ลบ Report สำเร็จ');
-viewReports(currentSetForHistory.id, currentSetForHistory.title);
-} catch (error) {
-console.error("Error deleting report:", error);
-showAlert('ลบ Report ล้มเหลว');
-}
-};
-    // 1. ฟังก์ชัน Share Email (ปรับจาก Quiz Page)
-    const shareReportByEmail = (report) => {
-        const recipientEmail = prompt("Please enter recipient email (use commas to separate multiple emails ,):");
-        if (recipientEmail) {
-            const lang = 'th';
-            const subject = `Summary Lock & Key: ${getTextInLanguage(report.quizTitle, lang)} (${report.sessionName})`;
+                <div id="final-podium-container" class="hidden mt-4">
+                    <h2 class="text-3xl font-bold mb-4 text-center"> 🏆  Final Results  🏆 </h2>
+                    <div id="final-podium" class="podium-container"></div>
+                </div>
+                
+                <div id="leaderboard-list-container" class="hidden mt-6">
+                    <div id="leaderboard-list-others" class="space-y-2"></div>
+                </div>
 
-            let body = `Game Results Summary Lock & Key:\n\n`;
-            body += `Title: ${getTextInLanguage(report.quizTitle, lang)}\n`;
-            body += `Session: ${report.sessionName}\n`;
-            body += `------------------------------------\n`;
-            body += `Summary:\n`;
-            body += `- Participants: ${report.summary.participantsCount} Participants\n`;
+                <button id="next-round-btn" class="mt-8 w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition text-2xl shadow-lg" style="display: none;">
+                    <i class="fas fa-arrow-right mr-2"></i>Start Next Round
+                </button>
+                
+                <button id="end-game-btn" class="mt-8 w-full bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 transition text-xl">
+                    End Game & View Report
+                </button>
+            </div>
+        </div>
 
-            // [!!!] เพิ่ม Accuracy และ Rounds ที่คำนวณใหม่
-            if (report.summary.accuracy) {
-                 body += `- Accuracy: ${report.summary.accuracy}%\n`;
-            } else {
-                // Fallback for old reports
-                body += `- Correct Pairs: ${report.summary.correctMatches}\n`;
+        <div id="history-screen" class="screen">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold mb-1">Lock & Key Game History</h2>
+                <p class="text-gray-500 mb-6">For: <span id="history-set-title" class="font-semibold"></span></p>
+                <div id="history-list" class="space-y-3"></div>
+                <button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to Set List</button>
+            </div>
+        </div>
+
+        <div id="report-screen" class="screen">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex-grow">
+                        <h2 id="report-set-title" class="text-2xl md:text-3xl font-bold">Report Title</h2>
+                        <p id="report-session-name" class="text-gray-500">Session Name</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-2">
+                        <span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">Completed</span>
+                        <button id="share-report-btn" class="bg-blue-500 text-white font-bold py-1 px-3 rounded-md text-sm hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-envelope mr-1"></i> Share
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div class="bg-amber-100 text-amber-900 p-3 md:p-5 rounded-xl shadow-md">
+                        <p class="font-semibold">Accuracy</p>
+                        <p id="report-summary-accuracy" class="text-3xl font-bold">-%</p>
+                    </div>
+                    <div class="bg-blue-100 text-blue-900 p-3 md:p-5 rounded-xl shadow-md">
+                        <p class="font-semibold">Completion</p>
+                        <p id="report-summary-completion" class="text-3xl font-bold">-%</p>
+                    </div>
+                    <div class="bg-violet-100 text-violet-900 p-3 md:p-5 rounded-xl shadow-md">
+                        <p class="font-semibold">Participants</p>
+                        <p id="report-summary-participants" class="text-3xl font-bold">-</p>
+                    </div>
+                    <div class="bg-teal-100 text-teal-900 p-3 md:p-5 rounded-xl shadow-md">
+                        <p class="font-semibold">Rounds</p>
+                        <p id="report-summary-questions" class="text-3xl font-bold">-</p>
+                    </div>
+                </div>
+
+                <div class="border-b border-gray-200 mb-4">
+                    <nav class="flex space-x-4" aria-label="Tabs">
+                        <button id="tab-btn-participants" class="tab-btn active font-medium px-1 py-2 border-b-2 border-transparent">Participants</button>
+                        <button id="tab-btn-questions" class="tab-btn font-medium px-1 py-2 border-b-2 border-transparent">Rounds (Questions)</button>
+                    </nav>
+                </div>
+                
+                <div id="tab-content-participants" class="tab-content"></div>
+                <div id="tab-content-questions" class="tab-content hidden"></div>
+                
+                <button class="back-btn mt-6 text-gray-500 hover:text-gray-700">&larr; Back to history</button>
+            </div>
+        </div>
+
+        <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm">
+                <p id="alert-message" class="mb-4"></p>
+                <button id="alert-ok-btn" class="bg-indigo-500 text-white px-4 py-2 rounded-lg">OK</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
+
+    <script>
+        // --- Firebase Config ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu9xCpoV_Ei0izGWuch9bPNOLU8nu7vBg",
+            authDomain: "trc-funny-quiz.firebaseapp.com",
+            projectId: "trc-funny-quiz",
+            storageBucket: "trc-funny-quiz.appspot.com",
+            messagingSenderId: "323647073409",
+            appId: "1:323647073409:web:1445589b1bc6eb77bcf180"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        db.settings({ experimentalForceLongPolling: true });
+        const functions = firebase.functions();
+        const auth = firebase.auth();
+        const {serverTimestamp, increment} = firebase.firestore.FieldValue;
+
+        // --- Path & Constants ---
+        const appId = 'trc-funny-quiz';
+        const DATA_PATH_PREFIX = `/artifacts/${appId}/public/data`;
+        const QUIZZES_COLLECTION = `${DATA_PATH_PREFIX}/matchingQuizzes`;
+        const SESSIONS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameSessions`;
+        const REPORTS_COLLECTION = `${DATA_PATH_PREFIX}/matchingGameReports`;
+        const DEFAULT_COVER_IMAGES = [
+            'https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg',
+            'https://images.pexels.com/photos/356079/pexels-photo-356079.jpeg',
+            'https://images.pexels.com/photos/3244513/pexels-photo-3244513.jpeg',
+            'https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg'
+        ];
+        // [V4.5] Storage Key
+        const HOST_SESSION_KEY = 'trc_host_session_v4_5';
+
+        // --- Global State ---
+        const sfx = { applause: new Audio("sfx-applause.mp3") };
+        let userId = null;
+        let currentSetId = null;
+        let currentGameSessionId = null;
+        let currentSetForHistory = null;
+        let gameUnsubscribe = null;
+        let playersUnsubscribe = null;
+        let countdownTimer = null;
+        const TIME_LIMIT_SECONDS = 180;
+
+        // --- Utility Functions ---
+        const screens = document.querySelectorAll('.screen');
+        const alertModal = document.getElementById('alert-modal');
+        const alertMessage = document.getElementById('alert-message');
+
+        const showScreen = (screenId) => {
+            screens.forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        };
+
+        const showAlert = (message) => {
+            alertMessage.textContent = message;
+            alertModal.style.display = 'flex';
+        };
+        document.getElementById('alert-ok-btn').addEventListener('click', () => {
+            alertModal.style.display = 'none';
+        });
+
+        const getTextInLanguage = (data, lang = 'th') => {
+            if (typeof data === 'object' && data !== null) {
+                if (data[lang]) return data[lang];
+                if (lang === 'th' && data.en) return data.en;
+                if (lang === 'en' && data.th) return data.th;
+                return data.th || data.en || '';
             }
-            if (report.summary.questionsCount) {
-                 body += `- Rounds: ${report.summary.questionsCount} Rounds\n\n`;
+            if (typeof data === 'string') return data;
+            return '';
+        };
+
+        // --- [V4.5] Host Auto-Reconnect & Safety Logic ---
+        
+        // 1. Anti-Flee: Prevent accidental close
+        window.addEventListener('beforeunload', (e) => {
+            if (currentGameSessionId) {
+                e.preventDefault();
+                e.returnValue = ''; 
             }
+        });
 
-            body += `Leaderboard:\n`;
-            report.participants.forEach((p, index) => {
-                // [!!!] เพิ่ม Accuracy (ถ้ามี)
-                const accuracyStat = p.accuracy ? ` (Accuracy ${p.accuracy}%)` : '';
-                body += `${index + 1}. ${p.name} - ${p.totalScore} Score${accuracyStat}\n`;
-            });
-            body += `\n------------------------------------\n`;
+        // 2. Save/Clear Session
+        const saveHostSession = (sessionId, quizId) => {
+            localStorage.setItem(HOST_SESSION_KEY, JSON.stringify({
+                sessionId, quizId, timestamp: Date.now()
+            }));
+        };
 
-            // [!!!] ตรวจสอบว่ามี quizRounds (ข้อมูลใหม่) หรือไม่
-            if (report.quizRounds && report.questionsData) {
-                body += `Rounds Summary:\n\n`;
-                report.quizRounds.forEach((round, index) => {
-                    const roundNum = index + 1;
-                    const roundConcept = getTextInLanguage(round.concept, lang);
-                    const questionData = report.questionsData.find(q => q.round === roundNum);
+        const clearHostSession = () => {
+            localStorage.removeItem(HOST_SESSION_KEY);
+        };
 
-                    body += `${roundNum}. ${roundConcept} (Accuracy ${questionData.accuracy}%)\n`;
-                    round.pairs.forEach(pair => {
-                        body += `  ✔️  ${getTextInLanguage(pair.qText, lang)} <-> ${getTextInLanguage(pair.aText, lang)}\n`;
-                    });
-                    body += `\n`;
-                });
-            }
-
-            body += `\nCreated By TRC Funny Quiz`;
+        // 3. Reconnect Logic
+        const tryHostReconnect = () => {
+            const saved = localStorage.getItem(HOST_SESSION_KEY);
+            if (!saved) return;
+            
             try {
-                navigator.clipboard.writeText(body);
-                showAlert('Report Copied Successfully! Paste It in Your Email');
-                const encodedSubject = encodeURIComponent(subject);
-                const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}`;
-                window.location.href = mailtoLink;
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-                showAlert('You Cannot Copy This Content');
-            }
-        }
-    };
-
-    // 2. ฟังก์ชันวาดแท็บ Participants (ปรับจาก Quiz Page)
-    const renderParticipants = (participants, totalRounds) => {
-        const container = document.getElementById('tab-content-participants');
-        container.innerHTML = '<div class="space-y-4"></div>';
-        const listEl = container.querySelector('.space-y-4');
-        if (!participants || participants.length === 0) {
-            listEl.innerHTML = '<p>No Participants Available</p>';
-            return;
-        }
-
-        participants.forEach(p => {
-            let progressBar = '';
-            // [!!!] ตรวจสอบว่ามี roundHistory (ข้อมูลใหม่) หรือไม่
-            if (p.roundHistory && totalRounds > 0) {
-                 for (let i = 1; i <= totalRounds; i++) {
-                    const roundResult = (p.roundHistory || []).find(h => h.round === i);
-                    let barClass = 'bg-gray-300'; // Not played / Spectator
-                    if (roundResult) {
-                        barClass = roundResult.isCorrect ? 'bg-green-500' : 'bg-red-500';
-                    }
-                    progressBar += `<div class="flex-1 h-2 ${barClass} rounded"></div>`;
+                const { sessionId, quizId, timestamp } = JSON.parse(saved);
+                // Check if session is too old (e.g. 3 hours)
+                if (Date.now() - timestamp > 3 * 60 * 60 * 1000) {
+                    clearHostSession();
+                    return;
                 }
+
+                console.log("Restoring Host Session:", sessionId);
+                currentGameSessionId = sessionId;
+                currentSetId = quizId;
+
+                // Start Listeners again
+                listenToLobbyPlayers(sessionId);
+                listenToHostGameSession(sessionId, quizId);
+
+                // Default show leaderboard/timer screen as it's the safest bet
+                // The listeners will adjust UI if needed
+                showScreen('leaderboard-screen');
+
+            } catch (e) {
+                console.error("Host reconnect failed", e);
+                clearHostSession();
+            }
+        };
+
+
+        // --- Auth & Navigation ---
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                userId = user.uid;
             } else {
-                // Fallback for old reports
-                let barClass = 'bg-gray-300';
-                if (p.status === 'MATCHED') barClass = 'bg-green-500';
-                if (p.status === 'WRONG_MATCH') barClass = 'bg-red-500';
-                progressBar = `<div class="w-full h-2 ${barClass} rounded-full" title="Status: ${p.status}"></div>`;
+                await auth.signInAnonymously();
+                userId = auth.currentUser.uid;
+            }
+            console.log("Host User ID:", userId);
+            
+            // [V4.5] Try Reconnect
+            tryHostReconnect();
+        });
+
+        document.querySelectorAll('.back-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const parentScreen = e.target.closest('.screen').id;
+                // Add logic to clear session if backing out from active game (optional)
+                // For now, we keep session unless 'End Game' is clicked.
+                
+                if (['set-creator-screen', 'my-sets-screen'].includes(parentScreen)) {
+                    showScreen('host-home-screen');
+                }
+                if (parentScreen === 'host-lobby-screen') {
+                    // Cancel Lobby
+                    clearHostSession();
+                    if(playersUnsubscribe) playersUnsubscribe();
+                    if(gameUnsubscribe) gameUnsubscribe();
+                    currentGameSessionId = null;
+                    showScreen('my-sets-screen');
+                }
+                if (parentScreen === 'history-screen') {
+                    showScreen('my-sets-screen');
+                }
+                if (parentScreen === 'report-screen') {
+                    showScreen('history-screen');
+                }
+            });
+        });
+
+        document.getElementById('create-set-btn').addEventListener('click', () => {
+            resetSetCreator();
+            showScreen('set-creator-screen');
+        });
+
+        document.getElementById('view-my-sets-btn').addEventListener('click', () => viewMySets());
+
+        // --- Set Creator (CRUD) ---
+        const roundsContainer = document.getElementById('rounds-container');
+        document.getElementById('add-round-btn').addEventListener('click', () => addRoundToForm());
+
+        const addPairToForm = (targetPairsContainer, pair = {qText: {th: '', en: ''}, aText: {th: '', en: ''}}) => {
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'pair-block bg-gray-50 p-4 rounded-lg mb-4 border grid grid-cols-1 md:grid-cols-2 gap-4 relative';
+            pairDiv.innerHTML = `
+                <button class="remove-pair-btn text-red-500 hover:text-red-700 font-bold text-xl absolute top-2 right-3">&times;</button>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Card 1 (TH)</label>
+                    <textarea class="pair-qText-th w-full p-2 border rounded-md" placeholder="ข้อความการ์ดใบที่ 1 (TH)">${getTextInLanguage(pair.qText, 'th')}</textarea>
+                    <label class="block text-sm font-bold text-gray-700 mt-2">Card 1 (EN)</label>
+                    <textarea class="pair-qText-en w-full p-2 border rounded-md" placeholder="Card 1 Text (EN)">${getTextInLanguage(pair.qText, 'en')}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700">Card 2 (TH) - (คู่กัน)</label>
+                    <textarea class="pair-aText-th w-full p-2 border rounded-md" placeholder="ข้อความการ์ดใบที่ 2 (TH)">${getTextInLanguage(pair.aText, 'th')}</textarea>
+                    <label class="block text-sm font-bold text-gray-700 mt-2">Card 2 (EN) - (The Pair)</label>
+                    <textarea class="pair-aText-en w-full p-2 border rounded-md" placeholder="Card 2 Text (EN)">${getTextInLanguage(pair.aText, 'en')}</textarea>
+                </div>
+            `;
+            targetPairsContainer.appendChild(pairDiv);
+            pairDiv.querySelector('.remove-pair-btn').addEventListener('click', (e) => e.target.closest('.pair-block').remove());
+        };
+
+        const addRoundToForm = (round = { concept: '', pairs: [] }) => {
+            const roundIndex = roundsContainer.children.length + 1;
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'round-block bg-white border-2 border-dashed border-blue-300 p-5 rounded-lg';
+            roundDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-lg font-bold text-blue-700">Round ${roundIndex}</h4>
+                    <button class="remove-round-btn text-red-500 hover:text-red-700 font-bold text-xl">&times; Remove Round</button>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Round Concept (TH/EN)</label>
+                    <input type="text" class="round-concept w-full p-2 border rounded-lg mt-1" 
+                           placeholder="เช่น ข้อ 1: ความรุนแรง" 
+                           value="${getTextInLanguage(round.concept, 'th') || getTextInLanguage(round.concept, 'en')}">
+                </div>
+                <div class="round-pairs-container border-t pt-4 mt-4 space-y-3"></div>
+                <button class="add-pair-to-round-btn mt-4 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition w-full">
+                    <i class="fas fa-plus mr-2"></i>เพิ่มคู่ (Add Pair to this Round)
+                </button>
+            `;
+            roundsContainer.appendChild(roundDiv);
+            const currentPairsContainer = roundDiv.querySelector('.round-pairs-container');
+            
+            roundDiv.querySelector('.add-pair-to-round-btn').addEventListener('click', () => {
+                addPairToForm(currentPairsContainer);
+            });
+            roundDiv.querySelector('.remove-round-btn').addEventListener('click', (e) => {
+                if (confirm('Are you sure you want to remove this entire round?')) {
+                    e.target.closest('.round-block').remove();
+                }
+            });
+
+            if (round.pairs && round.pairs.length > 0) {
+                round.pairs.forEach(pair => addPairToForm(currentPairsContainer, pair));
+            } else {
+                addPairToForm(currentPairsContainer);
+            }
+        };
+
+        const resetSetCreator = () => {
+            currentSetId = null;
+            ['set-title-th', 'set-title-en', 'set-category-th', 'set-image-url'].forEach(id => document.getElementById(id).value = '');
+            roundsContainer.innerHTML = '';
+            addRoundToForm();
+        };
+
+        document.getElementById('save-set-btn').addEventListener('click', async (e) => {
+            const btn = e.target;
+            btn.disabled = true;
+            btn.textContent = "Saving...";
+            
+            const title_th = document.getElementById('set-title-th').value.trim();
+            const title_en = document.getElementById('set-title-en').value.trim();
+            
+            if (!title_th && !title_en) {
+                showAlert('กรุณาใส่ชื่อชุดคำถาม (อย่างน้อย 1 ภาษา)');
+                btn.disabled = false; btn.textContent = "Save Set"; return;
             }
 
-            // [!!!] คำนวณ Accuracy (ถ้ามีข้อมูลใหม่)
-            const accuracy = p.accuracy ? p.accuracy : (p.status === 'MATCHED' ? 100 : 0);
-            const accuracyText = p.accuracy !== undefined ? `${accuracy}% (${p.correctCount}/${p.totalRounds})` : `(Last: ${p.status})`;
+            const allRoundsData = [];
+            const roundBlocks = roundsContainer.querySelectorAll('.round-block');
+            
+            if (roundBlocks.length === 0) {
+                showAlert('กรุณาเพิ่มอย่างน้อย 1 รอบ');
+                btn.disabled = false; btn.textContent = "Save Set"; return;
+            }
 
-            const itemEl = document.createElement('div');
-            itemEl.className = 'bg-gray-50 p-4 rounded-lg';
-            itemEl.innerHTML = `
-                <div class="flex justify-between items-center mb-2">
-                    <p class="font-bold">${p.name}</p>
-                    <div class="text-right">
-                        <p class="font-semibold text-lg">${p.totalScore || 0} <span class="text-sm font-normal text-gray-600">Score</span></p>
-                        <p class="text-sm text-gray-600">${accuracyText}</p>
-                    </div>
-                </div>
-                <div class="flex gap-1">${progressBar}</div>`;
-            listEl.appendChild(itemEl);
-        });
-    };
+            for (let i = 0; i < roundBlocks.length; i++) {
+                const roundBlock = roundBlocks[i];
+                const conceptInput = roundBlock.querySelector('.round-concept').value.trim();
+                const concept = conceptInput ? conceptInput : `Round ${i + 1}`;
+                
+                const pairsInRound = [];
+                const pairBlocks = roundBlock.querySelectorAll('.pair-block');
+                
+                for (let j = 0; j < pairBlocks.length; j++) {
+                    const pairBlock = pairBlocks[j];
+                    const pairData = {
+                        qText: {
+                            th: pairBlock.querySelector('.pair-qText-th').value.trim(),
+                            en: pairBlock.querySelector('.pair-qText-en').value.trim()
+                        },
+                        aText: {
+                            th: pairBlock.querySelector('.pair-aText-th').value.trim(),
+                            en: pairBlock.querySelector('.pair-aText-en').value.trim()
+                        },
+                        qId: `q${j + 1}`,
+                        aId: `a${j + 1}`
+                    };
 
-    // 3. ฟังก์ชันวาดแท็บ Questions (Rounds) (ปรับจาก Quiz Page)
-    const renderQuestions = (quizRounds, questionsData) => {
-        const container = document.getElementById('tab-content-questions');
-        container.innerHTML = '<div class="space-y-4"></div>';
-        const listEl = container.querySelector('.space-y-4');
-
-        // [!!!] ตรวจสอบว่ามี quizRounds (ข้อมูลใหม่) หรือไม่
-        if (!quizRounds || quizRounds.length === 0) {
-            listEl.innerHTML = '<p>No Rounds/Questions data available for this old report.</p>';
-            return;
-        }
-        const lang = 'th';
-
-        quizRounds.forEach((round, index) => {
-            const roundNum = index + 1;
-            const qData = questionsData.find(q => q.round === roundNum) || { correct: 0, incorrect: 0, accuracy: 0 };
-
-            const pairsHtml = round.pairs.map(pair => 
-                `<div class="flex items-center py-1">
-                    <i class="fas fa-check text-green-500 mr-2"></i>
-                    <p class="text-gray-700">${getTextInLanguage(pair.qText, lang)}</p>
-                    <i class="fas fa-exchange-alt text-gray-400 mx-2"></i>
-                    <p class="text-gray-700">${getTextInLanguage(pair.aText, lang)}</p>
-                </div>`
-            ).join('');
-
-            const totalAnswers = qData.correct + qData.incorrect;
-            const correctWidth = totalAnswers > 0 ? (qData.correct / totalAnswers) * 100 : 0;
-            const incorrectWidth = totalAnswers > 0 ? (qData.incorrect / totalAnswers) * 100 : 0;
-
-            const itemEl = document.createElement('div');
-            itemEl.className = 'bg-gray-50 p-4 rounded-lg';
-            itemEl.innerHTML = `
-                <div class="flex justify-between items-center text-sm text-gray-600 mb-2">
-                    <span>Round ${roundNum}</span>
-                    <div class="flex items-center gap-4">
-                        <span><i class="fas fa-check-circle text-green-500 mr-1"></i> ${qData.accuracy}% Accuracy</span>
-                    </div>
-                </div>
-                <p class="font-semibold mb-3">${getTextInLanguage(round.concept, lang)}</p>
-                <div class="text-sm mb-4">${pairsHtml}</div>
-                <div class="space-y-2 text-xs text-gray-700">
-                    <div class="flex items-center justify-between">
-                        <span>Correct Matches (${qData.correct})</span>
-                        <span>Wrong Matches (${qData.incorrect})</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 flex">
-                        <div class="bg-green-500 h-2.5 rounded-l-full" style="width: ${correctWidth}%"></div>
-                        <div class="bg-red-500 h-2.5 rounded-r-full" style="width: ${incorrectWidth}%"></div>
-                    </div>
-                </div>`;
-            listEl.appendChild(itemEl);
-        });
-    };
-
-    // 4. ฟังก์ชันหลัก (renderReportScreen) - (ตัวใหม่ที่รื้อระบบแล้ว)
-    const renderReportScreen = (report) => {
-        showScreen('report-screen');
-        const lang = 'th';
-
-        let totalRounds = 0;
-        let overallAccuracy = 0;
-        let completion = 0;
-        let questionsData = []; // [!!!]
-
-        // --- 1. วิเคราะห์ข้อมูล (ตรวจสอบว่าเป็น Report ใหม่หรือเก่า) ---
-        if (report.quizRounds && report.participants[0].roundHistory !== undefined) {
-            // --- 1A. (ข้อมูลใหม่) มี roundHistory ---
-            totalRounds = report.quizRounds.length;
-            let totalCorrectAttempts = 0;
-            let totalAttempts = 0;
-
-            report.participants.forEach(p => {
-                p.correctCount = 0;
-                p.totalRounds = 0; 
-                (p.roundHistory || []).forEach(h => {
-                    p.totalRounds++;
-                    if (h.isCorrect) {
-                        p.correctCount++;
+                    // Skip empty pairs
+                    if (!pairData.qText.th && !pairData.qText.en && !pairData.aText.th && !pairData.aText.en) continue;
+                    
+                    // Validation: Partial pair
+                    if ((!pairData.qText.th && !pairData.qText.en) || (!pairData.aText.th && !pairData.aText.en)) {
+                        showAlert(`รอบที่ ${i+1}, คู่ที่ ${j+1} ต้องมีข้อความอย่างน้อย 1 ภาษา (ทั้ง 2 การ์ด)`);
+                        btn.disabled = false; btn.textContent = "Save Set"; return;
                     }
-                });
-                totalCorrectAttempts += p.correctCount;
-                totalAttempts += p.totalRounds;
-                p.accuracy = p.totalRounds > 0 ? Math.round((p.correctCount / p.totalRounds) * 100) : 0;
-            });
-            report.participants.sort((a, b) => b.totalScore - a.totalScore);
+                    pairsInRound.push(pairData);
+                }
 
-            for (let i = 1; i <= totalRounds; i++) {
-                let correct = 0;
-                let incorrect = 0;
+                if (pairsInRound.length === 0) {
+                    showAlert(`รอบที่ ${i+1} ต้องมีอย่างน้อย 1 คู่ (ที่กรอกข้อมูลแล้ว)`);
+                    btn.disabled = false; btn.textContent = "Save Set"; return;
+                }
+
+                allRoundsData.push({
+                    concept: { th: concept, en: concept },
+                    pairs: pairsInRound
+                });
+            }
+
+            const manualImageUrl = document.getElementById('set-image-url').value.trim();
+            const selectedImageUrl = manualImageUrl 
+                ? manualImageUrl 
+                : DEFAULT_COVER_IMAGES[Math.floor(Math.random() * DEFAULT_COVER_IMAGES.length)];
+
+            const setData = {
+                title: {th: title_th, en: title_en},
+                category: {th: document.getElementById('set-category-th').value.trim()},
+                imageUrl: selectedImageUrl,
+                rounds: allRoundsData,
+            };
+
+            try {
+                const saveFunction = functions.httpsCallable('saveMatchQuiz');
+                await saveFunction({quizId: currentSetId, quizData: setData});
+                showAlert(currentSetId ? 'อัปเดตชุดคำถามสำเร็จ!' : 'สร้างชุดคำถามสำเร็จ!');
+                viewMySets();
+            } catch (error) {
+                console.error("Error saving set:", error);
+                showAlert('เกิดข้อผิดพลาด: ' + error.message);
+            } finally {
+                btn.disabled = false; btn.textContent = "Save Set";
+            }
+        });
+
+        // --- View My Sets ---
+        const viewMySets = async () => {
+            showScreen('my-sets-screen');
+            const listEl = document.getElementById('my-sets-list');
+            listEl.innerHTML = '<p>Loading sets...</p>';
+            
+            try {
+                const q = db.collection(QUIZZES_COLLECTION).orderBy("createdAt", "desc");
+                const querySnapshot = await q.get();
+                
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="col-span-full text-center">คุณยังไม่ได้สร้างชุดคำถามจับคู่</p>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                querySnapshot.forEach(docSnap => {
+                    const set = docSnap.data();
+                    const setId = docSnap.id;
+                    const lang = 'th';
+                    const titleText = getTextInLanguage(set.title, lang) || 'N/A';
+                    const categoryText = getTextInLanguage(set.category, lang);
+                    
+                    let totalPairs = 0;
+                    if (set.rounds && Array.isArray(set.rounds)) {
+                        totalPairs = set.rounds.reduce((sum, round) => sum + (round.pairs ? round.pairs.length : 0), 0);
+                    } else if (set.pairs && Array.isArray(set.pairs)) {
+                        totalPairs = set.pairs.length;
+                    }
+
+                    const setCard = document.createElement('div');
+                    setCard.className = 'relative quiz-card bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-105';
+                    setCard.innerHTML = `
+                        <div class="w-full h-32 bg-gray-200 flex items-center justify-center bg-cover bg-center"
+                             style="${set.imageUrl ? `background-image: url('${set.imageUrl}');` : ''}">
+                             ${set.imageUrl ? '' : '<i class="fas fa-lock-open text-gray-400 text-4xl"></i>'}
+                        </div>
+                        <div class="p-4 flex-grow flex flex-col">
+                            <div class="flex gap-1 mb-2">
+                                <button data-id="${setId}" class="edit-set-btn text-xs bg-yellow-500 text-white px-2 py-1 rounded-md hover:bg-yellow-600">Edit</button>
+                                <button data-id="${setId}" class="delete-set-btn text-xs bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600">Delete</button>
+                                <button data-id="${setId}" data-title='${JSON.stringify(set.title)}' class="reports-set-btn text-xs bg-cyan-500 text-white px-2 py-1 rounded-md hover:bg-cyan-600">Reports</button>
+                            </div>
+                            ${categoryText ? `<span class="text-sm font-semibold text-indigo-500 mb-1">${categoryText}</span>` : ''}
+                            <h3 class="text-lg font-bold mb-2 text-gray-800">${titleText}</h3>
+                            <div class="flex justify-between items-center text-xs text-gray-500 border-t pt-3 mt-auto">
+                                <span class="flex items-center gap-1.5"><i class="fas fa-arrows-alt-h"></i>${totalPairs} Pairs (${set.rounds ? set.rounds.length : 0} Rounds)</span>
+                                <span class="flex items-center gap-1.5"><i class="fas fa-users"></i>${set.playCount || 0} Plays</span>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-gray-50 grid grid-cols-1">
+                            <button data-id="${setId}" class="host-set-btn w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors ${!set.rounds ? 'opacity-50 cursor-not-allowed' : ''}"
+                                    ${!set.rounds ? 'disabled' : ''}>
+                                <i class="fas fa-play mr-2"></i>Start Game
+                            </button>
+                        </div>
+                    `;
+                    listEl.appendChild(setCard);
+                });
+
+                listEl.querySelectorAll('.host-set-btn:not([disabled])').forEach(btn => btn.addEventListener('click', (e) => hostGame(e.target.dataset.id)));
+                listEl.querySelectorAll('.edit-set-btn').forEach(btn => btn.addEventListener('click', (e) => editSet(e.target.dataset.id)));
+                listEl.querySelectorAll('.delete-set-btn').forEach(btn => btn.addEventListener('click', (e) => deleteSet(e.target.dataset.id)));
+                listEl.querySelectorAll('.reports-set-btn').forEach(btn => btn.addEventListener('click', (e) => viewReports(e.target.dataset.id, JSON.parse(e.target.dataset.title))));
+
+            } catch (error) {
+                console.error("Error loading sets:", error);
+                listEl.innerHTML = '<p class="text-red-500 col-span-full">Error loading sets.</p>';
+            }
+        };
+
+        const editSet = async (setId) => {
+            try {
+                const setDoc = await db.collection(QUIZZES_COLLECTION).doc(setId).get();
+                if (!setDoc.exists) return showAlert('ไม่พบชุดคำถามนี้');
+                
+                const set = setDoc.data();
+                resetSetCreator();
+                currentSetId = setId;
+                
+                document.getElementById('set-title-th').value = getTextInLanguage(set.title, 'th');
+                document.getElementById('set-title-en').value = getTextInLanguage(set.title, 'en');
+                document.getElementById('set-category-th').value = getTextInLanguage(set.category, 'th');
+                document.getElementById('set-image-url').value = set.imageUrl || '';
+                
+                roundsContainer.innerHTML = '';
+                if (set.rounds && set.rounds.length > 0) {
+                    set.rounds.forEach(round => addRoundToForm(round));
+                } else if (set.pairs && set.pairs.length > 0) {
+                    showAlert('This is an old quiz format. Converting to 1-Round format.');
+                    addRoundToForm({ concept: 'Imported Round 1', pairs: set.pairs });
+                } else {
+                    addRoundToForm();
+                }
+                showScreen('set-creator-screen');
+            } catch (error) {
+                console.error("Error in editSet:", error);
+                showAlert('Error loading set for edit: ' + error.message);
+            }
+        };
+
+        const deleteSet = async (setId) => {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบชุดคำถามนี้? (การกระทำนี้ยกเลิกไม่ได้)')) return;
+            try {
+                const deleteFunction = functions.httpsCallable('deleteMatchQuiz');
+                await deleteFunction({quizId: setId});
+                showAlert('ลบชุดคำถามสำเร็จ');
+                viewMySets();
+            } catch (error) {
+                console.error("Error deleting set:", error);
+                showAlert('เกิดข้อผิดพลาด: ' + error.message);
+            }
+        };
+
+        // --- Host Game Logic ---
+        
+        const hostGame = async (quizId) => {
+            showScreen('host-lobby-screen');
+            document.getElementById('player-list').innerHTML = '';
+            document.getElementById('player-count').textContent = '0';
+            document.getElementById('start-game-btn').disabled = true;
+
+            try {
+                const createSessionFunc = functions.httpsCallable('createMatchSession');
+                const result = await createSessionFunc({quizId: quizId});
+                const {sessionId, pin} = result.data;
+                
+                currentGameSessionId = sessionId;
+                // [V4.5] Save Session
+                saveHostSession(sessionId, quizId);
+
+                document.getElementById('game-pin-display').textContent = pin;
+                listenToLobbyPlayers(sessionId);
+                listenToHostGameSession(sessionId, quizId);
+            } catch (error) {
+                console.error("Error hosting game:", error);
+                showAlert('Failed to create game room: ' + error.message);
+                showScreen('my-sets-screen');
+            }
+        };
+
+        const listenToLobbyPlayers = (sessionId) => {
+            const playersRef = db.collection(SESSIONS_COLLECTION).doc(sessionId).collection('players');
+            if (playersUnsubscribe) playersUnsubscribe();
+            
+            playersUnsubscribe = playersRef.onSnapshot((snapshot) => {
+                const playerList = document.getElementById('player-list');
+                playerList.innerHTML = '';
+                snapshot.docs.forEach(doc => {
+                    const playerEl = document.createElement('div');
+                    playerEl.className = 'bg-gray-200 p-2 rounded-md truncate';
+                    playerEl.textContent = doc.data().name;
+                    playerList.appendChild(playerEl);
+                });
+                document.getElementById('player-count').textContent = snapshot.size;
+                document.getElementById('start-game-btn').disabled = snapshot.size < 2;
+            });
+        };
+
+        document.getElementById('start-game-btn').addEventListener('click', async () => {
+            document.getElementById('start-game-btn').disabled = true;
+            try {
+                const startGameFunc = functions.httpsCallable('startGame');
+                await startGameFunc({sessionId: currentGameSessionId});
+            } catch (error) {
+                showAlert('Error starting game: ' + error.message);
+                document.getElementById('start-game-btn').disabled = false;
+            }
+        });
+
+        document.getElementById('next-round-btn').addEventListener('click', async (e) => {
+            const btn = e.target;
+            btn.disabled = true;
+            btn.textContent = "Starting...";
+            try {
+                const startGameFunc = functions.httpsCallable('startGame');
+                await startGameFunc({sessionId: currentGameSessionId});
+            } catch (error) {
+                if (!error.message.includes("Reached max rounds")) {
+                    showAlert('Error starting next round: ' + error.message);
+                }
+            }
+        });
+
+        const listenToHostGameSession = (sessionId, quizId) => {
+            const gameRef = db.collection(SESSIONS_COLLECTION).doc(sessionId);
+            if (gameUnsubscribe) gameUnsubscribe();
+            
+            gameUnsubscribe = gameRef.onSnapshot(async (docSnap) => {
+                if (!docSnap.exists) {
+                    if (countdownTimer) clearInterval(countdownTimer);
+                    return;
+                }
+                const game = docSnap.data();
+                const roundDisplay = document.getElementById('current-round-display');
+                const nextRoundBtn = document.getElementById('next-round-btn');
+                const endGameBtn = document.getElementById('end-game-btn');
+
+                if (game.status === 'round-in-progress') {
+                    showScreen('leaderboard-screen');
+                    roundDisplay.textContent = `Round ${game.currentRound} / ${game.totalRounds} (${getTextInLanguage(game.currentRoundConcept, 'th') || getTextInLanguage(game.currentRoundConcept, 'en')})`;
+                    nextRoundBtn.style.display = 'none';
+                    endGameBtn.style.display = 'block';
+                    updateHostLeaderboard(game);
+                    startHostTimer(game.gameStartTime);
+
+                } else if (game.status === 'finished') {
+                    if (countdownTimer) clearInterval(countdownTimer);
+                    
+                    showScreen('leaderboard-screen');
+                    document.getElementById('final-podium-container').classList.remove('hidden');
+                    document.getElementById('leaderboard-list').style.display = 'none';
+                    document.getElementById('leaderboard-list-container').style.display = 'block';
+
+                    document.getElementById('host-timer-display').style.display = 'none';
+                    document.getElementById('current-round-display').style.display = 'none';
+                    document.getElementById('next-round-btn').style.display = 'none';
+                    
+                    const finalLeaderboard = (game.leaderboard || []).sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+                    renderPodium(finalLeaderboard.slice(0, 3));
+                    renderLeaderboardList(finalLeaderboard.slice(3), 'leaderboard-list-others');
+
+                    const endGameBtn = document.getElementById('end-game-btn');
+                    endGameBtn.textContent = "View Report";
+                    endGameBtn.style.display = 'block';
+                    
+                    // Reset Button Handler
+                    const newEndGameBtn = endGameBtn.cloneNode(true);
+                    endGameBtn.parentNode.replaceChild(newEndGameBtn, endGameBtn);
+                    newEndGameBtn.addEventListener('click', async () => {
+                        const quizDoc = await db.collection(QUIZZES_COLLECTION).doc(quizId).get();
+                        // [V4.5] Clear Session
+                        clearHostSession();
+                        viewReports(quizId, quizDoc.data().title || {});
+                    });
+
+                } else if (game.status === 'round-finished') {
+                    if (countdownTimer) clearInterval(countdownTimer);
+                    document.getElementById('host-timer-display').innerText = "00:00";
+                    showAlert('จบรอบ! รอเริ่มรอบถัดไป...');
+                    
+                    roundDisplay.textContent = `Finished Round ${game.currentRound} / ${game.totalRounds}. Waiting for Host...`;
+                    
+                    const btn = nextRoundBtn;
+                    btn.disabled = false;
+                    btn.classList.remove('bg-orange-500'); // Reset Force Color
+                    btn.classList.add('bg-green-500');
+                    
+                    if (game.currentRound >= game.totalRounds) {
+                        btn.textContent = "Finish Game & View Report";
+                    } else {
+                        btn.textContent = `Start Round ${game.currentRound + 1}`;
+                    }
+                    btn.style.display = 'block';
+                    endGameBtn.style.display = 'none';
+                }
+            });
+        };
+
+        const updateHostLeaderboard = (game) => {
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '';
+            const players = game.leaderboard || [];
+            players.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                if (player.status === 'MATCHED') row.className = 'bg-green-50';
+                if (player.status === 'WRONG_MATCH') row.className = 'bg-red-50';
+                row.innerHTML = `
+                    <td class="p-2">${player.name}</td>
+                    <td class="p-2 status-${player.status}">${player.status}</td>
+                    <td class="p-2 font-bold">${player.totalScore || 0}</td>
+                `;
+                listEl.appendChild(row);
+            });
+        };
+
+        // [V4.5 MODIFIED] Force Flow Logic in Timer
+        const startHostTimer = (gameStartTime) => {
+            if (countdownTimer) clearInterval(countdownTimer);
+            const timerEl = document.getElementById('host-timer-display');
+            const nextRoundBtn = document.getElementById('next-round-btn');
+
+            countdownTimer = setInterval(() => {
+                const now = Math.floor(Date.now() / 1000);
+                const timeElapsed = now - gameStartTime;
+                const timeLeft = Math.max(0, TIME_LIMIT_SECONDS - timeElapsed);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    timerEl.innerText = "00:00";
+                    
+                    // [V4.5] FORCE ENABLE NEXT ROUND BUTTON
+                    showAlert("หมดเวลา! คุณสามารถเริ่มรอบถัดไปได้ทันที (Force Start)");
+                    nextRoundBtn.style.display = 'block';
+                    nextRoundBtn.disabled = false;
+                    nextRoundBtn.textContent = "Time Up! Force Next Round >>";
+                    nextRoundBtn.classList.remove('bg-green-500');
+                    nextRoundBtn.classList.add('bg-orange-500'); // Warning Color
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timerEl.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }, 1000);
+        };
+
+        // --- Podium Functions ---
+        const renderPodium = (top3) => {
+            const podiumEl = document.getElementById('final-podium');
+            podiumEl.innerHTML = '';
+            const podiumOrder = [1, 0, 2];
+            const podiumItems = podiumOrder.map(rankIndex => top3[rankIndex]).filter(p => p);
+            
+            podiumItems.forEach(player => {
+                if (!player) return;
+                const rank = top3.findIndex(p => p.uid === player.uid) + 1;
+                const podiumDiv = document.createElement('div');
+                podiumDiv.className = `podium-item podium-${rank}`;
+                podiumDiv.innerHTML = `
+                    ${rank === 1 ? '<i class="fas fa-crown"></i>' : ''}
+                    <div class="podium-rank">${rank}</div>
+                    <div class="podium-name">${player.name}</div>
+                    <div class="podium-score">${player.totalScore || 0} Score</div>
+                `;
+                podiumEl.appendChild(podiumDiv);
+            });
+
+            setTimeout(() => {
+                sfx.applause.play().catch(() => { });
+                document.querySelectorAll('.podium-item').forEach(el => el.classList.add('animate'));
+                
+                var duration = 5 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+                var interval = setInterval(function () {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                }, 250);
+            }, 100);
+        };
+
+        const renderLeaderboardList = (players, targetListId) => {
+            const listEl = document.getElementById(targetListId);
+            listEl.innerHTML = '';
+            if (players.length === 0) {
+                listEl.innerHTML = '<p class="text-center text-gray-500 mt-4">- No other players -</p>';
+                return;
+            }
+            players.forEach((player, i) => {
+                const rank = i + 4;
+                const itemEl = document.createElement('div');
+                itemEl.className = 'flex justify-between items-center p-3 rounded-lg bg-gray-100';
+                itemEl.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold w-8 text-center text-lg">${rank}</span>
+                        <span>${player.name}</span>
+                    </div>
+                    <span class="font-bold text-indigo-600">${player.totalScore || 0} Score</span>
+                `;
+                listEl.appendChild(itemEl);
+            });
+        };
+
+        // --- End Game Handler ---
+        document.getElementById('end-game-btn').addEventListener('click', async () => {
+            if (!confirm('แน่ใจหรือไม่ที่จะจบเกมนี้? (ผู้เล่นทุกคนจะถูกตัดจบ)')) return;
+            if (countdownTimer) clearInterval(countdownTimer);
+            try {
+                const resetFunc = functions.httpsCallable('resetGame');
+                await resetFunc({sessionId: currentGameSessionId});
+                // [V4.5] Clear Session
+                clearHostSession();
+            } catch (error) {
+                showAlert('Error ending game: ' + error.message);
+            }
+        });
+
+        // --- Reports ---
+        const viewReports = async (setId, setTitle) => {
+            currentSetForHistory = {id: setId, title: setTitle};
+            showScreen('history-screen');
+            document.getElementById('history-set-title').textContent = getTextInLanguage(setTitle, 'th');
+            
+            const listEl = document.getElementById('history-list');
+            listEl.innerHTML = '<p>Loading History...</p>';
+            
+            try {
+                const q = db.collection(REPORTS_COLLECTION).where("quizId", "==", setId);
+                const querySnapshot = await q.get();
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p>No reports available for this set.</p>';
+                    return;
+                }
+                listEl.innerHTML = '';
+                const sortedDocs = querySnapshot.docs.sort((a, b) => {
+                    const timeA = a.data().playedAt.toDate();
+                    const timeB = b.data().playedAt.toDate();
+                    return timeB - timeA; 
+                });
+                sortedDocs.forEach(docSnap => {
+                    const report = docSnap.data();
+                    const d = report.playedAt.toDate();
+                    const dateString = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'report-item bg-gray-100 p-3 rounded-lg flex justify-between items-center';
+                    itemEl.innerHTML = `
+                        <div class="flex-grow cursor-pointer hover:bg-gray-200 -m-3 p-3 rounded-lg report-clickable-area">
+                            <p class="font-bold">${report.sessionName}</p>
+                            <p class="text-sm text-gray-500">${dateString} - ${report.summary.participantsCount} Players</p>
+                        </div>
+                        <button data-id="${docSnap.id}" class="delete-report-btn ml-4 bg-red-500 text-white font-bold py-1 px-2 rounded-md text-xs hover:bg-red-600">
+                             <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    itemEl.querySelector('.report-clickable-area').addEventListener('click', () => renderReportScreen(report));
+                    itemEl.querySelector('.delete-report-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deleteReport(e.target.closest('button').dataset.id);
+                    });
+                    listEl.appendChild(itemEl);
+                });
+            } catch (error) {
+                console.error("Error loading reports:", error);
+                listEl.innerHTML = '<p class="text-red-500">Error loading reports. (Ensure a Firestore Index exists for quizId and playedAt)</p>';
+            }
+        };
+
+        const deleteReport = async (reportId) => {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบ Report นี้?')) return;
+            try {
+                await db.collection(REPORTS_COLLECTION).doc(reportId).delete();
+                showAlert('ลบ Report สำเร็จ');
+                viewReports(currentSetForHistory.id, currentSetForHistory.title);
+            } catch (error) {
+                console.error("Error deleting report:", error);
+                showAlert('ลบ Report ล้มเหลว');
+            }
+        };
+
+        const shareReportByEmail = (report) => {
+            const recipientEmail = prompt("Please enter recipient email (use commas to separate multiple emails ,):");
+            if (recipientEmail) {
+                const lang = 'th';
+                const subject = `Summary Lock & Key: ${getTextInLanguage(report.quizTitle, lang)} (${report.sessionName})`;
+                let body = `Game Results Summary Lock & Key:\n\n`;
+                body += `Title: ${getTextInLanguage(report.quizTitle, lang)}\n`;
+                body += `Session: ${report.sessionName}\n`;
+                body += `------------------------------------\n`;
+                body += `Summary:\n`;
+                body += `- Participants: ${report.summary.participantsCount} Participants\n`;
+                if (report.summary.accuracy) {
+                    body += `- Accuracy: ${report.summary.accuracy}%\n`;
+                } else {
+                    body += `- Correct Pairs: ${report.summary.correctMatches}\n`;
+                }
+                if (report.summary.questionsCount) {
+                    body += `- Rounds: ${report.summary.questionsCount} Rounds\n\n`;
+                }
+                body += `Leaderboard:\n`;
+                report.participants.forEach((p, index) => {
+                    const accuracyStat = p.accuracy ? ` (Accuracy ${p.accuracy}%)` : '';
+                    body += `${index + 1}. ${p.name} - ${p.totalScore} Score${accuracyStat}\n`;
+                });
+                body += `\n------------------------------------\n`;
+                
+                if (report.quizRounds && report.questionsData) {
+                    body += `Rounds Summary:\n\n`;
+                    report.quizRounds.forEach((round, index) => {
+                         const roundNum = index + 1;
+                         const roundConcept = getTextInLanguage(round.concept, lang);
+                         const questionData = report.questionsData.find(q => q.round === roundNum);
+                         body += `${roundNum}. ${roundConcept} (Accuracy ${questionData.accuracy}%)\n`;
+                         round.pairs.forEach(pair => {
+                             body += `   ✔️   ${getTextInLanguage(pair.qText, lang)} <-> ${getTextInLanguage(pair.aText, lang)}\n`;
+                         });
+                         body += `\n`;
+                    });
+                }
+
+                body += `\nCreated By TRC Funny Quiz`;
+                try {
+                    navigator.clipboard.writeText(body);
+                    showAlert('Report Copied Successfully! Paste It in Your Email');
+                    const encodedSubject = encodeURIComponent(subject);
+                    const mailtoLink = `mailto:${recipientEmail}?subject=${encodedSubject}`;
+                    window.location.href = mailtoLink;
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    showAlert('You Cannot Copy This Content');
+                }
+            }
+        };
+
+        const renderParticipants = (participants, totalRounds) => {
+            const container = document.getElementById('tab-content-participants');
+            container.innerHTML = '<div class="space-y-4"></div>';
+            const listEl = container.querySelector('.space-y-4');
+            if (!participants || participants.length === 0) {
+                listEl.innerHTML = '<p>No Participants Available</p>';
+                return;
+            }
+            participants.forEach(p => {
+                let progressBar = '';
+                if (p.roundHistory && totalRounds > 0) {
+                     for (let i = 1; i <= totalRounds; i++) {
+                         const roundResult = (p.roundHistory || []).find(h => h.round === i);
+                         let barClass = 'bg-gray-300';
+                         if (roundResult) {
+                             barClass = roundResult.isCorrect ? 'bg-green-500' : 'bg-red-500';
+                         }
+                         progressBar += `<div class="flex-1 h-2 ${barClass} rounded"></div>`;
+                     }
+                } else {
+                     let barClass = 'bg-gray-300';
+                     if (p.status === 'MATCHED') barClass = 'bg-green-500';
+                     if (p.status === 'WRONG_MATCH') barClass = 'bg-red-500';
+                     progressBar = `<div class="w-full h-2 ${barClass} rounded-full" title="Status: ${p.status}"></div>`;
+                }
+
+                const accuracy = p.accuracy ? p.accuracy : (p.status === 'MATCHED' ? 100 : 0);
+                const accuracyText = p.accuracy !== undefined ? `${accuracy}% (${p.correctCount}/${p.totalRounds})` : `(Last: ${p.status})`;
+                
+                const itemEl = document.createElement('div');
+                itemEl.className = 'bg-gray-50 p-4 rounded-lg';
+                itemEl.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-bold">${p.name}</p>
+                        <div class="text-right">
+                            <p class="font-semibold text-lg">${p.totalScore || 0} <span class="text-sm font-normal text-gray-600">Score</span></p>
+                            <p class="text-sm text-gray-600">${accuracyText}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-1">${progressBar}</div>`;
+                listEl.appendChild(itemEl);
+            });
+        };
+
+        const renderQuestions = (quizRounds, questionsData) => {
+            const container = document.getElementById('tab-content-questions');
+            container.innerHTML = '<div class="space-y-4"></div>';
+            const listEl = container.querySelector('.space-y-4');
+            if (!quizRounds || quizRounds.length === 0) {
+                listEl.innerHTML = '<p>No Rounds/Questions data available for this old report.</p>';
+                return;
+            }
+            const lang = 'th';
+            quizRounds.forEach((round, index) => {
+                const roundNum = index + 1;
+                const qData = questionsData.find(q => q.round === roundNum) || { correct: 0, incorrect: 0, accuracy: 0 };
+                const pairsHtml = round.pairs.map(pair => 
+                    `<div class="flex items-center py-1">
+                        <i class="fas fa-check text-green-500 mr-2"></i>
+                        <p class="text-gray-700">${getTextInLanguage(pair.qText, lang)}</p>
+                        <i class="fas fa-exchange-alt text-gray-400 mx-2"></i>
+                        <p class="text-gray-700">${getTextInLanguage(pair.aText, lang)}</p>
+                    </div>`
+                ).join('');
+                
+                const totalAnswers = qData.correct + qData.incorrect;
+                const correctWidth = totalAnswers > 0 ? (qData.correct / totalAnswers) * 100 : 0;
+                const incorrectWidth = totalAnswers > 0 ? (qData.incorrect / totalAnswers) * 100 : 0;
+                
+                const itemEl = document.createElement('div');
+                itemEl.className = 'bg-gray-50 p-4 rounded-lg';
+                itemEl.innerHTML = `
+                    <div class="flex justify-between items-center text-sm text-gray-600 mb-2">
+                        <span>Round ${roundNum}</span>
+                        <div class="flex items-center gap-4">
+                            <span><i class="fas fa-check-circle text-green-500 mr-1"></i> ${qData.accuracy}% Accuracy</span>
+                        </div>
+                    </div>
+                    <p class="font-semibold mb-3">${getTextInLanguage(round.concept, lang)}</p>
+                    <div class="text-sm mb-4">${pairsHtml}</div>
+                    <div class="space-y-2 text-xs text-gray-700">
+                        <div class="flex items-center justify-between">
+                            <span>Correct Matches (${qData.correct})</span>
+                            <span>Wrong Matches (${qData.incorrect})</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 flex">
+                            <div class="bg-green-500 h-2.5 rounded-l-full" style="width: ${correctWidth}%"></div>
+                            <div class="bg-red-500 h-2.5 rounded-r-full" style="width: ${incorrectWidth}%"></div>
+                        </div>
+                    </div>`;
+                listEl.appendChild(itemEl);
+            });
+        };
+
+        const renderReportScreen = (report) => {
+            showScreen('report-screen');
+            const lang = 'th';
+            let totalRounds = 0;
+            let overallAccuracy = 0;
+            let completion = 0;
+            let questionsData = [];
+
+            if (report.quizRounds && report.participants[0].roundHistory !== undefined) {
+                totalRounds = report.quizRounds.length;
+                let totalCorrectAttempts = 0;
+                let totalAttempts = 0;
+                
                 report.participants.forEach(p => {
-                    const roundResult = (p.roundHistory || []).find(h => h.round === i);
-                    if (roundResult) {
-                        if (roundResult.isCorrect) correct++;
-                        else incorrect++;
-                    }
+                    p.correctCount = 0;
+                    p.totalRounds = 0;
+                    (p.roundHistory || []).forEach(h => {
+                        p.totalRounds++;
+                        if (h.isCorrect) p.correctCount++;
+                    });
+                    totalCorrectAttempts += p.correctCount;
+                    totalAttempts += p.totalRounds;
+                    p.accuracy = p.totalRounds > 0 ? Math.round((p.correctCount / p.totalRounds) * 100) : 0;
                 });
-                const total = correct + incorrect;
-                questionsData.push({
-                    round: i,
-                    correct: correct,
-                    incorrect: incorrect,
-                    accuracy: total > 0 ? Math.round((correct / total) * 100) : 0
-                });
+                
+                report.participants.sort((a, b) => b.totalScore - a.totalScore);
+
+                for (let i = 1; i <= totalRounds; i++) {
+                    let correct = 0;
+                    let incorrect = 0;
+                    report.participants.forEach(p => {
+                        const roundResult = (p.roundHistory || []).find(h => h.round === i);
+                        if (roundResult) {
+                            if (roundResult.isCorrect) correct++;
+                            else incorrect++;
+                        }
+                    });
+                    const total = correct + incorrect;
+                    questionsData.push({
+                        round: i,
+                        correct: correct,
+                        incorrect: incorrect,
+                        accuracy: total > 0 ? Math.round((correct / total) * 100) : 0
+                    });
+                }
+                report.questionsData = questionsData;
+                overallAccuracy = totalAttempts > 0 ? Math.round((totalCorrectAttempts / totalAttempts) * 100) : 0;
+                completion = (totalRounds * report.participants.length) > 0 ? Math.round((totalAttempts / (totalRounds * report.participants.length)) * 100) : 0;
+            } else {
+                totalRounds = report.summary.totalRoundsPlayed || 1;
+                report.participants.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+                overallAccuracy = Math.round((report.summary.correctMatches * 2) / (report.summary.correctMatches * 2 + report.summary.wrongMatches * 2) * 100) || 0;
+                completion = 100;
             }
-            report.questionsData = questionsData; 
 
-            overallAccuracy = totalAttempts > 0 ? Math.round((totalCorrectAttempts / totalAttempts) * 100) : 0;
-            completion = (totalRounds * report.participants.length) > 0 ? Math.round((totalAttempts / (totalRounds * report.participants.length)) * 100) : 0;
+            document.getElementById('report-set-title').textContent = getTextInLanguage(report.quizTitle, lang);
+            document.getElementById('report-session-name').textContent = report.sessionName;
+            document.getElementById('report-summary-accuracy').textContent = `${overallAccuracy}%`;
+            document.getElementById('report-summary-completion').textContent = `${completion}%`;
+            document.getElementById('report-summary-participants').textContent = report.participants.length;
+            document.getElementById('report-summary-questions').textContent = totalRounds;
 
-        } else {
-            // --- 1B. (ข้อมูลเก่า) ไม่มี roundHistory ---
-            totalRounds = report.summary.totalRoundsPlayed || 1; // Fallback
-            report.participants.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
-            // (ใช้ข้อมูลสรุปเก่า)
-            overallAccuracy = Math.round((report.summary.correctMatches * 2) / (report.summary.correctMatches * 2 + report.summary.wrongMatches * 2) * 100) || 0;
-            completion = 100; // (ข้อมูลเก่าไม่มีทางรู้)
-        }
+            report.summary.accuracy = overallAccuracy;
+            report.summary.questionsCount = totalRounds;
 
-        // --- 2. อัปเดต Summary Boxes ---
-        document.getElementById('report-set-title').textContent = getTextInLanguage(report.quizTitle, lang);
-        document.getElementById('report-session-name').textContent = report.sessionName;
-        document.getElementById('report-summary-accuracy').textContent = `${overallAccuracy}%`;
-        document.getElementById('report-summary-completion').textContent = `${completion}%`;
-        document.getElementById('report-summary-participants').textContent = report.participants.length;
-        document.getElementById('report-summary-questions').textContent = totalRounds;
+            const shareButton = document.getElementById('share-report-btn');
+            const newShareButton = shareButton.cloneNode(true);
+            newShareButton.addEventListener('click', () => shareReportByEmail(report));
+            shareButton.parentNode.replaceChild(newShareButton, shareButton);
 
-        // (บันทึกค่า accuracy ไว้ใน report object เพื่อให้ Share email ใช้งานได้)
-        report.summary.accuracy = overallAccuracy;
-        report.summary.questionsCount = totalRounds;
+            renderParticipants(report.participants, totalRounds);
+            renderQuestions(report.quizRounds, questionsData);
 
-        // --- 3. ผูกปุ่ม Share ---
-        const shareButton = document.getElementById('share-report-btn');
-        const newShareButton = shareButton.cloneNode(true); 
-        newShareButton.addEventListener('click', () => shareReportByEmail(report));
-        shareButton.parentNode.replaceChild(newShareButton, shareButton);
-
-        // --- 4. วาด Tabs ---
-        renderParticipants(report.participants, totalRounds);
-        renderQuestions(report.quizRounds, questionsData); // (ถ้า report.quizRounds เป็น undefined, มันจะแสดงข้อความ "No data")
-
-        // --- 5. ผูกปุ่ม Tabs ---
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        tabButtons.forEach(btn => {
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-
-            newBtn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                newBtn.classList.add('active');
-                tabContents.forEach(c => c.classList.add('hidden'));
-                const contentId = newBtn.id.replace('btn', 'content');
-                document.getElementById(contentId).classList.remove('hidden');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabButtons.forEach(btn => {
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                newBtn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    newBtn.classList.add('active');
+                    tabContents.forEach(c => c.classList.add('hidden'));
+                    const contentId = newBtn.id.replace('btn', 'content');
+                    document.getElementById(contentId).classList.remove('hidden');
+                });
             });
-        });
+            document.getElementById('tab-btn-participants').click();
+        };
 
-        document.getElementById('tab-btn-participants').click();
-    };
-
-</script>
+    </script>
 </body>
 </html>
